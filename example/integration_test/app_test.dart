@@ -803,14 +803,15 @@ void main() {
 
       // When I tap "Show Snackbar"
       await tester.tap(find.byKey(const Key('show_snackbar_button')));
-      await tester.pump(); // pump once to show snackbar
+      await tester.pump(); // kick off show animation
+      await tester.pump(const Duration(milliseconds: 750)); // complete show animation
 
       // Then the snackbar message is visible
       expect(find.text('This is a snackbar message!'), findsOneWidget);
 
       // After the snackbar duration, it disappears
-      await tester.pump(const Duration(seconds: 3));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 2)); // fire the 2 s duration timer
+      await tester.pump(const Duration(milliseconds: 750)); // complete hide animation
       expect(find.text('This is a snackbar message!'), findsNothing);
     });
 
