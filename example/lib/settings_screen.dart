@@ -41,50 +41,78 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
-      body: ListView(
-        padding: const EdgeInsets.all(16.0),
-        children: [
-          SwitchListTile(
-            key: const Key('notifications_switch'),
-            title: const Text('Enable Notifications'),
-            value: _notificationsEnabled,
-            onChanged: (value) {
-              setState(() {
-                _notificationsEnabled = value;
-              });
-            },
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: ListView(
+            padding: const EdgeInsets.all(16.0),
+            children: [
+              Card(
+                child: Column(
+                  children: [
+                    SwitchListTile(
+                      key: const Key('notifications_switch'),
+                      title: const Text('Enable Notifications'),
+                      secondary: const Icon(Icons.notifications),
+                      value: _notificationsEnabled,
+                      onChanged: (value) {
+                        setState(() {
+                          _notificationsEnabled = value;
+                        });
+                      },
+                    ),
+                    const Divider(height: 1),
+                    CheckboxListTile(
+                      key: const Key('dark_mode_checkbox'),
+                      title: const Text('Enable Dark Mode'),
+                      secondary: const Icon(Icons.dark_mode),
+                      value: _darkModeEnabled,
+                      onChanged: (value) {
+                        setState(() {
+                          _darkModeEnabled = value ?? false;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Volume', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      Slider(
+                        key: const Key('volume_slider'),
+                        min: 0,
+                        max: 100,
+                        value: _volume,
+                        onChanged: (value) {
+                          setState(() {
+                            _volume = value;
+                          });
+                        },
+                      ),
+                      Text('Current Volume: ${_volume.round()}', key: const Key('volume_label')),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                key: const Key('view_terms_button'),
+                icon: const Icon(Icons.description),
+                label: const Text('View Terms & Conditions'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.all(16),
+                ),
+                onPressed: _showTermsDialog,
+              ),
+            ],
           ),
-          CheckboxListTile(
-            key: const Key('dark_mode_checkbox'),
-            title: const Text('Enable Dark Mode'),
-            value: _darkModeEnabled,
-            onChanged: (value) {
-              setState(() {
-                _darkModeEnabled = value ?? false;
-              });
-            },
-          ),
-          const SizedBox(height: 16),
-          const Text('Volume'),
-          Slider(
-            key: const Key('volume_slider'),
-            min: 0,
-            max: 100,
-            value: _volume,
-            onChanged: (value) {
-              setState(() {
-                _volume = value;
-              });
-            },
-          ),
-          Text('Volume: ${_volume.round()}', key: const Key('volume_label')),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            key: const Key('view_terms_button'),
-            onPressed: _showTermsDialog,
-            child: const Text('View Terms & Conditions'),
-          ),
-        ],
+        ),
       ),
     );
   }

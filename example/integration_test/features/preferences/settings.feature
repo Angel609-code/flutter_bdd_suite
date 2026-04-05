@@ -1,7 +1,8 @@
-Feature: User Settings
+@preferences
+Feature: User Preferences and Settings
   As an authenticated user
-  I want to customize my preferences
-  So that the app behaves according to my liking
+  I want to customize my settings
+  So that the app reflects my preferences
 
   Background:
     Given I fill the "username_field" field with "admin"
@@ -10,10 +11,9 @@ Feature: User Settings
     And I click in input with key "settings_action"
     Then I should see "Enable Notifications"
 
-  Scenario: Toggling settings
-    When I click in input with key "notifications_switch"
-    And I click in input with key "dark_mode_checkbox"
-    And I click in input with key "view_terms_button"
+  @doc_string
+  Scenario: Reading terms and conditions
+    When I click in input with key "view_terms_button"
     Then I see text:
       """
       Please read our terms and conditions...

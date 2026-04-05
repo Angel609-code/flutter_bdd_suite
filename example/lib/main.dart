@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'login_screen.dart';
 import 'settings_screen.dart';
+import 'files_screen.dart';
+import 'dialogs_screen.dart';
 
 void main() {
   runApp(const BddExampleApp());
@@ -23,6 +25,8 @@ class BddExampleApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/home': (context) => const HomeScreen(),
         '/settings': (context) => const SettingsScreen(),
+        '/files': (context) => const FilesScreen(),
+        '/dialogs': (context) => const DialogsScreen(),
       },
       debugShowCheckedModeBanner: false,
     );

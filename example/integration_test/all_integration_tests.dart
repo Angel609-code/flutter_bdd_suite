@@ -2,14 +2,18 @@
 import 'package:flutter_gherkin_parser/integration_test_helper.dart';
 import 'test_config.dart';
 
-import 'generated/settings.dart' as settings;
-import 'generated/home.dart' as home;
-import 'generated/login.dart' as login;
+import 'generated/dashboard/home.dart' as home;
+import 'generated/interactions/dialogs.dart' as dialogs;
+import 'generated/file_management/csv.dart' as csv;
+import 'generated/preferences/settings.dart' as settings;
+import 'generated/auth/login.dart' as login;
 
 void main() {
   IntegrationTestHelper(config: config);
 
-  settings.main();
   home.main();
+  dialogs.main();
+  csv.main();
+  settings.main();
   login.main();
 }

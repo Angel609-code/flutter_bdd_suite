@@ -1,7 +1,8 @@
-Feature: Home Dashboard Features
+@dashboard @smoke
+Feature: Dashboard and Data Tables
   As an authenticated user
-  I want to view and manage my data on the home screen
-  So that I can keep track of items and users
+  I want to view my dashboard
+  So that I can see recent items and manage users
 
   Background:
     Given I fill the "username_field" field with "admin"
@@ -9,15 +10,15 @@ Feature: Home Dashboard Features
     And I click in input with key "login_button"
     And I should see "Welcome to the Dashboard!"
 
-  Scenario: Interacting with lists and dialogs
-    When I scroll until "list_item_15" is visible
-    And I should see "Item 15"
-    And I click in input with key "add_user_fab"
+  @dialog
+  Scenario: Adding a new user via dialog
+    When I click in input with key "add_user_fab"
     Then I should see "Do you want to add a new user?"
     When I click in input with key "dialog_confirm"
     Then I should not see "Do you want to add a new user?"
 
-  Scenario: Printing and verifying table data
+  @data_table
+  Scenario: Verifying user management data table
     Given I print table
       | ID | Name        | Status  |
       | 1  | John Doe    | Active  |
