@@ -8,7 +8,6 @@ void main() async {
   final helper = IntegrationTestHelper(
     config: config,
     backgroundSteps: _backgroundSteps,
-    scenariosAndSteps: _scenariosAndSteps,
   );
 
   group('Feature: Dashboard and Data Tables', () {
@@ -21,6 +20,12 @@ void main() async {
         scenarioName: 'Adding a new user via dialog',
         line: 14,
         tags: ['@dialog'],
+        steps: [
+          r'''{"text":"When I click in input with key \"add_user_fab\"","line":15}''',
+          r'''{"text":"Then I should see \"Do you want to add a new user?\"","line":16}''',
+          r'''{"text":"When I click in input with key \"dialog_confirm\"","line":17}''',
+          r'''{"text":"Then I should not see \"Do you want to add a new user?\"","line":18}''',
+        ],
       );
 
       await helper.setUp(tester, scenario);
@@ -32,6 +37,10 @@ void main() async {
         scenarioName: 'Verifying user management data table with escaping',
         line: 21,
         tags: ['@data_table'],
+        steps: [
+          r'''{"text":"* I print table \"<<<{\"header\":[\"ID\",\"Name\",\"Info\"],\"rows\":[[\"1\",\"John Doe\",\"Role: Admin\\nActive\"],[\"2\",\"Jane Smith\",\"Role: User|Inactive\"],[\"3\",\"Bob Johnson\",\"Dir: C:\\\\Users\\\\Bob\"]]}>>>\"","line":26}''',
+          r'''{"text":"Then I should see \"Bob Johnson\"","line":27}''',
+        ],
       );
 
       await helper.setUp(tester, scenario);
@@ -42,6 +51,11 @@ void main() async {
       final ScenarioInfo scenario = ScenarioInfo(
         scenarioName: 'Verifying quick links (Example 1)',
         line: 33,
+        steps: [
+          r'''{"text":"Given I should see \"Welcome to the Dashboard!\"","line":31}''',
+          r'''{"text":"When I click in input with key \"settings_btn\"","line":34}''',
+          r'''{"text":"Then I should see \"Settings\"","line":35}''',
+        ],
       );
 
       await helper.setUp(tester, scenario);
@@ -52,6 +66,11 @@ void main() async {
       final ScenarioInfo scenario = ScenarioInfo(
         scenarioName: 'Verifying quick links (Example 2)',
         line: 33,
+        steps: [
+          r'''{"text":"Given I should see \"Welcome to the Dashboard!\"","line":31}''',
+          r'''{"text":"When I click in input with key \"files_action\"","line":34}''',
+          r'''{"text":"Then I should see \"File Management\"","line":35}''',
+        ],
       );
 
       await helper.setUp(tester, scenario);
@@ -74,25 +93,3 @@ final List<String> _backgroundSteps = <String>[
   r'''{"text":"And I should see \"Welcome to the Dashboard!\"","line":11}''',
 ];
 
-final Map<String, List<String>> _scenariosAndSteps = {
-  'Adding a new user via dialog': [
-    r'''{"text":"When I click in input with key \"add_user_fab\"","line":15}''',
-    r'''{"text":"Then I should see \"Do you want to add a new user?\"","line":16}''',
-    r'''{"text":"When I click in input with key \"dialog_confirm\"","line":17}''',
-    r'''{"text":"Then I should not see \"Do you want to add a new user?\"","line":18}''',
-  ],
-  'Verifying user management data table with escaping': [
-    r'''{"text":"* I print table \"<<<{\"header\":[\"ID\",\"Name\",\"Info\"],\"rows\":[[\"1\",\"John Doe\",\"Role: Admin\\nActive\"],[\"2\",\"Jane Smith\",\"Role: User|Inactive\"],[\"3\",\"Bob Johnson\",\"Dir: C:\\\\Users\\\\Bob\"]]}>>>\"","line":26}''',
-    r'''{"text":"Then I should see \"Bob Johnson\"","line":27}''',
-  ],
-  'Verifying quick links (Example 1)': [
-    r'''{"text":"Given I should see \"Welcome to the Dashboard!\"","line":31}''',
-    r'''{"text":"When I click in input with key \"settings_btn\"","line":34}''',
-    r'''{"text":"Then I should see \"Settings\"","line":35}''',
-  ],
-  'Verifying quick links (Example 2)': [
-    r'''{"text":"Given I should see \"Welcome to the Dashboard!\"","line":31}''',
-    r'''{"text":"When I click in input with key \"files_action\"","line":34}''',
-    r'''{"text":"Then I should see \"File Management\"","line":35}''',
-  ],
-};

@@ -7,7 +7,6 @@ import 'package:flutter_gherkin_parser/integration_test_helper.dart';
 void main() async {
   final helper = IntegrationTestHelper(
     config: config,
-    scenariosAndSteps: _scenariosAndSteps,
   );
 
   group('Feature: User Authentication', () {
@@ -19,6 +18,12 @@ void main() async {
       final ScenarioInfo scenario = ScenarioInfo(
         scenarioName: 'Logging in with various credentials (Example 1)',
         line: 7,
+        steps: [
+          r'''{"text":"Given I fill the \"username_field\" field with \"wrong\"","line":8}''',
+          r'''{"text":"And I fill the \"password_field\" field with \"pass\"","line":9}''',
+          r'''{"text":"When I click in input with key \"login_button\"","line":10}''',
+          r'''{"text":"Then I should see \"Invalid credentials.\"","line":11}''',
+        ],
       );
 
       await helper.setUp(tester, scenario);
@@ -29,6 +34,12 @@ void main() async {
       final ScenarioInfo scenario = ScenarioInfo(
         scenarioName: 'Logging in with various credentials (Example 2)',
         line: 7,
+        steps: [
+          r'''{"text":"Given I fill the \"username_field\" field with \"\"","line":8}''',
+          r'''{"text":"And I fill the \"password_field\" field with \"\"","line":9}''',
+          r'''{"text":"When I click in input with key \"login_button\"","line":10}''',
+          r'''{"text":"Then I should see \"Username and password are required.\"","line":11}''',
+        ],
       );
 
       await helper.setUp(tester, scenario);
@@ -39,6 +50,12 @@ void main() async {
       final ScenarioInfo scenario = ScenarioInfo(
         scenarioName: 'Logging in with various credentials (Example 3)',
         line: 7,
+        steps: [
+          r'''{"text":"Given I fill the \"username_field\" field with \"admin\"","line":8}''',
+          r'''{"text":"And I fill the \"password_field\" field with \"password123\"","line":9}''',
+          r'''{"text":"When I click in input with key \"login_button\"","line":10}''',
+          r'''{"text":"Then I should see \"Welcome to the Dashboard!\"","line":11}''',
+        ],
       );
 
       await helper.setUp(tester, scenario);
@@ -54,23 +71,3 @@ FeatureInfo _featureInfo = FeatureInfo(
   tags: ['@auth', '@regression'],
 );
 
-final Map<String, List<String>> _scenariosAndSteps = {
-  'Logging in with various credentials (Example 1)': [
-    r'''{"text":"Given I fill the \"username_field\" field with \"wrong\"","line":8}''',
-    r'''{"text":"And I fill the \"password_field\" field with \"pass\"","line":9}''',
-    r'''{"text":"When I click in input with key \"login_button\"","line":10}''',
-    r'''{"text":"Then I should see \"Invalid credentials.\"","line":11}''',
-  ],
-  'Logging in with various credentials (Example 2)': [
-    r'''{"text":"Given I fill the \"username_field\" field with \"\"","line":8}''',
-    r'''{"text":"And I fill the \"password_field\" field with \"\"","line":9}''',
-    r'''{"text":"When I click in input with key \"login_button\"","line":10}''',
-    r'''{"text":"Then I should see \"Username and password are required.\"","line":11}''',
-  ],
-  'Logging in with various credentials (Example 3)': [
-    r'''{"text":"Given I fill the \"username_field\" field with \"admin\"","line":8}''',
-    r'''{"text":"And I fill the \"password_field\" field with \"password123\"","line":9}''',
-    r'''{"text":"When I click in input with key \"login_button\"","line":10}''',
-    r'''{"text":"Then I should see \"Welcome to the Dashboard!\"","line":11}''',
-  ],
-};

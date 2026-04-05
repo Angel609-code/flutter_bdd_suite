@@ -8,7 +8,6 @@ void main() async {
   final helper = IntegrationTestHelper(
     config: config,
     backgroundSteps: _backgroundSteps,
-    scenariosAndSteps: _scenariosAndSteps,
   );
 
   group('Feature: File Management and CSV Operations', () {
@@ -20,6 +19,15 @@ void main() async {
       final ScenarioInfo scenario = ScenarioInfo(
         scenarioName: 'Importing and Exporting CSV files',
         line: 14,
+        steps: [
+          r'''{"text":"Given I should see \"No files imported yet.\"","line":15}''',
+          r'''{"text":"And I enter text \"import_data_field\" with \"<<<DOCSTRING:      name,age,email\\n      John,30,john@example.com\\n      Alice,25,alice@example.com>>>\"","line":22}''',
+          r'''{"text":"When I click in input with key \"import_csv_button\"","line":23}''',
+          r'''{"text":"Then I should see \"CSV file imported successfully.\"","line":24}''',
+          r'''{"text":"And I should not see \"Empty list\"","line":25}''',
+          r'''{"text":"When I click in input with key \"export_csv_button\"","line":26}''',
+          r'''{"text":"Then I should see \"Data exported to CSV successfully.\"","line":27}''',
+        ],
       );
 
       await helper.setUp(tester, scenario);
@@ -43,14 +51,3 @@ final List<String> _backgroundSteps = <String>[
   r'''{"text":"Then I should see \"File Management\"","line":12}''',
 ];
 
-final Map<String, List<String>> _scenariosAndSteps = {
-  'Importing and Exporting CSV files': [
-    r'''{"text":"Given I should see \"No files imported yet.\"","line":15}''',
-    r'''{"text":"And I enter text \"import_data_field\" with \"<<<DOCSTRING:      name,age,email\\n      John,30,john@example.com\\n      Alice,25,alice@example.com>>>\"","line":22}''',
-    r'''{"text":"When I click in input with key \"import_csv_button\"","line":23}''',
-    r'''{"text":"Then I should see \"CSV file imported successfully.\"","line":24}''',
-    r'''{"text":"And I should not see \"Empty list\"","line":25}''',
-    r'''{"text":"When I click in input with key \"export_csv_button\"","line":26}''',
-    r'''{"text":"Then I should see \"Data exported to CSV successfully.\"","line":27}''',
-  ],
-};

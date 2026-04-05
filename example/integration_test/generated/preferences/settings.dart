@@ -8,7 +8,6 @@ void main() async {
   final helper = IntegrationTestHelper(
     config: config,
     backgroundSteps: _backgroundSteps,
-    scenariosAndSteps: _scenariosAndSteps,
   );
 
   group('Feature: User Preferences and Settings', () {
@@ -21,6 +20,12 @@ void main() async {
         scenarioName: 'Reading terms and conditions',
         line: 15,
         tags: ['@doc_string'],
+        steps: [
+          r'''{"text":"When I click in input with key \"view_terms_button\"","line":16}''',
+          r'''{"text":"Then I see text: \"<<<DOCSTRING:      Please read our terms and conditions...>>>\"","line":20}''',
+          r'''{"text":"And I click in input with key \"close_terms\"","line":21}''',
+          r'''{"text":"Then I should not see \"Please read our terms and conditions...\"","line":22}''',
+        ],
       );
 
       await helper.setUp(tester, scenario);
@@ -44,11 +49,3 @@ final List<String> _backgroundSteps = <String>[
   r'''{"text":"Then I should see \"Enable Notifications\"","line":12}''',
 ];
 
-final Map<String, List<String>> _scenariosAndSteps = {
-  'Reading terms and conditions': [
-    r'''{"text":"When I click in input with key \"view_terms_button\"","line":16}''',
-    r'''{"text":"Then I see text: \"<<<DOCSTRING:      Please read our terms and conditions...>>>\"","line":20}''',
-    r'''{"text":"And I click in input with key \"close_terms\"","line":21}''',
-    r'''{"text":"Then I should not see \"Please read our terms and conditions...\"","line":22}''',
-  ],
-};

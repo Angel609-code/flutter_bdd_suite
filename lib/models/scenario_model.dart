@@ -33,10 +33,12 @@ class ScenarioInfo {
   final String scenarioName;
   final int line;
   final List<String> tags;
+  final List<String> steps;
 
   ScenarioInfo({
     required this.scenarioName,
     required this.line,
     this.tags = const [],
+    this.steps = const [],
   });
 }

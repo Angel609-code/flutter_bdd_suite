@@ -12,7 +12,6 @@ void main() async {
     backgroundSteps: _backgroundSteps,
     {{/hasBackgroundSteps}}
     {{/features}}
-    scenariosAndSteps: _scenariosAndSteps,
   );
   {{#features}}
 
@@ -29,6 +28,11 @@ void main() async {
         {{#hasTags}}
         tags: {{{tagsString}}},
         {{/hasTags}}
+        steps: [
+          {{#steps}}
+          r'''{{{json}}}''',
+          {{/steps}}
+        ],
       );
 
       await helper.setUp(tester, scenario);
@@ -63,13 +67,4 @@ final List<String> _backgroundSteps = <String>[
 {{^hasBackgroundSteps}}
 
 {{/hasBackgroundSteps}}
-final Map<String, List<String>> _scenariosAndSteps = {
-{{#scenarios}}
-  '{{name}}': [
-    {{#steps}}
-    r'''{{{json}}}''',
-    {{/steps}}
-  ],
-{{/scenarios}}
-};
 {{/features}}
