@@ -125,7 +125,8 @@ Future<GeneratePipelineResult> runGeneratePipeline(
       scenarioMaps.add({
         'name': sc.name,
         'line': sc.line,
-        'tags': scTagsUnique.map((e) => "'$e'").toList(),
+        'hasTags': scTagsUnique.isNotEmpty,
+        'tagsString': '[${scTagsUnique.map((e) => "'$e'").join(', ')}]',
         'steps': sc.steps.map((s) => {'json': s.toString()}).toList(),
         'isLast': i == feature.scenarios.length - 1,
       });
@@ -137,7 +138,8 @@ Future<GeneratePipelineResult> runGeneratePipeline(
       'name': feature.name,
       'uri': feature.uri,
       'line': feature.line,
-      'tags': featureTagsUnique.map((e) => "'$e'").toList(),
+      'hasTags': featureTagsUnique.isNotEmpty,
+      'tagsString': '[${featureTagsUnique.map((e) => "'$e'").join(', ')}]',
       'scenarios': scenarioMaps,
       'backgroundSteps': feature.background?.steps.map((s) => {'jsonStep': s.toString()}).toList() ?? [],
       'hasBackgroundSteps': feature.background?.steps.isNotEmpty ?? false,

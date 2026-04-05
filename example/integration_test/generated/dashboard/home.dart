@@ -65,7 +65,6 @@ FeatureInfo _featureInfo = FeatureInfo(
   uri: '/features/dashboard/home.feature',
   line: 2,
   tags: ['@dashboard', '@smoke'],
-  tags: ['@dashboard', '@smoke'],
 );
 
 final List<String> _backgroundSteps = <String>[

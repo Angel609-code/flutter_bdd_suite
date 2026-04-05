@@ -26,9 +26,9 @@ void main() async {
       final ScenarioInfo scenario = ScenarioInfo(
         scenarioName: '{{name}}',
         line: {{line}},
-        {{#tags}}
-        tags: {{tags}},
-        {{/tags}}
+        {{#hasTags}}
+        tags: {{{tagsString}}},
+        {{/hasTags}}
       );
 
       await helper.setUp(tester, scenario);
@@ -47,9 +47,9 @@ FeatureInfo _featureInfo = FeatureInfo(
   featureName: '{{name}}',
   uri: '{{uri}}',
   line: {{line}},
-  {{#tags}}
-  tags: {{tags}},
-  {{/tags}}
+  {{#hasTags}}
+  tags: {{{tagsString}}},
+  {{/hasTags}}
 );
 {{#hasBackgroundSteps}}
 

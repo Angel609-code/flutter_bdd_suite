@@ -52,7 +52,6 @@ FeatureInfo _featureInfo = FeatureInfo(
   uri: '/features/auth/login.feature',
   line: 2,
   tags: ['@auth', '@regression'],
-  tags: ['@auth', '@regression'],
 );
 
 final Map<String, List<String>> _scenariosAndSteps = {
