@@ -302,34 +302,40 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     // ── Stats row ───────────────────────────────────────────
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _StatCard(
-                          key: const Key('stat_total'),
-                          label: 'Total Employees',
-                          value: '${_employees.length}',
-                          icon: Icons.people,
-                          color: Colors.indigo,
+                        Expanded(
+                          child: _StatCard(
+                            key: const Key('stat_total'),
+                            label: 'Total Employees',
+                            value: '${_employees.length}',
+                            icon: Icons.people,
+                            color: Colors.indigo,
+                          ),
                         ),
-                        _StatCard(
-                          key: const Key('stat_roles'),
-                          label: 'Unique Roles',
-                          value:
-                              '${_employees.map((e) => e.role).toSet().length}',
-                          icon: Icons.work,
-                          color: Colors.teal,
+                        Expanded(
+                          child: _StatCard(
+                            key: const Key('stat_roles'),
+                            label: 'Unique Roles',
+                            value:
+                                '${_employees.map((e) => e.role).toSet().length}',
+                            icon: Icons.work,
+                            color: Colors.teal,
+                          ),
                         ),
-                        _StatCard(
-                          key: const Key('stat_avg_age'),
-                          label: 'Average Age',
-                          value: _employees.isEmpty
-                              ? '—'
-                              : (_employees
-                                          .fold<int>(0, (sum, e) => sum + e.age) /
-                                      _employees.length)
-                                  .toStringAsFixed(1),
-                          icon: Icons.bar_chart,
-                          color: Colors.orange,
+                        Expanded(
+                          child: _StatCard(
+                            key: const Key('stat_avg_age'),
+                            label: 'Average Age',
+                            value: _employees.isEmpty
+                                ? '—'
+                                : (_employees
+                                            .fold<int>(
+                                                0, (sum, e) => sum + e.age) /
+                                        _employees.length)
+                                    .toStringAsFixed(1),
+                            icon: Icons.bar_chart,
+                            color: Colors.orange,
+                          ),
                         ),
                       ],
                     ),
@@ -469,18 +475,22 @@ class _StatCard extends StatelessWidget {
     return Card(
       elevation: 2,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: color, size: 32),
-            const SizedBox(height: 8),
+            Icon(icon, color: color, size: 28),
+            const SizedBox(height: 6),
             Text(
               value,
               style: TextStyle(
-                  fontSize: 22, fontWeight: FontWeight.bold, color: color),
+                  fontSize: 20, fontWeight: FontWeight.bold, color: color),
             ),
-            Text(label, style: const TextStyle(fontSize: 12)),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 11),
+              textAlign: TextAlign.center,
+            ),
           ],
         ),
       ),
