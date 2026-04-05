@@ -7,7 +7,7 @@ import 'package:flutter_gherkin_parser/models/endpoint_registration_model.dart';
 typedef EndpointHandler = Future<void> Function(HttpRequest request);
 
 class IntegrationTestServer {
-  final int port = 9876;
+  final int port;
   HttpServer? _server;
 
   final Map<String, Map<String, EndpointHandler>> _custom = {
@@ -15,7 +15,8 @@ class IntegrationTestServer {
     'POST': {},
   };
 
-  IntegrationTestServer();
+  IntegrationTestServer({int? port})
+      : port = port ?? int.tryParse(Platform.environment['FGP_BRIDGE_PORT'] ?? '') ?? 9876;
 
   void registerEndpoint(EndpointRegistration registration) {
     final m = registration.method.toUpperCase();
@@ -29,7 +30,14 @@ class IntegrationTestServer {
   }
 
   Future<void> start() async {
-    _server = await HttpServer.bind(InternetAddress.anyIPv4, port);
+    try {
+      _server = await HttpServer.bind(InternetAddress.anyIPv4, port);
+    } on SocketException catch (error) {
+      throw StateError(
+        'Failed to bind integration bridge server on port $port. '
+        'Check bridge config or free the port. Original error: $error',
+      );
+    }
     _server!.listen((req) async {
       req.response.headers.set('Access-Control-Allow-Origin', '*');
       req.response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');

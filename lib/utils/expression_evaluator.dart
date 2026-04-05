@@ -8,7 +8,7 @@ class TagAtom extends TagExpr {
   TagAtom(this.tag);
 
   @override
-  bool evaluate(Set<String> tags) => tags.contains(tag);
+  bool evaluate(Set<String> tags) => tags.contains(tag) || tags.contains('@$tag');
 }
 
 class NotExpr extends TagExpr {

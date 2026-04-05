@@ -2,10 +2,6 @@ import 'package:flutter_gherkin_parser/server/integration_test_server.dart';
 
 import 'integration_endpoints/endpoints.dart';
 
-void main() {
-  final server = IntegrationTestServer();
-
+void registerBridgeEndpoints(IntegrationTestServer server) {
   EndpointUtils.addHelloEndpoint(server);
-
-  server.start();
 }
