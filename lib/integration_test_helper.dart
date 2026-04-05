@@ -126,6 +126,11 @@ class IntegrationTestHelper {
     }
   }
 
+  Future<void> testScenario(WidgetTester tester, ScenarioInfo scenario) async {
+    await setUp(tester, scenario);
+    await runStepsForScenario(scenario);
+  }
+
   Future<void> _executeStep(Step step, bool isBackground, {ScenarioInfo? scenario}) async {
     final start = DateTime.now().microsecondsSinceEpoch;
     late StepResult result;

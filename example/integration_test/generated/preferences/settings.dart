@@ -16,20 +16,20 @@ void main() async {
     });
 
     testWidgets('Scenario: Reading terms and conditions', (WidgetTester tester) async {
-      final ScenarioInfo scenario = ScenarioInfo(
-        scenarioName: 'Reading terms and conditions',
-        line: 15,
-        tags: ['@doc_string'],
-        steps: [
-          r'''{"text":"When I click in input with key \"view_terms_button\"","line":16}''',
-          r'''{"text":"Then I see text: \"<<<DOCSTRING:      Please read our terms and conditions...>>>\"","line":20}''',
-          r'''{"text":"And I click in input with key \"close_terms\"","line":21}''',
-          r'''{"text":"Then I should not see \"Please read our terms and conditions...\"","line":22}''',
-        ],
+      await helper.testScenario(
+        tester,
+        ScenarioInfo(
+          scenarioName: 'Reading terms and conditions',
+          line: 15,
+          tags: ['@doc_string'],
+          steps: [
+            r'''{"text":"When I click in input with key \"view_terms_button\"","line":16}''',
+            r'''{"text":"Then I see text: \"<<<DOCSTRING:      Please read our terms and conditions...>>>\"","line":20}''',
+            r'''{"text":"And I click in input with key \"close_terms\"","line":21}''',
+            r'''{"text":"Then I should not see \"Please read our terms and conditions...\"","line":22}''',
+          ],
+        ),
       );
-
-      await helper.setUp(tester, scenario);
-      await helper.runStepsForScenario(scenario);
     });
   });
 }

@@ -22,21 +22,21 @@ void main() async {
 
     {{#scenarios}}
     testWidgets('Scenario: {{name}}', (WidgetTester tester) async {
-      final ScenarioInfo scenario = ScenarioInfo(
-        scenarioName: '{{name}}',
-        line: {{line}},
-        {{#hasTags}}
-        tags: {{{tagsString}}},
-        {{/hasTags}}
-        steps: [
-          {{#steps}}
-          r'''{{{json}}}''',
-          {{/steps}}
-        ],
+      await helper.testScenario(
+        tester,
+        ScenarioInfo(
+          scenarioName: '{{name}}',
+          line: {{line}},
+          {{#hasTags}}
+          tags: {{{tagsString}}},
+          {{/hasTags}}
+          steps: [
+            {{#steps}}
+            r'''{{{json}}}''',
+            {{/steps}}
+          ],
+        ),
       );
-
-      await helper.setUp(tester, scenario);
-      await helper.runStepsForScenario(scenario);
     });
     {{^isLast}}
 

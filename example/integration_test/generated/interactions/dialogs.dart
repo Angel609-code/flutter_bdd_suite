@@ -16,65 +16,65 @@ void main() async {
     });
 
     testWidgets('Scenario: Interacting with an alert dialog', (WidgetTester tester) async {
-      final ScenarioInfo scenario = ScenarioInfo(
-        scenarioName: 'Interacting with an alert dialog',
-        line: 14,
-        steps: [
-          r'''{"text":"When I click in input with key \"show_alert_button\"","line":15}''',
-          r'''{"text":"Then I should see \"This is a simple alert dialog.\"","line":16}''',
-          r'''{"text":"When I click in input with key \"alert_ok_button\"","line":17}''',
-          r'''{"text":"Then I should not see \"This is a simple alert dialog.\"","line":18}''',
-        ],
+      await helper.testScenario(
+        tester,
+        ScenarioInfo(
+          scenarioName: 'Interacting with an alert dialog',
+          line: 14,
+          steps: [
+            r'''{"text":"When I click in input with key \"show_alert_button\"","line":15}''',
+            r'''{"text":"Then I should see \"This is a simple alert dialog.\"","line":16}''',
+            r'''{"text":"When I click in input with key \"alert_ok_button\"","line":17}''',
+            r'''{"text":"Then I should not see \"This is a simple alert dialog.\"","line":18}''',
+          ],
+        ),
       );
-
-      await helper.setUp(tester, scenario);
-      await helper.runStepsForScenario(scenario);
     });
 
     testWidgets('Scenario: Interacting with a confirmation dialog', (WidgetTester tester) async {
-      final ScenarioInfo scenario = ScenarioInfo(
-        scenarioName: 'Interacting with a confirmation dialog',
-        line: 20,
-        steps: [
-          r'''{"text":"When I click in input with key \"show_confirm_button\"","line":21}''',
-          r'''{"text":"Then I should see \"Are you sure you want to proceed?\"","line":22}''',
-          r'''{"text":"When I click in input with key \"confirm_cancel_button\"","line":23}''',
-          r'''{"text":"Then I should not see \"Are you sure you want to proceed?\"","line":24}''',
-        ],
+      await helper.testScenario(
+        tester,
+        ScenarioInfo(
+          scenarioName: 'Interacting with a confirmation dialog',
+          line: 20,
+          steps: [
+            r'''{"text":"When I click in input with key \"show_confirm_button\"","line":21}''',
+            r'''{"text":"Then I should see \"Are you sure you want to proceed?\"","line":22}''',
+            r'''{"text":"When I click in input with key \"confirm_cancel_button\"","line":23}''',
+            r'''{"text":"Then I should not see \"Are you sure you want to proceed?\"","line":24}''',
+          ],
+        ),
       );
-
-      await helper.setUp(tester, scenario);
-      await helper.runStepsForScenario(scenario);
     });
 
     testWidgets('Scenario: Interacting with a bottom sheet', (WidgetTester tester) async {
-      final ScenarioInfo scenario = ScenarioInfo(
-        scenarioName: 'Interacting with a bottom sheet',
-        line: 26,
-        steps: [
-          r'''{"text":"When I click in input with key \"show_bottom_sheet_button\"","line":27}''',
-          r'''{"text":"Then I should see \"Bottom Sheet Options\"","line":28}''',
-          r'''{"text":"When I click in input with key \"bottom_sheet_option_1\"","line":29}''',
-          r'''{"text":"Then I should not see \"Bottom Sheet Options\"","line":30}''',
-        ],
+      await helper.testScenario(
+        tester,
+        ScenarioInfo(
+          scenarioName: 'Interacting with a bottom sheet',
+          line: 26,
+          steps: [
+            r'''{"text":"When I click in input with key \"show_bottom_sheet_button\"","line":27}''',
+            r'''{"text":"Then I should see \"Bottom Sheet Options\"","line":28}''',
+            r'''{"text":"When I click in input with key \"bottom_sheet_option_1\"","line":29}''',
+            r'''{"text":"Then I should not see \"Bottom Sheet Options\"","line":30}''',
+          ],
+        ),
       );
-
-      await helper.setUp(tester, scenario);
-      await helper.runStepsForScenario(scenario);
     });
 
     testWidgets('Scenario: Interacting with a snackbar', (WidgetTester tester) async {
-      final ScenarioInfo scenario = ScenarioInfo(
-        scenarioName: 'Interacting with a snackbar',
-        line: 32,
-        steps: [
-          r'''{"text":"When I click in input with key \"show_snackbar_button\"","line":33}''',
-          r'''{"text":"Then I should see \"This is a snackbar message!\"","line":34}''',
-        ],
+      await helper.testScenario(
+        tester,
+        ScenarioInfo(
+          scenarioName: 'Interacting with a snackbar',
+          line: 32,
+          steps: [
+            r'''{"text":"When I click in input with key \"show_snackbar_button\"","line":33}''',
+            r'''{"text":"Then I should see \"This is a snackbar message!\"","line":34}''',
+          ],
+        ),
       );
-
-      await helper.setUp(tester, scenario);
-      await helper.runStepsForScenario(scenario);
     });
   });
 }
