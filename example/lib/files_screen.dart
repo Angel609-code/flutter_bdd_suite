@@ -43,6 +43,15 @@ class _FilesScreenState extends State<FilesScreen> {
                       children: [
                         Text(_statusMessage, key: const Key('file_status_message')),
                         const SizedBox(height: 16),
+                        const TextField(
+                          key: Key('import_data_field'),
+                          maxLines: 5,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            hintText: 'Enter CSV data here',
+                          ),
+                        ),
+                        const SizedBox(height: 16),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [

@@ -55,7 +55,7 @@ void main() async {
           line: 33,
           steps: [
             r'''{"text":"Given I should see \"Welcome to the Dashboard!\"","line":31}''',
-            r'''{"text":"When I click in input with key \"settings_btn\"","line":34}''',
+            r'''{"text":"When I click in input with key \"settings_action\"","line":34}''',
             r'''{"text":"Then I should see \"Settings\"","line":35}''',
           ],
         ),

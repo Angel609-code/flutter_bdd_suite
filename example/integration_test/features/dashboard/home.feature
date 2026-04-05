@@ -35,6 +35,6 @@ Feature: Dashboard and Data Tables
       Then I should see "<expected_page>"
 
       Scenarios:
-        | link_key     | expected_page   |
-        | settings_btn | Settings        |
-        | files_action | File Management |
+        | link_key        | expected_page   |
+        | settings_action | Settings        |
+        | files_action    | File Management |
