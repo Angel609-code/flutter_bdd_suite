@@ -8,6 +8,7 @@ const List<String> _stepKeywords = [
   'Then',
   'And',
   'But',
+  '*',
 ];
 
 /// Dynamically builds the escaped keyword group for the RegExp.
@@ -16,8 +17,9 @@ final String _escapedKeywordGroup = _stepKeywords.map((kw) => RegExp.escape(kw))
 
 /// Pattern to detect if a line STARTS with one of the keywords 
 /// (allowing optional leading whitespace). For example: “  Given user logs in”, “* something”, etc.
+/// `\b` is used for word boundary, but since `\*` is not a word character, we must handle it.
 final RegExp stepLinePattern = RegExp(
-  r'^\s*(?:' + _escapedKeywordGroup + r')\b',
+  r'^\s*(?:' + _escapedKeywordGroup + r')(?:\b|\s)',
   caseSensitive: false,
 );
 
@@ -25,7 +27,7 @@ final RegExp stepLinePattern = RegExp(
 /// - Matches exactly “^(Given|When|Then|And|But)\s+”
 /// - Removes the keyword plus the whitespace that follows it.
 final RegExp cleanStepPattern = RegExp(
-  r'^(?:' + _escapedKeywordGroup + r')\s+',
+  r'^\s*(?:' + _escapedKeywordGroup + r')\s+',
   caseSensitive: false,
 );
 

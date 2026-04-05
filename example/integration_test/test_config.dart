@@ -17,7 +17,7 @@ import 'steps/when_click_in_step.dart';
 final config = IntegrationTestConfig(
   appLauncher: (WidgetTester tester) async {
     await tester.binding.reassembleApplication();
-    await tester.pumpWidget(const MainApp());
+    await tester.pumpWidget(const BddExampleApp());
 
     await tester.pumpAndSettle();
   },

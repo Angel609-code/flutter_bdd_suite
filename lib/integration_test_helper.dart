@@ -17,7 +17,6 @@ bool _managersRegistered = false;
 class IntegrationTestHelper {
   final IntegrationTestConfig config;
   final List<String> backgroundSteps;
-  final Map<String, List<String>> scenariosAndSteps;
 
   late final LifecycleManager _hookManager;
   late final LifecycleManager _reporterManager;
@@ -50,15 +49,14 @@ class IntegrationTestHelper {
 
   factory IntegrationTestHelper({
     required IntegrationTestConfig config,
-    Map<String,List<String>> scenariosAndSteps = const {},
     List<String> backgroundSteps = const [],
     IntegrationTestServer? server,
   }) {
     bootstrap(config);
-    return IntegrationTestHelper._(config, scenariosAndSteps, backgroundSteps);
+    return IntegrationTestHelper._(config, backgroundSteps);
   }
 
-  IntegrationTestHelper._(this.config, this.scenariosAndSteps, this.backgroundSteps) {
+  IntegrationTestHelper._(this.config, this.backgroundSteps) {
     _hookManager = LifecycleManager(config.hooks);
     _reporterManager = LifecycleManager(config.reporters);
 
@@ -105,8 +103,7 @@ class IntegrationTestHelper {
     await _hookManager.onBeforeScenario(scenario);
     await _reporterManager.onBeforeScenario(scenario);
 
-    final stepsJson = scenariosAndSteps[scenario.scenarioName] ?? <String>[];
-    final steps = _parseStepsFromJsonList(stepsJson);
+    final steps = _parseStepsFromJsonList(scenario.steps);
 
     for (final step in steps) {
       await _executeStep(step, false, scenario: scenario);
@@ -127,6 +124,11 @@ class IntegrationTestHelper {
       await _hookManager.onAfterScenario(scenario.scenarioName);
       await _reporterManager.onAfterScenario(scenario.scenarioName);
     }
+  }
+
+  Future<void> testScenario(WidgetTester tester, ScenarioInfo scenario) async {
+    await setUp(tester, scenario);
+    await runStepsForScenario(scenario);
   }
 
   Future<void> _executeStep(Step step, bool isBackground, {ScenarioInfo? scenario}) async {

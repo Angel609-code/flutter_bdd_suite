@@ -2,16 +2,18 @@
 import 'package:flutter_gherkin_parser/integration_test_helper.dart';
 import 'test_config.dart';
 
-import 'generated/aa_test.dart' as aa_test;
-import 'generated/subfolder/a_test_second_example.dart' as a_test_second_example;
-import 'generated/subfolder/c_third_second_example.dart' as c_third_second_example;
-import 'generated/z_test_regex_driven.dart' as z_test_regex_driven;
+import 'generated/dashboard/home.dart' as home;
+import 'generated/interactions/dialogs.dart' as dialogs;
+import 'generated/file_management/csv.dart' as csv;
+import 'generated/preferences/settings.dart' as settings;
+import 'generated/auth/login.dart' as login;
 
 void main() {
   IntegrationTestHelper(config: config);
 
-  aa_test.main();
-  a_test_second_example.main();
-  c_third_second_example.main();
-  z_test_regex_driven.main();
+  home.main();
+  dialogs.main();
+  csv.main();
+  settings.main();
+  login.main();
 }

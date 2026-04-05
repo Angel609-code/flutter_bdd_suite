@@ -12,7 +12,6 @@ void main() async {
     backgroundSteps: _backgroundSteps,
     {{/hasBackgroundSteps}}
     {{/features}}
-    scenariosAndSteps: _scenariosAndSteps,
   );
   {{#features}}
 
@@ -23,16 +22,21 @@ void main() async {
 
     {{#scenarios}}
     testWidgets('Scenario: {{name}}', (WidgetTester tester) async {
-      final ScenarioInfo scenario = ScenarioInfo(
-        scenarioName: '{{name}}',
-        line: {{line}},
-        {{#tags}}
-        tags: {{tags}},
-        {{/tags}}
+      await helper.testScenario(
+        tester,
+        ScenarioInfo(
+          scenarioName: '{{name}}',
+          line: {{line}},
+          {{#hasTags}}
+          tags: {{{tagsString}}},
+          {{/hasTags}}
+          steps: [
+            {{#steps}}
+            r'''{{{json}}}''',
+            {{/steps}}
+          ],
+        ),
       );
-
-      await helper.setUp(tester, scenario);
-      await helper.runStepsForScenario(scenario);
     });
     {{^isLast}}
 
@@ -47,9 +51,9 @@ FeatureInfo _featureInfo = FeatureInfo(
   featureName: '{{name}}',
   uri: '{{uri}}',
   line: {{line}},
-  {{#tags}}
-  tags: {{tags}},
-  {{/tags}}
+  {{#hasTags}}
+  tags: {{{tagsString}}},
+  {{/hasTags}}
 );
 {{#hasBackgroundSteps}}
 
@@ -63,13 +67,4 @@ final List<String> _backgroundSteps = <String>[
 {{^hasBackgroundSteps}}
 
 {{/hasBackgroundSteps}}
-final Map<String, List<String>> _scenariosAndSteps = {
-{{#scenarios}}
-  '{{name}}': [
-    {{#steps}}
-    r'''{{{json}}}''',
-    {{/steps}}
-  ],
-{{/scenarios}}
-};
 {{/features}}
