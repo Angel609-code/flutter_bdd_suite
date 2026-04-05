@@ -325,8 +325,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           value: _employees.isEmpty
                               ? '—'
                               : (_employees
-                                          .map((e) => e.age)
-                                          .reduce((a, b) => a + b) /
+                                          .fold<int>(0, (sum, e) => sum + e.age) /
                                       _employees.length)
                                   .toStringAsFixed(1),
                           icon: Icons.bar_chart,

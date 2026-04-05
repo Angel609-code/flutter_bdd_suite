@@ -163,14 +163,15 @@ David Kim,Analyst,35,david@teamsync.io''';
                                           fontWeight: FontWeight.bold))))
                               .toList(),
                           rows: List.generate(dataRows.length, (i) {
+                            final row = dataRows[i];
                             return DataRow(
                               key: ValueKey('csv_row_$i'),
-                              cells: dataRows[i]
-                                  .map((cell) => DataCell(
-                                      Text(cell,
-                                          key: Key('csv_cell_${i}_'
-                                              '${dataRows[i].indexOf(cell)}'))))
-                                  .toList(),
+                              cells: List.generate(
+                                row.length,
+                                (j) => DataCell(
+                                  Text(row[j], key: Key('csv_cell_${i}_$j')),
+                                ),
+                              ),
                             );
                           }),
                         ),
