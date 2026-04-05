@@ -16,10 +16,10 @@ import 'steps/when_click_in_step.dart';
 
 final config = IntegrationTestConfig(
   appLauncher: (WidgetTester tester) async {
-    await tester.binding.reassembleApplication(); // Reinitialize app state
+    await tester.binding.reassembleApplication();
     await tester.pumpWidget(const MainApp());
 
-    await tester.pumpAndSettle(); // Wait for UI to settle
+    await tester.pumpAndSettle();
   },
   onBindingInitialized: (IntegrationTestWidgetsFlutterBinding binding) async {
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;

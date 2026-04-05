@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_print
 import 'dart:convert';
 import 'dart:io';
 
@@ -69,14 +70,37 @@ class IntegrationTestServer {
   }
 
   Future<void> _handleReport(HttpRequest req) async {
-    final data = jsonDecode(await utf8.decoder.bind(req).join());
-    final file = File(data['path']);
-    await file.create(recursive: true);
-    await file.writeAsString(data['content']);
-    req.response
-      ..statusCode = 200
-      ..write('Report saved');
-    await req.response.close();
+    try {
+      final data = jsonDecode(await utf8.decoder.bind(req).join());
+      String pathFromClient = data['path'];
+
+      // 1. Get the Project Root (where the dev is running the app/test)
+      final projectRoot = Directory.current.path;
+
+      // 2. Build the Absolute Path
+      // If the path is already absolute, use it. Otherwise, join it with project root.
+      final absolutePath = pathFromClient.startsWith('/') 
+          ? pathFromClient 
+          : '$projectRoot/$pathFromClient';
+
+      final file = File(absolutePath);
+
+      // 3. Create directories if they don't exist and write
+      await file.create(recursive: true);
+      await file.writeAsString(data['content']);
+
+      print('[IntegrationTestServer] Report saved at: $absolutePath');
+
+      req.response
+        ..statusCode = 200
+        ..write('Report saved to $absolutePath');
+    } catch (e) {
+      req.response
+        ..statusCode = 500
+        ..write('Failed to save report: $e');
+    } finally {
+      await req.response.close();
+    }
   }
 
   Future<void> stop() async {

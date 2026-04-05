@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_print
 import 'package:flutter_gherkin_parser/models/feature_model.dart';
 import 'package:flutter_gherkin_parser/models/scenario_model.dart';
 import 'package:flutter_gherkin_parser/reporters/integration_reporter.dart';
@@ -69,12 +70,12 @@ class SummaryReporter extends IntegrationReporter {
 
     print('');
     print(
-        '$_totalScenarios scenarios ' +
-            '(${green}$_passedScenarios passed$reset, ' +
-            '${red}$_failedScenarios failed$reset, ' +
-            '${yellow}$_skippedScenarios skipped$reset)'
+        '$_totalScenarios scenarios ' 
+        '($green$_passedScenarios passed$reset, ' 
+        '$red$_failedScenarios failed$reset, ' 
+        '$yellow$_skippedScenarios skipped$reset)'
     );
-    print('${mins}m${secs}.${millis}s');
+    print('${mins}m$secs.${millis}s');
     print('');
   }
 

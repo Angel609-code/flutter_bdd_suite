@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_print
 import 'dart:convert' show jsonDecode;
 import 'package:flutter_gherkin_parser/integration_test_config.dart';
 import 'package:flutter_gherkin_parser/lifecycle_manager.dart';
@@ -257,7 +258,7 @@ class IntegrationTestHelper {
     }
 
     for (final line in lastByFile.values) {
-      print('${red}$line$reset');
+      print('$red$line$reset');
     }
 
     final String errorMessage = '${red}Error on step, skipping remaining steps for ${_errorOnBackground ? 'background' : 'scenario: "$_scenarioName"'}$reset';

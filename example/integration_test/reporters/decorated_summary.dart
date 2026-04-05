@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_print
 import 'dart:math';
 import 'package:wcwidth/wcwidth.dart';
 import 'package:flutter_gherkin_parser/models/feature_model.dart';
@@ -71,14 +72,14 @@ class DecoratedSummaryReporter extends IntegrationReporter {
       ['Passed',          _passedScenarios.toString(), '✓', green],
       ['Failed',          _failedScenarios.toString(),  '✗', red],
       ['Skipped',         _skippedScenarios.toString(), '↺', yellow],
-      ['Elapsed Time',    '${mins}m${secs}.${millis}s', null, null],
+      ['Elapsed Time',    '${mins}m$secs.${millis}s', null, null],
     ];
 
     // Compute inner content width W
     final contentWidths = entries.map((e) {
       final label = e[0] as String;
       final val   = e[1] as String;
-      final sym   = e[2] as String?;
+      final sym   = e[2];
       final raw   = sym != null ? '$sym$val' : val;
       return _visibleWidth('$label : $raw');
     });
@@ -98,7 +99,7 @@ class DecoratedSummaryReporter extends IntegrationReporter {
       '╠$border╣',
       for (var e in entries)
         _buildLine(e[0] as String, e[1] as String, W,
-            symbol: e[2] as String?, colorCode: e[3] as String?),
+            symbol: e[2], colorCode: e[3]),
       '╚$border╝',
     ];
 

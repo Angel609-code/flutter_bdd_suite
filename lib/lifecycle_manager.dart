@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_print
 import 'package:flutter_gherkin_parser/lifecycle_listener.dart';
 import 'package:flutter_gherkin_parser/models/feature_model.dart';
 import 'package:flutter_gherkin_parser/models/scenario_model.dart';
