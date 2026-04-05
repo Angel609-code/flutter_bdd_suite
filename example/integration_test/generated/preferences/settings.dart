@@ -47,7 +47,7 @@ final List<String> _backgroundSteps = <String>[
 final Map<String, List<String>> _scenariosAndSteps = {
   'Reading terms and conditions': [
     r'''{"text":"When I click in input with key \"view_terms_button\"","line":16}''',
-    r'''{"text":"Then I see text:","line":17}''',
+    r'''{"text":"Then I see text: \"<<<DOCSTRING:      Please read our terms and conditions...>>>\"","line":20}''',
     r'''{"text":"And I click in input with key \"close_terms\"","line":21}''',
     r'''{"text":"Then I should not see \"Please read our terms and conditions...\"","line":22}''',
   ],

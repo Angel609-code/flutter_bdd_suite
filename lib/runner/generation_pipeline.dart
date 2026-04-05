@@ -115,28 +115,29 @@ Future<GeneratePipelineResult> runGeneratePipeline(
       throw StateError('Expected one Feature in ${featureFile.path}');
     }
 
-    final backgroundCount = RegExp(r'^\s*Background:', multiLine: true).allMatches(raw).length;
-    if (backgroundCount > 1) {
-      throw StateError('More than one Background in ${featureFile.path}');
-    }
+    // We allow multiple Backgrounds now (one per Feature, and one per Rule).
+    // The parser handles appending Rule Backgrounds to Scenarios.
 
     final scenarioMaps = <Map<String, dynamic>>[];
     for (var i = 0; i < feature.scenarios.length; i++) {
       final sc = feature.scenarios[i];
+      final scTagsUnique = sc.tags.toSet().toList();
       scenarioMaps.add({
         'name': sc.name,
         'line': sc.line,
-        'tags': sc.tags.map((e) => "'$e'").toList(),
+        'tags': scTagsUnique.map((e) => "'$e'").toList(),
         'steps': sc.steps.map((s) => {'json': s.toString()}).toList(),
         'isLast': i == feature.scenarios.length - 1,
       });
     }
 
+    // Deduplicate tags
+    final featureTagsUnique = feature.tags.toSet().toList();
     final featureData = {
       'name': feature.name,
       'uri': feature.uri,
       'line': feature.line,
-      'tags': feature.tags.map((e) => "'$e'").toList(),
+      'tags': featureTagsUnique.map((e) => "'$e'").toList(),
       'scenarios': scenarioMaps,
       'backgroundSteps': feature.background?.steps.map((s) => {'jsonStep': s.toString()}).toList() ?? [],
       'hasBackgroundSteps': feature.background?.steps.isNotEmpty ?? false,

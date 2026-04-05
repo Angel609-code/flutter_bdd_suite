@@ -15,6 +15,35 @@ void main() async {
       await helper.setUpFeature(featureInfo: _featureInfo);
     });
 
+    testWidgets('Scenario: Logging in with various credentials (Example 1)', (WidgetTester tester) async {
+      final ScenarioInfo scenario = ScenarioInfo(
+        scenarioName: 'Logging in with various credentials (Example 1)',
+        line: 7,
+      );
+
+      await helper.setUp(tester, scenario);
+      await helper.runStepsForScenario(scenario);
+    });
+
+    testWidgets('Scenario: Logging in with various credentials (Example 2)', (WidgetTester tester) async {
+      final ScenarioInfo scenario = ScenarioInfo(
+        scenarioName: 'Logging in with various credentials (Example 2)',
+        line: 7,
+      );
+
+      await helper.setUp(tester, scenario);
+      await helper.runStepsForScenario(scenario);
+    });
+
+    testWidgets('Scenario: Logging in with various credentials (Example 3)', (WidgetTester tester) async {
+      final ScenarioInfo scenario = ScenarioInfo(
+        scenarioName: 'Logging in with various credentials (Example 3)',
+        line: 7,
+      );
+
+      await helper.setUp(tester, scenario);
+      await helper.runStepsForScenario(scenario);
+    });
   });
 }
 
@@ -23,7 +52,26 @@ FeatureInfo _featureInfo = FeatureInfo(
   uri: '/features/auth/login.feature',
   line: 2,
   tags: ['@auth', '@regression'],
+  tags: ['@auth', '@regression'],
 );
 
 final Map<String, List<String>> _scenariosAndSteps = {
+  'Logging in with various credentials (Example 1)': [
+    r'''{"text":"Given I fill the \"username_field\" field with \"wrong\"","line":8}''',
+    r'''{"text":"And I fill the \"password_field\" field with \"pass\"","line":9}''',
+    r'''{"text":"When I click in input with key \"login_button\"","line":10}''',
+    r'''{"text":"Then I should see \"Invalid credentials.\"","line":11}''',
+  ],
+  'Logging in with various credentials (Example 2)': [
+    r'''{"text":"Given I fill the \"username_field\" field with \"\"","line":8}''',
+    r'''{"text":"And I fill the \"password_field\" field with \"\"","line":9}''',
+    r'''{"text":"When I click in input with key \"login_button\"","line":10}''',
+    r'''{"text":"Then I should see \"Username and password are required.\"","line":11}''',
+  ],
+  'Logging in with various credentials (Example 3)': [
+    r'''{"text":"Given I fill the \"username_field\" field with \"admin\"","line":8}''',
+    r'''{"text":"And I fill the \"password_field\" field with \"password123\"","line":9}''',
+    r'''{"text":"When I click in input with key \"login_button\"","line":10}''',
+    r'''{"text":"Then I should see \"Welcome to the Dashboard!\"","line":11}''',
+  ],
 };
