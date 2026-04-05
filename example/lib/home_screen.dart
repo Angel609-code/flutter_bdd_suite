@@ -309,7 +309,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             label: 'Total Employees',
                             value: '${_employees.length}',
                             icon: Icons.people,
-                            color: Colors.indigo,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                         ),
                         Expanded(

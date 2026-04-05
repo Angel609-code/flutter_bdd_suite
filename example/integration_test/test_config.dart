@@ -1,5 +1,7 @@
 import 'package:example/main.dart';
+import 'package:example/app_theme.dart';
 import 'package:flutter/foundation.dart' show debugPrint;
+import 'package:flutter/material.dart';
 import 'package:flutter_gherkin_parser/integration_test_config.dart';
 import 'package:flutter_gherkin_parser/reporters/json_reporter.dart';
 import 'package:flutter_gherkin_parser/reporters/summary_reporter.dart';
@@ -16,6 +18,7 @@ import 'steps/when_click_in_step.dart';
 
 final config = IntegrationTestConfig(
   appLauncher: (WidgetTester tester) async {
+    themeNotifier.value = ThemeMode.light;
     await tester.binding.reassembleApplication();
     await tester.pumpWidget(const BddExampleApp());
 

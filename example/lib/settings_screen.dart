@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'app_theme.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -12,6 +13,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _darkModeEnabled = false;
   double _volume = 50.0;
   final String _termsText = 'Please read our terms and conditions...';
+
+  @override
+  void initState() {
+    super.initState();
+    _darkModeEnabled = themeNotifier.value == ThemeMode.dark;
+  }
 
   void _showTermsDialog() {
     showDialog(
@@ -68,10 +75,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       secondary: const Icon(Icons.dark_mode),
                       value: _darkModeEnabled,
                       onChanged: (value) {
+                        final enabled = value ?? false;
                         setState(() {
-                          _darkModeEnabled = value ?? false;
+                          _darkModeEnabled = enabled;
                         });
+                        themeNotifier.value =
+                            enabled ? ThemeMode.dark : ThemeMode.light;
                       },
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 4),
+                      child: Text(
+                        _darkModeEnabled
+                            ? 'Dark Mode: Enabled'
+                            : 'Dark Mode: Disabled',
+                        key: const Key('theme_mode_indicator'),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
                     ),
                   ],
                 ),

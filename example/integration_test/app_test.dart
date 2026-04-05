@@ -17,13 +17,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:example/main.dart';
+import 'package:example/app_theme.dart';
 
 // =============================================================================
 // Helper utilities — reusable pump+action shortcuts used across all tests
 // =============================================================================
 
 /// Pump the full application fresh from the login screen.
+///
+/// Also resets global state (theme) so tests don't interfere with each other.
 Future<void> launchApp(WidgetTester tester) async {
+  themeNotifier.value = ThemeMode.light;
   await tester.pumpWidget(const BddExampleApp());
   await tester.pumpAndSettle();
 }

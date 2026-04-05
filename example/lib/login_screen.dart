@@ -44,15 +44,19 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Icon(Icons.people_alt, size: 64, color: Colors.indigo),
+                Icon(
+                  Icons.people_alt,
+                  size: 64,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
                 const SizedBox(height: 12),
-                const Text(
+                Text(
                   'TeamSync',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
-                    color: Colors.indigo,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 const Text(

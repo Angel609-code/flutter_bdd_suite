@@ -20,3 +20,11 @@ Feature: User Preferences and Settings
       """
     And I click in input with key "close_terms"
     Then I should not see "Please read our terms and conditions..."
+
+  @dark_mode
+  Scenario: Enabling dark mode
+    Then I should see "Dark Mode: Disabled"
+    When I click in input with key "dark_mode_checkbox"
+    Then I should see "Dark Mode: Enabled"
+    When I click in input with key "dark_mode_checkbox"
+    Then I should see "Dark Mode: Disabled"
