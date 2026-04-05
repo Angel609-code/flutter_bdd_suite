@@ -1,8 +1,8 @@
 @dashboard @smoke
-Feature: Dashboard and Data Tables
+Feature: Employee Directory Dashboard
   As an authenticated user
-  I want to view my dashboard
-  So that I can see recent items and manage users
+  I want to view the TeamSync employee dashboard
+  So that I can see employee records and manage staff
 
   Background:
     Given I fill the "username_field" field with "admin"
@@ -11,30 +11,33 @@ Feature: Dashboard and Data Tables
     And I should see "Welcome to the Dashboard!"
 
   @dialog
-  Scenario: Adding a new user via dialog
-    When I click in input with key "add_user_fab"
-    Then I should see "Do you want to add a new user?"
-    When I click in input with key "dialog_confirm"
-    Then I should not see "Do you want to add a new user?"
+  Scenario: Adding a new employee via the Add Employee dialog
+    When I click in input with key "add_employee_fab"
+    Then I should see "Add Employee"
+    When I fill the "employee_name_field" field with "Eve Torres"
+    And I fill the "employee_role_field" field with "DevOps"
+    And I fill the "employee_age_field" field with "29"
+    And I click in input with key "save_employee_button"
+    Then I should see "Eve Torres"
 
   @data_table
-  Example: Verifying user management data table with escaping
+  Example: Verifying employee data table columns
     * I print table
-      | ID | Name        | Info                 |
-      | 1  | John Doe    | Role: Admin\nActive  |
-      | 2  | Jane Smith  | Role: User\|Inactive |
-      | 3  | Bob Johnson | Dir: C:\\Users\\Bob  |
-    Then I should see "Bob Johnson"
+      | ID | Name          | Role     | Age |
+      | 1  | Alice Johnson | Engineer | 30  |
+      | 2  | Bob Martinez  | Designer | 27  |
+      | 3  | Carol White   | Manager  | 42  |
+    Then I should see "Alice Johnson"
 
-  Rule: Admin Dashboard Rules
+  Rule: Admin Dashboard Navigation Rules
     Background:
       Given I should see "Welcome to the Dashboard!"
 
-    Scenario Outline: Verifying quick links
+    Scenario Outline: Verifying quick links from the dashboard
       When I click in input with key "<link_key>"
       Then I should see "<expected_page>"
 
       Scenarios:
-        | link_key     | expected_page   |
-        | settings_btn | Settings        |
-        | files_action | File Management |
+        | link_key        | expected_page          |
+        | settings_action | Enable Notifications   |
+        | files_action    | File Management        |
