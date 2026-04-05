@@ -46,10 +46,11 @@ final List<String> _backgroundSteps = <String>[
 final Map<String, List<String>> _scenariosAndSteps = {
   'Importing and Exporting CSV files': [
     r'''{"text":"Given I should see \"No files imported yet.\"","line":15}''',
-    r'''{"text":"When I click in input with key \"import_csv_button\"","line":16}''',
-    r'''{"text":"Then I should see \"CSV file imported successfully.\"","line":17}''',
-    r'''{"text":"And I should not see \"Empty list\"","line":18}''',
-    r'''{"text":"When I click in input with key \"export_csv_button\"","line":19}''',
-    r'''{"text":"Then I should see \"Data exported to CSV successfully.\"","line":20}''',
+    r'''{"text":"And I enter text \"import_data_field\" with \"<<<DOCSTRING:      name,age,email\\n      John,30,john@example.com\\n      Alice,25,alice@example.com>>>\"","line":22}''',
+    r'''{"text":"When I click in input with key \"import_csv_button\"","line":23}''',
+    r'''{"text":"Then I should see \"CSV file imported successfully.\"","line":24}''',
+    r'''{"text":"And I should not see \"Empty list\"","line":25}''',
+    r'''{"text":"When I click in input with key \"export_csv_button\"","line":26}''',
+    r'''{"text":"Then I should see \"Data exported to CSV successfully.\"","line":27}''',
   ],
 };

@@ -13,6 +13,13 @@ Feature: File Management and CSV Operations
 
   Scenario: Importing and Exporting CSV files
     Given I should see "No files imported yet."
+    # We use a doc string to simulate pasting bulk data or logging
+    And I enter text "import_data_field" with
+      ```markdown
+      name,age,email
+      John,30,john@example.com
+      Alice,25,alice@example.com
+      ```
     When I click in input with key "import_csv_button"
     Then I should see "CSV file imported successfully."
     And I should not see "Empty list"

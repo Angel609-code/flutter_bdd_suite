@@ -18,10 +18,23 @@ Feature: Dashboard and Data Tables
     Then I should not see "Do you want to add a new user?"
 
   @data_table
-  Scenario: Verifying user management data table
-    Given I print table
-      | ID | Name        | Status  |
-      | 1  | John Doe    | Active  |
-      | 2  | Jane Smith  | Inactive|
-      | 3  | Bob Johnson | Active  |
+  Example: Verifying user management data table with escaping
+    * I print table
+      | ID | Name        | Info                 |
+      | 1  | John Doe    | Role: Admin\nActive  |
+      | 2  | Jane Smith  | Role: User\|Inactive |
+      | 3  | Bob Johnson | Dir: C:\\Users\\Bob  |
     Then I should see "Bob Johnson"
+
+  Rule: Admin Dashboard Rules
+    Background:
+      Given I should see "Welcome to the Dashboard!"
+
+    Scenario Outline: Verifying quick links
+      When I click in input with key "<link_key>"
+      Then I should see "<expected_page>"
+
+      Scenarios:
+        | link_key     | expected_page   |
+        | settings_btn | Settings        |
+        | files_action | File Management |

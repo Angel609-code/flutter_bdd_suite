@@ -5,9 +5,7 @@ import 'test_config.dart';
 import 'generated/dashboard/home.dart' as home;
 import 'generated/interactions/dialogs.dart' as dialogs;
 import 'generated/file_management/csv.dart' as csv;
-import 'generated/test_rule.dart' as test_rule;
 import 'generated/preferences/settings.dart' as settings;
-import 'generated/test_outline.dart' as test_outline;
 import 'generated/auth/login.dart' as login;
 
 void main() {
@@ -16,8 +14,6 @@ void main() {
   home.main();
   dialogs.main();
   csv.main();
-  test_rule.main();
   settings.main();
-  test_outline.main();
   login.main();
 }
