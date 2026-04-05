@@ -450,6 +450,8 @@ void main() {
         expect(find.text('Alice Johnson'), findsOneWidget);
 
         // When I tap the delete button for the first employee (index 0)
+        await tester.ensureVisible(find.byKey(const Key('delete_employee_0')));
+        await tester.pumpAndSettle();
         await tester.tap(find.byKey(const Key('delete_employee_0')));
         await tester.pumpAndSettle();
 
@@ -478,6 +480,8 @@ void main() {
         expect(find.text('Alice Johnson'), findsOneWidget);
 
         // When I tap the delete button for the first employee
+        await tester.ensureVisible(find.byKey(const Key('delete_employee_0')));
+        await tester.pumpAndSettle();
         await tester.tap(find.byKey(const Key('delete_employee_0')));
         await tester.pumpAndSettle();
 
@@ -514,6 +518,8 @@ void main() {
         expect(find.text('Bob Martinez'), findsOneWidget);
 
         // When I tap the edit button for the second employee (index 1)
+        await tester.ensureVisible(find.byKey(const Key('edit_employee_1')));
+        await tester.pumpAndSettle();
         await tester.tap(find.byKey(const Key('edit_employee_1')));
         await tester.pumpAndSettle();
 
@@ -1314,6 +1320,8 @@ void main() {
 
       // ── Step 4: Edit ─────────────────────────────────────────────────────
       // When I tap the edit button for "Eve Torres" (she is last = index 3)
+      await tester.ensureVisible(find.byKey(const Key('edit_employee_3')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('edit_employee_3')));
       await tester.pumpAndSettle();
 
@@ -1334,6 +1342,8 @@ void main() {
 
       // ── Step 5: Delete ───────────────────────────────────────────────────
       // When I tap the delete button for "Eve Torres" (still index 3)
+      await tester.ensureVisible(find.byKey(const Key('delete_employee_3')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('delete_employee_3')));
       await tester.pumpAndSettle();
 
