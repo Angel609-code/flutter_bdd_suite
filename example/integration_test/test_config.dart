@@ -34,5 +34,13 @@ final config = IntegrationTestConfig(
     iTapButton(),
     iShouldSee(),
     iShouldReachDashboard(),
+    iFillField(),
+    iShouldSeeElement(),
+    iShouldNotSeeElement(),
+    iShouldNotSee(),
+    iShouldSeeMultipleTexts(),
+    iTapElement(),
+    iScrollToElement(),
+    theElementIs(),
   ]
 );

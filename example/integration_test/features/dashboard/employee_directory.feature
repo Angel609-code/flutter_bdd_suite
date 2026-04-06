@@ -1,0 +1,131 @@
+@dashboard @smoke
+Feature: Employee Directory Dashboard
+  As an authenticated admin user
+  I want to view and manage employees
+  So that I can maintain an accurate team roster
+
+  Background:
+    Given the application is launched
+    And I enter the username "admin"
+    And I enter the password "password123"
+    And I tap the login button
+    Then I should see "Welcome to the Dashboard!"
+
+  Scenario: Dashboard shows welcome message and employee table
+    Then I should see "Welcome to the Dashboard!"
+    And I should see the "employee_table" element
+    And I should see "Alice Johnson"
+    And I should see "Bob Martinez"
+    And I should see "Carol White"
+
+  Scenario: Dashboard stat cards reflect employee data
+    Then I should see multiple "3" texts
+    And I should see "Total Employees"
+    And I should see "Average Age"
+
+  Rule: Employee records must pass validation
+    Scenario: Adding employee with valid data adds a table row
+      When I tap the "add_employee_fab" element
+      Then I should see the "employee_dialog_title" element
+      And I should see "Add Employee"
+      When I fill the "employee_name_field" field with "David Kim"
+      And I fill the "employee_role_field" field with "Analyst"
+      And I fill the "employee_age_field" field with "35"
+      And I fill the "employee_bio_field" field with "Business analyst with expertise in data.\nSix years experience."
+      And I tap the "save_employee_button" element
+      Then I should not see the "employee_dialog_title" element
+      And I should see "David Kim"
+      And I should see "Analyst"
+
+    Scenario Outline: Adding employees with boundary ages
+      When I tap the "add_employee_fab" element
+      And I fill the "employee_name_field" field with "<name>"
+      And I fill the "employee_role_field" field with "Tester"
+      And I fill the "employee_age_field" field with "<age>"
+      And I tap the "save_employee_button" element
+      Then the "employee_dialog_title" element is "<dialog_state>"
+      And I should see "<expected_text>"
+
+      Examples:
+        | name         | age | dialog_state | expected_text                              |
+        | Under18Test  | 17  | visible      | Employee must be at least 18 years old     |
+        | Adult18Test  | 18  | hidden       | Adult18Test                                |
+        | Adult100Test | 100 | hidden       | Adult100Test                               |
+
+    Scenario: Empty name shows validation error
+      When I tap the "add_employee_fab" element
+      And I fill the "employee_role_field" field with "Developer"
+      And I fill the "employee_age_field" field with "25"
+      And I tap the "save_employee_button" element
+      Then I should see "Name is required"
+      And I should see the "employee_dialog_title" element
+
+    Scenario: Non-numeric age shows validation error
+      When I tap the "add_employee_fab" element
+      And I fill the "employee_name_field" field with "Test User"
+      And I fill the "employee_role_field" field with "QA"
+      And I fill the "employee_age_field" field with "abc"
+      And I tap the "save_employee_button" element
+      Then I should see "Age must be a number"
+
+  Rule: Employees can be removed from the directory
+    Scenario: Deleting an employee removes them from the table
+      Given I should see "Alice Johnson"
+      When I scroll to the "delete_employee_0" element
+      And I tap the "delete_employee_0" element
+      Then I should see the "delete_confirm_message" element
+      And I should see "Delete Employee"
+      When I tap the "delete_confirm_button" element
+      Then I should not see "Alice Johnson"
+
+    Scenario: Cancelling delete keeps the employee in the table
+      Given I should see "Alice Johnson"
+      When I scroll to the "delete_employee_0" element
+      And I tap the "delete_employee_0" element
+      Then I should see the "delete_confirm_message" element
+      When I tap the "delete_cancel_button" element
+      Then I should not see the "delete_confirm_message" element
+      And I should see "Alice Johnson"
+
+  Rule: Employee records can be updated via the edit dialog
+    Scenario: Editing an employee updates the table row
+      Given I should see "Bob Martinez"
+      When I scroll to the "edit_employee_1" element
+      And I tap the "edit_employee_1" element
+      Then I should see "Edit Employee"
+      When I fill the "employee_name_field" field with "Robert Martinez"
+      And I tap the "save_employee_button" element
+      Then I should see "Robert Martinez"
+      And I should not see "Bob Martinez"
+
+  Rule: Search filters visible employees
+    Scenario Outline: Searching by name narrows the displayed employees
+      When I fill the "search_field" field with "<query>"
+      Then I should see "<expected_visible>"
+      And I should not see "<expected_hidden>"
+
+      Examples:
+        | query   | expected_visible | expected_hidden |
+        | Alice   | Alice Johnson    | Bob Martinez    |
+        | Manager | Carol White      | Alice Johnson   |
+
+    Scenario: Searching by name narrows the displayed employees empty state
+      When I fill the "search_field" field with "xyznotfound"
+      Then I should not see "Alice Johnson"
+      And I should see the "empty_employee_text" element
+
+  Scenario: Employee table displays all required columns
+    Then I should see "ID"
+    And I should see "Name"
+    And I should see "Role"
+    And I should see "Age"
+    And I should see "Biography"
+    And I should see "Actions"
+
+  Scenario: Cancelling the Add Employee dialog saves nothing
+    Given I should see "Alice Johnson"
+    When I tap the "add_employee_fab" element
+    And I fill the "employee_name_field" field with "Ghost Employee"
+    And I tap the "cancel_employee_button" element
+    Then I should not see the "employee_dialog_title" element
+    And I should not see "Ghost Employee"

@@ -23,6 +23,15 @@ StepDefinitionGeneric iEnterValueInField() {
   );
 }
 
+StepDefinitionGeneric iFillField() {
+  return generic2<String, String, WidgetTesterWorld>(
+    r'I fill the {string} field with {string}', (fieldKey, value, world) async {
+      await world.tester.enterText(find.byKey(Key(fieldKey)), value);
+      await world.tester.pump();
+    },
+  );
+}
+
 StepDefinitionGeneric iTapButton() {
   return generic1<String, WidgetTesterWorld>(
     r'I tap the (.+?) button', (type, world) async {
