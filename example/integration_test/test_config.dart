@@ -39,7 +39,6 @@ final config = IntegrationTestConfig(
     iShouldNotSeeElement(),
     iShouldNotSee(),
     iShouldSeeMultipleTexts(),
-    iTapElement(),
     iScrollToElement(),
     theElementIs(),
   ]

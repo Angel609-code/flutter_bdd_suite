@@ -15,9 +15,27 @@ StepDefinitionGeneric theApplicationIsLaunched() {
   );
 }
 
+// Reusable element key mapper for app steps
+String getElementKey(String type) {
+  final Map<String, String> elementMappings = {
+    'employee table': 'employee_table',
+    'employee dialog title': 'employee_dialog_title',
+    'delete confirm message': 'delete_confirm_message',
+    'empty employee text': 'empty_employee_text',
+  };
+
+  final dynamic elementKey = elementMappings[type];
+
+  if (elementKey == null) {
+    throw Exception('Element mapping "$type" is not defined.');
+  }
+  return elementKey;
+}
+
 StepDefinitionGeneric iShouldSeeElement() {
   return generic1<String, WidgetTesterWorld>(
-    r'I should see the {string} element', (key, world) async {
+    r'I should see the (.+?)(?: element)?', (type, world) async {
+      final key = getElementKey(type);
       expect(find.byKey(Key(key)), findsOneWidget);
     },
   );
@@ -25,7 +43,8 @@ StepDefinitionGeneric iShouldSeeElement() {
 
 StepDefinitionGeneric iShouldNotSeeElement() {
   return generic1<String, WidgetTesterWorld>(
-    r'I should not see the {string} element', (key, world) async {
+    r'I should not see the (.+?)(?: element)?', (type, world) async {
+      final key = getElementKey(type);
       expect(find.byKey(Key(key)), findsNothing);
     },
   );
@@ -47,19 +66,21 @@ StepDefinitionGeneric iShouldSeeMultipleTexts() {
   );
 }
 
-StepDefinitionGeneric iTapElement() {
-  return generic1<String, WidgetTesterWorld>(
-    r'I tap the {string} element', (key, world) async {
-      await world.tester.tap(find.byKey(Key(key)));
-      await world.tester.pumpAndSettle();
-    },
-  );
-}
-
 StepDefinitionGeneric iScrollToElement() {
   return generic1<String, WidgetTesterWorld>(
-    r'I scroll to the {string} element', (key, world) async {
-      await world.tester.ensureVisible(find.byKey(Key(key)));
+    r'I scroll to the (.+?) button', (type, world) async {
+      String? buttonKey;
+      if (type.startsWith('delete employee ')) {
+        final index = type.split(' ').last;
+        buttonKey = 'delete_employee_$index';
+      } else if (type.startsWith('edit employee ')) {
+        final index = type.split(' ').last;
+        buttonKey = 'edit_employee_$index';
+      } else {
+        throw Exception('Scroll target mapping "$type" is not defined.');
+      }
+
+      await world.tester.ensureVisible(find.byKey(Key(buttonKey)));
       await world.tester.pumpAndSettle();
     },
   );
@@ -67,7 +88,8 @@ StepDefinitionGeneric iScrollToElement() {
 
 StepDefinitionGeneric theElementIs() {
   return generic2<String, String, WidgetTesterWorld>(
-    r'the {string} element is {string}', (key, state, world) async {
+    r'the (.+?)(?: element)? is {string}', (type, state, world) async {
+      final key = getElementKey(type);
       if (state == 'visible') {
         expect(find.byKey(Key(key)), findsOneWidget);
       } else if (state == 'hidden') {

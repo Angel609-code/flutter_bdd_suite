@@ -13,7 +13,7 @@ Feature: Employee Directory Dashboard
 
   Scenario: Dashboard shows welcome message and employee table
     Then I should see "Welcome to the Dashboard!"
-    And I should see the "employee_table" element
+    And I should see the employee table element
     And I should see "Alice Johnson"
     And I should see "Bob Martinez"
     And I should see "Carol White"
@@ -25,25 +25,25 @@ Feature: Employee Directory Dashboard
 
   Rule: Employee records must pass validation
     Scenario: Adding employee with valid data adds a table row
-      When I tap the "add_employee_fab" element
-      Then I should see the "employee_dialog_title" element
+      When I tap the add employee button
+      Then I should see the employee dialog title element
       And I should see "Add Employee"
-      When I fill the "employee_name_field" field with "David Kim"
-      And I fill the "employee_role_field" field with "Analyst"
-      And I fill the "employee_age_field" field with "35"
-      And I fill the "employee_bio_field" field with "Business analyst with expertise in data.\nSix years experience."
-      And I tap the "save_employee_button" element
-      Then I should not see the "employee_dialog_title" element
+      When I fill the employee name field with "David Kim"
+      And I fill the employee role field with "Analyst"
+      And I fill the employee age field with "35"
+      And I fill the employee bio field with "Business analyst with expertise in data.\nSix years experience."
+      And I tap the save employee button
+      Then I should not see the employee dialog title element
       And I should see "David Kim"
       And I should see "Analyst"
 
     Scenario Outline: Adding employees with boundary ages
-      When I tap the "add_employee_fab" element
-      And I fill the "employee_name_field" field with "<name>"
-      And I fill the "employee_role_field" field with "Tester"
-      And I fill the "employee_age_field" field with "<age>"
-      And I tap the "save_employee_button" element
-      Then the "employee_dialog_title" element is "<dialog_state>"
+      When I tap the add employee button
+      And I fill the employee name field with "<name>"
+      And I fill the employee role field with "Tester"
+      And I fill the employee age field with "<age>"
+      And I tap the save employee button
+      Then the employee dialog title element is "<dialog_state>"
       And I should see "<expected_text>"
 
       Examples:
@@ -53,54 +53,54 @@ Feature: Employee Directory Dashboard
         | Adult100Test | 100 | hidden       | Adult100Test                               |
 
     Scenario: Empty name shows validation error
-      When I tap the "add_employee_fab" element
-      And I fill the "employee_role_field" field with "Developer"
-      And I fill the "employee_age_field" field with "25"
-      And I tap the "save_employee_button" element
+      When I tap the add employee button
+      And I fill the employee role field with "Developer"
+      And I fill the employee age field with "25"
+      And I tap the save employee button
       Then I should see "Name is required"
-      And I should see the "employee_dialog_title" element
+      And I should see the employee dialog title element
 
     Scenario: Non-numeric age shows validation error
-      When I tap the "add_employee_fab" element
-      And I fill the "employee_name_field" field with "Test User"
-      And I fill the "employee_role_field" field with "QA"
-      And I fill the "employee_age_field" field with "abc"
-      And I tap the "save_employee_button" element
+      When I tap the add employee button
+      And I fill the employee name field with "Test User"
+      And I fill the employee role field with "QA"
+      And I fill the employee age field with "abc"
+      And I tap the save employee button
       Then I should see "Age must be a number"
 
   Rule: Employees can be removed from the directory
     Scenario: Deleting an employee removes them from the table
       Given I should see "Alice Johnson"
-      When I scroll to the "delete_employee_0" element
-      And I tap the "delete_employee_0" element
-      Then I should see the "delete_confirm_message" element
+      When I scroll to the delete employee 0 button
+      And I tap the delete employee 0 button
+      Then I should see the delete confirm message element
       And I should see "Delete Employee"
-      When I tap the "delete_confirm_button" element
+      When I tap the delete confirm button
       Then I should not see "Alice Johnson"
 
     Scenario: Cancelling delete keeps the employee in the table
       Given I should see "Alice Johnson"
-      When I scroll to the "delete_employee_0" element
-      And I tap the "delete_employee_0" element
-      Then I should see the "delete_confirm_message" element
-      When I tap the "delete_cancel_button" element
-      Then I should not see the "delete_confirm_message" element
+      When I scroll to the delete employee 0 button
+      And I tap the delete employee 0 button
+      Then I should see the delete confirm message element
+      When I tap the delete cancel button
+      Then I should not see the delete confirm message element
       And I should see "Alice Johnson"
 
   Rule: Employee records can be updated via the edit dialog
     Scenario: Editing an employee updates the table row
       Given I should see "Bob Martinez"
-      When I scroll to the "edit_employee_1" element
-      And I tap the "edit_employee_1" element
+      When I scroll to the edit employee 1 button
+      And I tap the edit employee 1 button
       Then I should see "Edit Employee"
-      When I fill the "employee_name_field" field with "Robert Martinez"
-      And I tap the "save_employee_button" element
+      When I fill the employee name field with "Robert Martinez"
+      And I tap the save employee button
       Then I should see "Robert Martinez"
       And I should not see "Bob Martinez"
 
   Rule: Search filters visible employees
     Scenario Outline: Searching by name narrows the displayed employees
-      When I fill the "search_field" field with "<query>"
+      When I fill the search field with "<query>"
       Then I should see "<expected_visible>"
       And I should not see "<expected_hidden>"
 
@@ -110,9 +110,9 @@ Feature: Employee Directory Dashboard
         | Manager | Carol White      | Alice Johnson   |
 
     Scenario: Searching by name narrows the displayed employees empty state
-      When I fill the "search_field" field with "xyznotfound"
+      When I fill the search field with "xyznotfound"
       Then I should not see "Alice Johnson"
-      And I should see the "empty_employee_text" element
+      And I should see the empty employee text element
 
   Scenario: Employee table displays all required columns
     Then I should see "ID"
@@ -124,8 +124,8 @@ Feature: Employee Directory Dashboard
 
   Scenario: Cancelling the Add Employee dialog saves nothing
     Given I should see "Alice Johnson"
-    When I tap the "add_employee_fab" element
-    And I fill the "employee_name_field" field with "Ghost Employee"
-    And I tap the "cancel_employee_button" element
-    Then I should not see the "employee_dialog_title" element
+    When I tap the add employee button
+    And I fill the employee name field with "Ghost Employee"
+    And I tap the cancel employee button
+    Then I should not see the employee dialog title element
     And I should not see "Ghost Employee"
