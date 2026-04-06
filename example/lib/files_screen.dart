@@ -194,6 +194,7 @@ David Kim,Analyst,35,david@teamsync.io''';
                               key: Key('empty_files_text')))
                       : ListView.builder(
                           key: const Key('imported_files_list'),
+                          cacheExtent: double.maxFinite,
                           itemCount: _importedFiles.length,
                           itemBuilder: (context, index) {
                             return Card(

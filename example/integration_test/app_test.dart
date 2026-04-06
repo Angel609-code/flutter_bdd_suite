@@ -1020,18 +1020,6 @@ void main() {
       await tester.tap(find.byKey(const Key('import_csv_button')));
       await tester.pumpAndSettle();
 
-      // Scroll the list to ensure file_item_1 is built (ListView.builder is
-      // lazy; on macOS the viewport may be too small to build it initially).
-      await tester.scrollUntilVisible(
-        find.byKey(const Key('file_item_1')),
-        100.0,
-        scrollable: find.descendant(
-          of: find.byKey(const Key('imported_files_list')),
-          matching: find.byType(Scrollable),
-        ),
-      );
-      await tester.pumpAndSettle();
-
       // Then two file entries are in the list
       expect(find.byKey(const Key('file_item_0')), findsOneWidget);
       expect(find.byKey(const Key('file_item_1')), findsOneWidget);
