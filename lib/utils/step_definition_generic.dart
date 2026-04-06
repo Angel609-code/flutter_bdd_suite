@@ -1,6 +1,6 @@
-import 'package:flutter_gherkin_parser/utils/capture_token.dart';
-import 'package:flutter_gherkin_parser/utils/placeholders.dart';
-import 'package:flutter_gherkin_parser/world/widget_tester_world.dart';
+import 'package:flutter_bdd_suite/utils/capture_token.dart';
+import 'package:flutter_bdd_suite/utils/placeholders.dart';
+import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
 
 class StepDefinitionGeneric {
   final RegExp pattern;

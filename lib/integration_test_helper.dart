@@ -1,14 +1,14 @@
 // ignore_for_file: avoid_print
 import 'dart:convert' show jsonDecode;
-import 'package:flutter_gherkin_parser/integration_test_config.dart';
-import 'package:flutter_gherkin_parser/lifecycle_manager.dart';
-import 'package:flutter_gherkin_parser/models/models.dart';
-import 'package:flutter_gherkin_parser/server/integration_test_server.dart';
-import 'package:flutter_gherkin_parser/steps/step_result.dart';
-import 'package:flutter_gherkin_parser/steps/steps_registry.dart';
-import 'package:flutter_gherkin_parser/bootstrap.dart';
-import 'package:flutter_gherkin_parser/utils/terminal_colors.dart';
-import 'package:flutter_gherkin_parser/world/widget_tester_world.dart';
+import 'package:flutter_bdd_suite/integration_test_config.dart';
+import 'package:flutter_bdd_suite/lifecycle_manager.dart';
+import 'package:flutter_bdd_suite/models/models.dart';
+import 'package:flutter_bdd_suite/server/integration_test_server.dart';
+import 'package:flutter_bdd_suite/steps/step_result.dart';
+import 'package:flutter_bdd_suite/steps/steps_registry.dart';
+import 'package:flutter_bdd_suite/bootstrap.dart';
+import 'package:flutter_bdd_suite/utils/terminal_colors.dart';
+import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 
@@ -242,7 +242,7 @@ class IntegrationTestHelper {
     print('${red}Error in ${_errorOnBackground ? 'background' : 'scenario "$_scenarioName"'}:\n$error.$reset');
 
     const blockedPrefixes = [
-      'flutter_gherkin_parser',
+      'flutter_bdd_suite',
     ];
 
     final lines = stackTrace.toString().trim().split('\n');

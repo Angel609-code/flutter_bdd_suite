@@ -2,7 +2,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter_gherkin_parser/models/endpoint_registration_model.dart';
+import 'package:flutter_bdd_suite/models/endpoint_registration_model.dart';
 
 typedef EndpointHandler = Future<void> Function(HttpRequest request);
 

@@ -1,7 +1,7 @@
 import 'dart:convert' show jsonEncode;
 
-import 'package:flutter_gherkin_parser/models/background_model.dart';
-import 'package:flutter_gherkin_parser/models/scenario_model.dart';
+import 'package:flutter_bdd_suite/models/background_model.dart';
+import 'package:flutter_bdd_suite/models/scenario_model.dart';
 
 class Feature {
   final String name;

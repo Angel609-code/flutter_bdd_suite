@@ -1,13 +1,13 @@
 // ignore_for_file: avoid_print
 import 'dart:math';
 import 'package:wcwidth/wcwidth.dart';
-import 'package:flutter_gherkin_parser/models/feature_model.dart';
-import 'package:flutter_gherkin_parser/models/scenario_model.dart';
-import 'package:flutter_gherkin_parser/reporters/integration_reporter.dart';
-import 'package:flutter_gherkin_parser/steps/step_result.dart';
-import 'package:flutter_gherkin_parser/utils/enums.dart';
-import 'package:flutter_gherkin_parser/utils/terminal_colors.dart';
-import 'package:flutter_gherkin_parser/world/widget_tester_world.dart';
+import 'package:flutter_bdd_suite/models/feature_model.dart';
+import 'package:flutter_bdd_suite/models/scenario_model.dart';
+import 'package:flutter_bdd_suite/reporters/integration_reporter.dart';
+import 'package:flutter_bdd_suite/steps/step_result.dart';
+import 'package:flutter_bdd_suite/utils/enums.dart';
+import 'package:flutter_bdd_suite/utils/terminal_colors.dart';
+import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
 
 class DecoratedSummaryReporter extends IntegrationReporter {
   final _ansiEscape = RegExp(r'\x1B\[[0-9;]*m');

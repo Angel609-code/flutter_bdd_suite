@@ -30,7 +30,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_gherkin_parser:
+  flutter_bdd_suite:
     path: ..
 
   # The following adds the Cupertino Icons font to your application.

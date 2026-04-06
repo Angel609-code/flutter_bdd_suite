@@ -1,6 +1,6 @@
 import 'dart:convert' show jsonEncode;
 
-import 'package:flutter_gherkin_parser/models/step_model.dart';
+import 'package:flutter_bdd_suite/models/step_model.dart';
 
 class Scenario {
   final String name;

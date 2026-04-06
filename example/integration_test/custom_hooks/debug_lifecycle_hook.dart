@@ -1,8 +1,8 @@
 // ignore_for_file: avoid_print
-import 'package:flutter_gherkin_parser/hooks/integration_hook.dart';
-import 'package:flutter_gherkin_parser/models/models.dart';
-import 'package:flutter_gherkin_parser/steps/step_result.dart';
-import 'package:flutter_gherkin_parser/world/widget_tester_world.dart';
+import 'package:flutter_bdd_suite/hooks/integration_hook.dart';
+import 'package:flutter_bdd_suite/models/models.dart';
+import 'package:flutter_bdd_suite/steps/step_result.dart';
+import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
 
 import '../integration_endpoints/say_hello.dart';
 

@@ -1,6 +1,6 @@
-import 'package:flutter_gherkin_parser/hooks/integration_hook.dart';
-import 'package:flutter_gherkin_parser/reporters/integration_reporter.dart';
-import 'package:flutter_gherkin_parser/utils/step_definition_generic.dart';
+import 'package:flutter_bdd_suite/hooks/integration_hook.dart';
+import 'package:flutter_bdd_suite/reporters/integration_reporter.dart';
+import 'package:flutter_bdd_suite/utils/step_definition_generic.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';

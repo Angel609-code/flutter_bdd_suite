@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'dart:async';
 
-import 'package:flutter_gherkin_parser/runner/generation_pipeline.dart';
-import 'package:flutter_gherkin_parser/server/integration_test_server.dart';
+import 'package:flutter_bdd_suite/runner/generation_pipeline.dart';
+import 'package:flutter_bdd_suite/server/integration_test_server.dart';
 
 Future<void> main(List<String> args) async {
   final cwd = Directory.current.path;
@@ -433,7 +433,7 @@ Future<String> _writeGeneratedBridgeRunner({
   required String cwd,
   required String bridgeSetupPath,
 }) async {
-  final generatedDir = Directory('$cwd/.dart_tool/flutter_gherkin_parser');
+  final generatedDir = Directory('$cwd/.dart_tool/flutter_bdd_suite');
   if (!generatedDir.existsSync()) {
     generatedDir.createSync(recursive: true);
   }
@@ -442,7 +442,7 @@ Future<String> _writeGeneratedBridgeRunner({
   final setupImport = bridgeSetupPath.replaceAll('\\', '/');
 
   final content = '''// GENERATED FILE. DO NOT EDIT.
-import 'package:flutter_gherkin_parser/server/integration_test_server.dart';
+import 'package:flutter_bdd_suite/server/integration_test_server.dart';
 import '../../$setupImport';
 
 Future<void> main() async {

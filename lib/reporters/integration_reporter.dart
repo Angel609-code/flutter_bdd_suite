@@ -1,4 +1,4 @@
-import 'package:flutter_gherkin_parser/lifecycle_listener.dart';
+import 'package:flutter_bdd_suite/lifecycle_listener.dart';
 
 abstract class IntegrationReporter implements LifecycleListener {
   final String path;

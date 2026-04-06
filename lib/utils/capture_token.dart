@@ -1,4 +1,4 @@
-import 'package:flutter_gherkin_parser/utils/placeholders.dart';
+import 'package:flutter_bdd_suite/utils/placeholders.dart';
 
 /// Indicates whether a capture token represents a placeholder or a manual group.
 enum CaptureKind { placeholder, manual }

@@ -1,5 +1,5 @@
 import 'dart:collection';
-import 'package:flutter_gherkin_parser/world/test_world.dart';
+import 'package:flutter_bdd_suite/world/test_world.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';

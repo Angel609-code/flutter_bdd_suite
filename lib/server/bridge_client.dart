@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
 
-import 'package:flutter_gherkin_parser/models/integration_server_result_model.dart';
+import 'package:flutter_bdd_suite/models/integration_server_result_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 

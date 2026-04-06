@@ -1,6 +1,6 @@
-import 'package:flutter_gherkin_parser/models/models.dart';
-import 'package:flutter_gherkin_parser/utils/steps_keywords.dart';
-import 'package:flutter_gherkin_parser/utils/gherkin_keywords.dart';
+import 'package:flutter_bdd_suite/models/models.dart';
+import 'package:flutter_bdd_suite/utils/steps_keywords.dart';
+import 'package:flutter_bdd_suite/utils/gherkin_keywords.dart';
 
 class FeatureParser {
   Feature parse(String content, String featurePath) {

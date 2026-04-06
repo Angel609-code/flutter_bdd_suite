@@ -70,18 +70,18 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_driver:
-    dependency: transitive
-    description: flutter
-    source: sdk
-    version: "0.0.0"
-  flutter_gherkin_parser:
+  flutter_bdd_suite:
     dependency: "direct main"
     description:
       path: ".."
       relative: true
     source: path
     version: "0.0.1"
+  flutter_driver:
+    dependency: transitive
+    description: flutter
+    source: sdk
+    version: "0.0.0"
   flutter_lints:
     dependency: "direct dev"
     description:

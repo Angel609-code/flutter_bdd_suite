@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_gherkin_parser/models/gherkin_table_model.dart';
+import 'package:flutter_bdd_suite/models/gherkin_table_model.dart';
 
 class JsonStep {
   final String keyword;

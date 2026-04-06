@@ -1,7 +1,7 @@
-import 'package:flutter_gherkin_parser/steps/when_fill_field_step.dart';
-import 'package:flutter_gherkin_parser/utils/step_definition_generic.dart';
-import 'package:flutter_gherkin_parser/utils/steps_keywords.dart';
-import 'package:flutter_gherkin_parser/world/widget_tester_world.dart';
+import 'package:flutter_bdd_suite/steps/when_fill_field_step.dart';
+import 'package:flutter_bdd_suite/utils/step_definition_generic.dart';
+import 'package:flutter_bdd_suite/utils/steps_keywords.dart';
+import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
 
 /// Type definition for step functions
 typedef StepFunction = Future<void> Function(WidgetTesterWorld);

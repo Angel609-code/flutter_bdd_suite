@@ -1,13 +1,13 @@
 // ignore_for_file: avoid_print
 import 'dart:convert';
-import 'package:flutter_gherkin_parser/models/feature_model.dart';
-import 'package:flutter_gherkin_parser/models/json_step_model.dart';
-import 'package:flutter_gherkin_parser/models/report_model.dart';
-import 'package:flutter_gherkin_parser/models/scenario_model.dart';
-import 'package:flutter_gherkin_parser/reporters/integration_reporter.dart';
-import 'package:flutter_gherkin_parser/server/integration_endpoints.dart';
-import 'package:flutter_gherkin_parser/steps/step_result.dart';
-import 'package:flutter_gherkin_parser/world/widget_tester_world.dart';
+import 'package:flutter_bdd_suite/models/feature_model.dart';
+import 'package:flutter_bdd_suite/models/json_step_model.dart';
+import 'package:flutter_bdd_suite/models/report_model.dart';
+import 'package:flutter_bdd_suite/models/scenario_model.dart';
+import 'package:flutter_bdd_suite/reporters/integration_reporter.dart';
+import 'package:flutter_bdd_suite/server/integration_endpoints.dart';
+import 'package:flutter_bdd_suite/steps/step_result.dart';
+import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
 
 import '../models/integration_server_result_model.dart';
 
