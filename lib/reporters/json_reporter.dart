@@ -11,6 +11,13 @@ import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
 
 import '../models/integration_server_result_model.dart';
 
+/// Creates a JSON file with the results of the test run.
+///
+/// This JSON file can be used by the [cucumber-html-reporter](https://www.npmjs.com/package/cucumber-html-reporter)
+/// npm package to create a comprehensive HTML report.
+///
+/// This reporter was inspired by the reporting implementation in the `flutter_gherkin` package,
+/// but has been specifically adapted for `integration_test` to replace the older `flutter_driver` approach.
 class JsonReporter extends IntegrationReporter {
   final List<JsonFeature> _features = [];
   JsonScenario? _currentScenario;
