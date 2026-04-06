@@ -10,68 +10,71 @@ void main() async {
     backgroundSteps: _backgroundSteps,
   );
 
-  group('Feature: Dashboard and Data Tables', () {
+  group('Feature: Employee Directory Dashboard', () {
     setUpAll(() async {
       await helper.setUpFeature(featureInfo: _featureInfo);
     });
 
-    testWidgets('Scenario: Adding a new user via dialog', (WidgetTester tester) async {
+    testWidgets('Scenario: Adding a new employee via the Add Employee dialog', (WidgetTester tester) async {
       await helper.testScenario(
         tester,
         ScenarioInfo(
-          scenarioName: 'Adding a new user via dialog',
+          scenarioName: 'Adding a new employee via the Add Employee dialog',
           line: 14,
           tags: ['@dialog'],
           steps: [
-            r'''{"text":"When I click in input with key \"add_user_fab\"","line":15}''',
-            r'''{"text":"Then I should see \"Do you want to add a new user?\"","line":16}''',
-            r'''{"text":"When I click in input with key \"dialog_confirm\"","line":17}''',
-            r'''{"text":"Then I should not see \"Do you want to add a new user?\"","line":18}''',
+            r'''{"text":"When I click in input with key \"add_employee_fab\"","line":15}''',
+            r'''{"text":"Then I should see \"Add Employee\"","line":16}''',
+            r'''{"text":"When I fill the \"employee_name_field\" field with \"Eve Torres\"","line":17}''',
+            r'''{"text":"And I fill the \"employee_role_field\" field with \"DevOps\"","line":18}''',
+            r'''{"text":"And I fill the \"employee_age_field\" field with \"29\"","line":19}''',
+            r'''{"text":"And I click in input with key \"save_employee_button\"","line":20}''',
+            r'''{"text":"Then I should see \"Eve Torres\"","line":21}''',
           ],
         ),
       );
     });
 
-    testWidgets('Scenario: Verifying user management data table with escaping', (WidgetTester tester) async {
+    testWidgets('Scenario: Verifying employee data table columns', (WidgetTester tester) async {
       await helper.testScenario(
         tester,
         ScenarioInfo(
-          scenarioName: 'Verifying user management data table with escaping',
-          line: 21,
+          scenarioName: 'Verifying employee data table columns',
+          line: 24,
           tags: ['@data_table'],
           steps: [
-            r'''{"text":"* I print table \"<<<{\"header\":[\"ID\",\"Name\",\"Info\"],\"rows\":[[\"1\",\"John Doe\",\"Role: Admin\\nActive\"],[\"2\",\"Jane Smith\",\"Role: User|Inactive\"],[\"3\",\"Bob Johnson\",\"Dir: C:\\\\Users\\\\Bob\"]]}>>>\"","line":26}''',
-            r'''{"text":"Then I should see \"Bob Johnson\"","line":27}''',
+            r'''{"text":"* I print table \"<<<{\"header\":[\"ID\",\"Name\",\"Role\",\"Age\"],\"rows\":[[\"1\",\"Alice Johnson\",\"Engineer\",\"30\"],[\"2\",\"Bob Martinez\",\"Designer\",\"27\"],[\"3\",\"Carol White\",\"Manager\",\"42\"]]}>>>\"","line":29}''',
+            r'''{"text":"Then I should see \"Alice Johnson\"","line":30}''',
           ],
         ),
       );
     });
 
-    testWidgets('Scenario: Verifying quick links (Example 1)', (WidgetTester tester) async {
+    testWidgets('Scenario: Verifying quick links from the dashboard (Example 1)', (WidgetTester tester) async {
       await helper.testScenario(
         tester,
         ScenarioInfo(
-          scenarioName: 'Verifying quick links (Example 1)',
-          line: 33,
+          scenarioName: 'Verifying quick links from the dashboard (Example 1)',
+          line: 37,
           steps: [
-            r'''{"text":"Given I should see \"Welcome to the Dashboard!\"","line":31}''',
-            r'''{"text":"When I click in input with key \"settings_btn\"","line":34}''',
-            r'''{"text":"Then I should see \"Settings\"","line":35}''',
+            r'''{"text":"Given I should see \"Welcome to the Dashboard!\"","line":33}''',
+            r'''{"text":"When I click in input with key \"settings_action\"","line":38}''',
+            r'''{"text":"Then I should see \"Enable Notifications\"","line":39}''',
           ],
         ),
       );
     });
 
-    testWidgets('Scenario: Verifying quick links (Example 2)', (WidgetTester tester) async {
+    testWidgets('Scenario: Verifying quick links from the dashboard (Example 2)', (WidgetTester tester) async {
       await helper.testScenario(
         tester,
         ScenarioInfo(
-          scenarioName: 'Verifying quick links (Example 2)',
-          line: 33,
+          scenarioName: 'Verifying quick links from the dashboard (Example 2)',
+          line: 37,
           steps: [
-            r'''{"text":"Given I should see \"Welcome to the Dashboard!\"","line":31}''',
-            r'''{"text":"When I click in input with key \"files_action\"","line":34}''',
-            r'''{"text":"Then I should see \"File Management\"","line":35}''',
+            r'''{"text":"Given I should see \"Welcome to the Dashboard!\"","line":33}''',
+            r'''{"text":"When I click in input with key \"files_action\"","line":38}''',
+            r'''{"text":"Then I should see \"File Management\"","line":39}''',
           ],
         ),
       );
@@ -80,7 +83,7 @@ void main() async {
 }
 
 FeatureInfo _featureInfo = FeatureInfo(
-  featureName: 'Dashboard and Data Tables',
+  featureName: 'Employee Directory Dashboard',
   uri: '/features/dashboard/home.feature',
   line: 2,
   tags: ['@dashboard', '@smoke'],
@@ -92,4 +95,5 @@ final List<String> _backgroundSteps = <String>[
   r'''{"text":"And I click in input with key \"login_button\"","line":10}''',
   r'''{"text":"And I should see \"Welcome to the Dashboard!\"","line":11}''',
 ];
+
 

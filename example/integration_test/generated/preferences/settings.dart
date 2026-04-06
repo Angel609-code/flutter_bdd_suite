@@ -31,6 +31,24 @@ void main() async {
         ),
       );
     });
+
+    testWidgets('Scenario: Enabling dark mode', (WidgetTester tester) async {
+      await helper.testScenario(
+        tester,
+        ScenarioInfo(
+          scenarioName: 'Enabling dark mode',
+          line: 25,
+          tags: ['@dark_mode'],
+          steps: [
+            r'''{"text":"Then I should see \"Dark Mode: Disabled\"","line":26}''',
+            r'''{"text":"When I click in input with key \"dark_mode_checkbox\"","line":27}''',
+            r'''{"text":"Then I should see \"Dark Mode: Enabled\"","line":28}''',
+            r'''{"text":"When I click in input with key \"dark_mode_checkbox\"","line":29}''',
+            r'''{"text":"Then I should see \"Dark Mode: Disabled\"","line":30}''',
+          ],
+        ),
+      );
+    });
   });
 }
 
