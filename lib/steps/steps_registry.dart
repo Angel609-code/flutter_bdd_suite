@@ -6,6 +6,11 @@ import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
 /// Type definition for step functions
 typedef StepFunction = Future<void> Function(WidgetTesterWorld);
 
+/// A registry that manages the mapping between Gherkin steps and their corresponding Dart implementations.
+///
+/// This registry holds the standard, built-in steps provided by the package as well as any
+/// custom user-defined steps. When executing a test, the framework queries this registry
+/// to find the correct Dart function for each step string defined in the feature files.
 class StepsRegistry {
   /// All built‐in steps shipped with the library.
   static final List<StepDefinitionGeneric> defaultSteps = [
