@@ -1,5 +1,3 @@
-import 'package:example/main.dart';
-import 'package:example/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bdd_suite/integration_test_config.dart';
 import 'package:flutter_bdd_suite/reporters/json_reporter.dart';
@@ -9,19 +7,12 @@ import 'package:integration_test/integration_test.dart';
 
 import 'custom_hooks/debug_lifecycle_hook.dart';
 import 'reporters/decorated_summary.dart';
-import 'steps/and_enter_text_step.dart';
-import 'steps/and_print_non_grouping_value_step.dart';
-import 'steps/and_print_table_step.dart';
-import 'steps/then_read_text_step.dart';
-import 'steps/when_click_in_step.dart';
+import 'steps/app_steps.dart';
+import 'steps/form_steps.dart';
 
 final config = IntegrationTestConfig(
   appLauncher: (WidgetTester tester) async {
-    themeNotifier.value = ThemeMode.light;
     await tester.binding.reassembleApplication();
-    await tester.pumpWidget(const BddExampleApp());
-
-    await tester.pumpAndSettle();
   },
   onBindingInitialized: (IntegrationTestWidgetsFlutterBinding binding) async {
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
@@ -36,16 +27,12 @@ final config = IntegrationTestConfig(
     JsonReporter(path: './report/report.json'),
   ],
   steps: [
-    thenReadTextStep(),
-    andPrintTable(),
-    whenClickWidgetStep(),
-    andPrintNonGroupingValue(),
-    andPrintNonGroupingValue3(),
-    andEnterTextWithLookahead(),
-    andHaveItemsInCategory(),
-    andPrintWithOptionalHeightAndAge(),
-    andMatchMultipleGroups(),
-    andProcessMultilineText(),
-    andProcessSixCaptures(),
+    theApplicationIsLaunched(),
+    theLoginScreenIsVisible(),
+    theLoginFieldsArePresent(),
+    iEnterValueInField(),
+    iTapButton(),
+    iShouldSee(),
+    iShouldReachDashboard(),
   ]
 );

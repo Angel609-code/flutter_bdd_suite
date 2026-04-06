@@ -6,5 +6,4 @@ import 'package:flutter/material.dart';
 /// ```dart
 /// themeNotifier.value = ThemeMode.dark;
 /// ```
-final ValueNotifier<ThemeMode> themeNotifier =
-    ValueNotifier<ThemeMode>(ThemeMode.light);
+final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier<ThemeMode>(ThemeMode.light);

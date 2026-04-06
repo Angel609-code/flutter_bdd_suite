@@ -1,17 +1,27 @@
 @auth @regression
 Feature: User Authentication
-  As a user
-  I want to be able to log in to the application
-  So that I can access my personalized dashboard
+  As a user of TeamSync
+  I want to log in with my credentials
+  So that I can access the employee directory
 
-  Scenario Outline: Logging in with various credentials
-    Given I fill the "username_field" field with "<username>"
-    And I fill the "password_field" field with "<password>"
-    When I click in input with key "login_button"
-    Then I should see "<expected_message>"
+  Background:
+    Given the application is launched
+    And the login screen is visible
+
+  Scenario Outline: Login with different credential combinations
+    When I enter the username "<username>"
+    And I enter the password "<password>"
+    And I tap the login button
+    Then I should see "<expectedText>"
+    And I <dashboardOutcome> reach the dashboard
 
     Examples:
-      | username | password    | expected_message                   |
-      | wrong    | pass        | Invalid credentials.               |
-      |          |             | Username and password are required.|
-      | admin    | password123 | Welcome to the Dashboard!          |
+      | username | password    | expectedText                        | dashboardOutcome |
+      | wrong    | pass        | Invalid credentials.                | should not       |
+      |          |             | Username and password are required. | should not       |
+      | admin    | password123 | Welcome to the Dashboard!           | should           |
+
+  Scenario: Login screen displays the TeamSync branding
+    Then I should see "TeamSync"
+    And I should see "Employee Directory"
+    And the login form fields are present

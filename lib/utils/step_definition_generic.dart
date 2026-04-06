@@ -202,7 +202,7 @@ _ParsedStepRegex _buildStepRegex(String rawPattern, int expectedCaptureCount) {
 }
 
 /// Defines a step with no captures—just literal text (no regex at all).
-StepDefinitionGeneric generic<T, W>(
+StepDefinitionGeneric generic<W>(
     String rawPattern,
     Future<void> Function(W world) fn,
     ) {

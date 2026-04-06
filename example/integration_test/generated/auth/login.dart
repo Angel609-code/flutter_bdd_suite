@@ -7,6 +7,7 @@ import 'package:flutter_bdd_suite/integration_test_helper.dart';
 void main() async {
   final helper = IntegrationTestHelper(
     config: config,
+    backgroundSteps: _backgroundSteps,
   );
 
   group('Feature: User Authentication', () {
@@ -14,49 +15,67 @@ void main() async {
       await helper.setUpFeature(featureInfo: _featureInfo);
     });
 
-    testWidgets('Scenario: Logging in with various credentials (Example 1)', (WidgetTester tester) async {
+    testWidgets('Scenario: Login with different credential combinations (Example 1)', (WidgetTester tester) async {
       await helper.testScenario(
         tester,
         ScenarioInfo(
-          scenarioName: 'Logging in with various credentials (Example 1)',
-          line: 7,
+          scenarioName: 'Login with different credential combinations (Example 1)',
+          line: 11,
           steps: [
-            r'''{"text":"Given I fill the \"username_field\" field with \"wrong\"","line":8}''',
-            r'''{"text":"And I fill the \"password_field\" field with \"pass\"","line":9}''',
-            r'''{"text":"When I click in input with key \"login_button\"","line":10}''',
-            r'''{"text":"Then I should see \"Invalid credentials.\"","line":11}''',
+            r'''{"text":"When I enter the username \"wrong\"","line":12}''',
+            r'''{"text":"And I enter the password \"pass\"","line":13}''',
+            r'''{"text":"And I tap the login button","line":14}''',
+            r'''{"text":"Then I should see \"Invalid credentials.\"","line":15}''',
+            r'''{"text":"And I should not reach the dashboard","line":16}''',
           ],
         ),
       );
     });
 
-    testWidgets('Scenario: Logging in with various credentials (Example 2)', (WidgetTester tester) async {
+    testWidgets('Scenario: Login with different credential combinations (Example 2)', (WidgetTester tester) async {
       await helper.testScenario(
         tester,
         ScenarioInfo(
-          scenarioName: 'Logging in with various credentials (Example 2)',
-          line: 7,
+          scenarioName: 'Login with different credential combinations (Example 2)',
+          line: 11,
           steps: [
-            r'''{"text":"Given I fill the \"username_field\" field with \"\"","line":8}''',
-            r'''{"text":"And I fill the \"password_field\" field with \"\"","line":9}''',
-            r'''{"text":"When I click in input with key \"login_button\"","line":10}''',
-            r'''{"text":"Then I should see \"Username and password are required.\"","line":11}''',
+            r'''{"text":"When I enter the username \"\"","line":12}''',
+            r'''{"text":"And I enter the password \"\"","line":13}''',
+            r'''{"text":"And I tap the login button","line":14}''',
+            r'''{"text":"Then I should see \"Username and password are required.\"","line":15}''',
+            r'''{"text":"And I should not reach the dashboard","line":16}''',
           ],
         ),
       );
     });
 
-    testWidgets('Scenario: Logging in with various credentials (Example 3)', (WidgetTester tester) async {
+    testWidgets('Scenario: Login with different credential combinations (Example 3)', (WidgetTester tester) async {
       await helper.testScenario(
         tester,
         ScenarioInfo(
-          scenarioName: 'Logging in with various credentials (Example 3)',
-          line: 7,
+          scenarioName: 'Login with different credential combinations (Example 3)',
+          line: 11,
           steps: [
-            r'''{"text":"Given I fill the \"username_field\" field with \"admin\"","line":8}''',
-            r'''{"text":"And I fill the \"password_field\" field with \"password123\"","line":9}''',
-            r'''{"text":"When I click in input with key \"login_button\"","line":10}''',
-            r'''{"text":"Then I should see \"Welcome to the Dashboard!\"","line":11}''',
+            r'''{"text":"When I enter the username \"admin\"","line":12}''',
+            r'''{"text":"And I enter the password \"password123\"","line":13}''',
+            r'''{"text":"And I tap the login button","line":14}''',
+            r'''{"text":"Then I should see \"Welcome to the Dashboard!\"","line":15}''',
+            r'''{"text":"And I should reach the dashboard","line":16}''',
+          ],
+        ),
+      );
+    });
+
+    testWidgets('Scenario: Login screen displays the TeamSync branding', (WidgetTester tester) async {
+      await helper.testScenario(
+        tester,
+        ScenarioInfo(
+          scenarioName: 'Login screen displays the TeamSync branding',
+          line: 24,
+          steps: [
+            r'''{"text":"Then I should see \"TeamSync\"","line":25}''',
+            r'''{"text":"And I should see \"Employee Directory\"","line":26}''',
+            r'''{"text":"And the login form fields are present","line":27}''',
           ],
         ),
       );
@@ -70,4 +89,9 @@ FeatureInfo _featureInfo = FeatureInfo(
   line: 2,
   tags: ['@auth', '@regression'],
 );
+
+final List<String> _backgroundSteps = <String>[
+  r'''{"text":"Given the application is launched","line":8}''',
+  r'''{"text":"And the login screen is visible","line":9}''',
+];
 
