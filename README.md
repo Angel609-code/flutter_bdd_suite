@@ -146,7 +146,7 @@ Feature: Login Validation
       | username | password | result        |
       | alice    | secret   | home screen   |
       | bob      | wrong    | error message |
-      | ""       | ""       | error message |
+      |          |          | error message |
 ```
 
 Each row in `Examples` generates a separate `testWidgets` call.
