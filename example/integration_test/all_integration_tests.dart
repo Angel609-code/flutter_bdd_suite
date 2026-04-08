@@ -2,12 +2,12 @@
 import 'package:flutter_bdd_suite/integration_test_helper.dart';
 import 'test_config.dart';
 
-import 'generated/auth/login.dart' as login;
 import 'generated/dashboard/employee_directory.dart' as employee_directory;
+import 'generated/auth/login.dart' as login;
 
 void main() {
   IntegrationTestHelper(config: config);
 
-  login.main();
   employee_directory.main();
+  login.main();
 }

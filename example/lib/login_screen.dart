@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// A screen that allows users to authenticate into the application.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -11,6 +12,13 @@ class _LoginScreenState extends State<LoginScreen> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   String _errorMessage = '';
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   void _login() {
     final username = _usernameController.text;

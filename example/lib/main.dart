@@ -10,6 +10,7 @@ void main() {
   runApp(const BddExampleApp());
 }
 
+/// The root widget of the BDD example application.
 class BddExampleApp extends StatelessWidget {
   const BddExampleApp({super.key});
 

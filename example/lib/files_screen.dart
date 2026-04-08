@@ -8,6 +8,7 @@ List<List<String>> parseCsv(String raw) {
   }).toList();
 }
 
+/// A screen to view and manage imported CSV files.
 class FilesScreen extends StatefulWidget {
   const FilesScreen({super.key});
 
@@ -247,19 +248,23 @@ class _FilesList extends StatelessWidget {
           if (files.isEmpty)
             const Text(key: Key('empty_files_text'), 'Empty list')
           else
-            Wrap(
+            ListView.builder(
               key: const Key('imported_files_list'),
-              children: [
-                ...files.map((f) => Card(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: files.length,
+              itemBuilder: (context, index) {
+                final f = files[index];
+                return Card(
                   child: ListTile(
-                    key: Key('file_item_${files.indexOf(f)}'),
+                    key: Key('file_item_$index'),
                     leading: const Icon(Icons.insert_drive_file),
                     title: Text(f.name),
                     subtitle: Text('${f.rowCount} data rows'),
                   ),
-                )),                 
-              ],
-            )
+                );
+              },
+            ),
         ],
       ),
     );
