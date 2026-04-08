@@ -4,6 +4,7 @@ import 'package:flutter_bdd_suite/models/scenario_model.dart';
 import 'package:flutter_bdd_suite/reporters/integration_reporter.dart';
 import 'package:flutter_bdd_suite/steps/step_result.dart';
 import 'package:flutter_bdd_suite/utils/enums.dart';
+import 'package:flutter_bdd_suite/utils/log_writer.dart';
 import 'package:flutter_bdd_suite/utils/terminal_colors.dart';
 import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
 
@@ -68,15 +69,15 @@ class SummaryReporter extends IntegrationReporter {
     final secs   = elapsed.inSeconds % 60;
     final millis = (elapsed.inMilliseconds % 1000).toString().padLeft(3, '0');
 
-    print('');
-    print(
+    logLine('');
+    logLine(
         '$_totalScenarios scenarios ' 
         '($green$_passedScenarios passed$reset, ' 
         '$red$_failedScenarios failed$reset, ' 
         '$yellow$_skippedScenarios skipped$reset)'
     );
-    print('${mins}m$secs.${millis}s');
-    print('');
+    logLine('${mins}m$secs.${millis}s');
+    logLine('');
   }
 
   @override Map<String, dynamic> toJson() => {};

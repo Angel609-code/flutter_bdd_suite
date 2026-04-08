@@ -146,7 +146,7 @@ Feature: Login Validation
       | username | password | result        |
       | alice    | secret   | home screen   |
       | bob      | wrong    | error message |
-      |          |          | error message |
+      | ""       | ""       | error message |
 ```
 
 Each row in `Examples` generates a separate `testWidgets` call.
@@ -294,7 +294,7 @@ final config = IntegrationTestConfig(
 
 ## Running Tests
 
-The `run_test` command is a thin orchestration wrapper. It handles two things:
+The `cli` command is a thin orchestration wrapper. It handles two things:
 
 1. **Generation** — Discovers `.feature` files, applies any filters (`--tags`, `--pattern`, `--order`), and generates the Dart test bindings.
 2. **Execution** — Delegates to the standard Flutter tooling. Under the hood it runs exactly:
@@ -302,14 +302,14 @@ The `run_test` command is a thin orchestration wrapper. It handles two things:
    - **Test mode:** `flutter test integration_test/all_integration_tests.dart [--coverage] [extra flutter args]`
    - **Drive mode:** `flutter drive --driver=test_driver/integration_test.dart --target=integration_test/all_integration_tests.dart -d chrome [extra flutter args]`
 
-Flags such as `--config`, `--mode`, `--tags`, `--pattern`, `--order`, `--dry-run`, and `--bridge-*` are consumed by `run_test` itself. Any `--flutter-arg` values are forwarded verbatim to the underlying `flutter` command.
+Flags such as `--config`, `--mode`, `--tags`, `--pattern`, `--order`, `--dry-run`, and `--bridge-*` are consumed by `cli` itself. Any `--flutter-arg` values are forwarded verbatim to the underlying `flutter` command.
 
 ### Test Mode (Mobile & Desktop)
 
 The default mode. Works on Android, iOS, macOS, Linux, and Windows — any platform supported by `flutter test`.
 
 ```bash
-dart run flutter_bdd_suite:run_test --config integration_test/test_config.dart
+dart run flutter_bdd_suite:cli --config integration_test/test_config.dart
 ```
 
 This is equivalent to running the following after generating test bindings:
@@ -323,10 +323,10 @@ flutter test integration_test/all_integration_tests.dart
 Web integration tests require `flutter drive`. This mode wraps `flutter drive --driver=test_driver/integration_test.dart`.
 
 ```bash
-dart run flutter_bdd_suite:run_test \
+dart run flutter_bdd_suite:cli \
   --config integration_test/test_config.dart \
   --mode drive \
-  --device chrome
+  -- -d chrome
 ```
 
 This is equivalent to running the following after generating test bindings:
@@ -349,7 +349,7 @@ Future<void> main() => integrationDriver();
 ### All CLI Options
 
 ```
-dart run flutter_bdd_suite:run_test [options]
+dart run flutter_bdd_suite:cli [options]
 ```
 
 | Flag | Default | Description |
@@ -361,11 +361,6 @@ dart run flutter_bdd_suite:run_test [options]
 | `--tags <expression>` | _(none)_ | Run only scenarios matching a boolean tag expression. |
 | `--dry-run` | `false` | Generate test files only; do not execute them. |
 | `--generate-only` | `false` | Same as `--dry-run`. |
-| `--coverage` | `false` | Enable coverage collection (test mode only). |
-| `--device <id>` | _(flutter default)_ | Target device ID (e.g. `chrome`, `linux`, emulator ID). |
-| `--flutter-arg <arg>` | _(none)_ | Pass an extra argument to the underlying `flutter` command. Repeatable. |
-| `--target <path>` | _(auto)_ | Override the generated master runner target file. |
-| `--driver <path>` | _(auto)_ | Override the web driver file (drive mode). |
 | `--command <shell>` | _(auto)_ | Replace the entire flutter invocation with a custom shell command. |
 | `--bridge-mode plain\|auto\|bridge` | `auto` | Bridge startup strategy. |
 | `--bridge-host <host>` | _(platform default)_ | Override the host address the bridge binds to. |
@@ -374,35 +369,36 @@ dart run flutter_bdd_suite:run_test [options]
 | `--bridge-script <path>` | _(none)_ | Path to a custom script that starts the bridge. |
 | `--bridge-setup <path>` | _(none)_ | Path to a Dart file that registers custom bridge endpoints. |
 
+Use `--` to pass native Flutter command arguments (for example `--coverage`, `-d chrome`, `--web-renderer=html`, `--driver=...`, `--target=...`).
+
 **Examples:**
 
 ```bash
 # Run only @smoke scenarios, randomized, with coverage
-dart run flutter_bdd_suite:run_test \
+dart run flutter_bdd_suite:cli \
   --config integration_test/test_config.dart \
   --tags "@smoke" \
   --order random \
-  --coverage
+  -- --coverage
 
 # Run only feature files matching 'auth', generate without running
-dart run flutter_bdd_suite:run_test \
+dart run flutter_bdd_suite:cli \
   --config integration_test/test_config.dart \
   --pattern auth \
   --dry-run
 
 # Web run on Chrome, pass extra flutter args
-dart run flutter_bdd_suite:run_test \
+dart run flutter_bdd_suite:cli \
   --config integration_test/test_config.dart \
   --mode drive \
-  --device chrome \
-  --flutter-arg "--web-renderer=html"
+  -- -d chrome --web-renderer=html
 ```
 
 ---
 
 ## Code Generation
 
-Every time you run `run_test`, the pipeline:
+Every time you run `cli`, the pipeline:
 
 1. Discovers all `*.feature` files under `integration_test/features/`.
 2. Parses each file with the built-in `FeatureParser` (handles outlines, backgrounds, rules, tables, doc strings, tags).
@@ -417,9 +413,9 @@ The generated files are **deterministic** and can be committed to version contro
 ## Coverage
 
 ```bash
-dart run flutter_bdd_suite:run_test \
+dart run flutter_bdd_suite:cli \
   --config integration_test/test_config.dart \
-  --coverage
+  -- --coverage
 ```
 
 > **Important:** `--coverage` only works with `--mode test`. The `flutter drive` command does not support coverage.
@@ -759,7 +755,7 @@ This works uniformly across **all supported platforms**: Android, iOS, macOS, Li
 
 ### Host-Side Server
 
-The bridge is started automatically by `run_test` unless `--no-bridge` is specified. Register custom endpoints in a bridge setup file:
+The bridge is started automatically by `cli` unless `--no-bridge` is specified. Register custom endpoints in a bridge setup file:
 
 ```dart
 // integration_test/bridge_setup.dart
@@ -798,10 +794,49 @@ void registerEndpoints(IntegrationTestServer server) {
 Then pass the file with `--bridge-setup`:
 
 ```bash
-dart run flutter_bdd_suite:run_test \
+dart run flutter_bdd_suite:cli \
   --config integration_test/test_config.dart \
   --bridge-setup integration_test/bridge_setup.dart
 ```
+
+### Drive/Web Server Setup Checklist
+
+When running with `--mode drive` (especially `-d chrome`), use this checklist to avoid missing bridge logs or report-save failures:
+
+1. Keep the bridge enabled. Do not pass `--no-bridge`.
+2. Make sure the bridge port is free before running. Default is `9876`.
+3. If the CLI prints a bridge warning (for example, port already in use), mirrored reporter logs and host-side endpoints will not be available for that run.
+4. For multiline shell commands, keep passthrough args after `--` on the same command using `\` line continuation.
+
+Example:
+
+```bash
+dart run flutter_bdd_suite:cli \
+  --mode drive \
+  --config integration_test/test_config.dart \
+  -- --driver=test_driver/integration_test.dart \
+     --target=integration_test/app_test.dart \
+     -d chrome
+```
+
+#### macOS App Sandbox Requirement
+
+If your test app runs with macOS sandbox entitlements, the app must be allowed to make outbound network calls to reach the local bridge (`http://localhost:9876`).
+
+In `macos/Runner/DebugProfile.entitlements` (and optionally `Release.entitlements`), include:
+
+```xml
+<key>com.apple.security.network.client</key>
+<true/>
+```
+
+Without this entitlement, bridge calls can fail with errors similar to `SocketException: Operation not permitted`.
+
+#### Why `flutter drive` Logs Can Differ from `flutter test`
+
+For web drive runs, Flutter tooling may not forward all app-side stdout the same way as `flutter test`. This can make hook/reporter logs appear incomplete even when hooks ran successfully.
+
+To improve visibility, `flutter_bdd_suite` mirrors runtime logs through the bridge when the bridge is active.
 
 ### Device-Side HTTP Client
 
@@ -847,12 +882,12 @@ The bridge client automatically picks the right address so you never need to har
 | Platform | Default host |
 |---|---|
 | Android emulator | `10.0.2.2` (routes to host `localhost`) |
-| Android physical device | Set `BRIDGE_HOST` env var or `--bridge-host` to the host's network IP. |
+| Android physical device | Set `FGP_BRIDGE_HOST` env var or `--bridge-host` to the host's network IP. |
 | iOS simulator | `localhost` |
 | macOS / Linux / Windows desktop | `localhost` |
 | Web (Chrome) | `localhost` |
 
-Override with the `BRIDGE_HOST` / `BRIDGE_PORT` environment variables, or the `--bridge-host` / `--bridge-port` CLI flags.
+Override with the `FGP_BRIDGE_HOST` / `FGP_BRIDGE_PORT` environment variables, or the `--bridge-host` / `--bridge-port` CLI flags.
 
 ### `IntegrationServerResult`
 
@@ -880,7 +915,7 @@ Use the `--tags` CLI flag with a boolean tag expression to run only matching sce
 
 ```bash
 # Run only smoke tests that are not WIP
-dart run flutter_bdd_suite:run_test \
+dart run flutter_bdd_suite:cli \
   --config integration_test/test_config.dart \
   --tags "(@smoke or @auth) and not @wip"
 ```

@@ -251,16 +251,11 @@ class _FilesList extends StatelessWidget {
               key: const Key('imported_files_list'),
               children: [
                 ...files.map((f) => Card(
-                  child: Builder(
-                    builder: (context) {
-                      print('file_item_${files.indexOf(f)}');
-                      return ListTile(
-                        key: Key('file_item_${files.indexOf(f)}'),
-                        leading: const Icon(Icons.insert_drive_file),
-                        title: Text(f.name),
-                        subtitle: Text('${f.rowCount} data rows'),
-                      );
-                    }
+                  child: ListTile(
+                    key: Key('file_item_${files.indexOf(f)}'),
+                    leading: const Icon(Icons.insert_drive_file),
+                    title: Text(f.name),
+                    subtitle: Text('${f.rowCount} data rows'),
                   ),
                 )),                 
               ],

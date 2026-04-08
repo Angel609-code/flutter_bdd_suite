@@ -7,8 +7,8 @@ import 'package:integration_test/integration_test.dart';
 
 import 'custom_hooks/debug_lifecycle_hook.dart';
 import 'reporters/decorated_summary.dart';
-import 'steps/app_steps.dart';
-import 'steps/form_steps.dart';
+import 'steps/common_steps.dart';
+import 'steps/interaction_steps.dart';
 
 final config = IntegrationTestConfig(
   appLauncher: (WidgetTester tester) async {
@@ -28,11 +28,11 @@ final config = IntegrationTestConfig(
   ],
   steps: [
     theApplicationIsLaunched(),
-    theLoginScreenIsVisible(),
-    theLoginFieldsArePresent(),
-    iEnterValueInField(),
-    iTapButton(),
-    iShouldSee(),
+    iShouldSeeTextOrElement(),
+    theLoginUIIsVisible(),
     iShouldReachDashboard(),
+    theElementIsVisible(),
+    iEnterText(),
+    iInteractWithButton(),
   ]
 );

@@ -3,6 +3,7 @@ import 'package:flutter_bdd_suite/lifecycle_listener.dart';
 import 'package:flutter_bdd_suite/models/feature_model.dart';
 import 'package:flutter_bdd_suite/models/scenario_model.dart';
 import 'package:flutter_bdd_suite/steps/step_result.dart';
+import 'package:flutter_bdd_suite/utils/log_writer.dart';
 import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
 
 class LifecycleManager {
@@ -15,7 +16,7 @@ class LifecycleManager {
       try {
         await listener.onBeforeAll();
       } catch (e, st) {
-        print('🔴 Error in onBeforeAll: $e\n$st');
+        logLine('🔴 Error in onBeforeAll: $e\n$st');
       }
     }
   }
@@ -25,7 +26,7 @@ class LifecycleManager {
       try {
         await listener.onAfterAll();
       } catch (e, st) {
-        print('🔴 Error in onAfterAll: $e\n$st');
+        logLine('🔴 Error in onAfterAll: $e\n$st');
       }
     }
   }
@@ -35,7 +36,7 @@ class LifecycleManager {
       try {
         await listener.onFeatureStarted(feature);
       } catch (e, st) {
-        print('🔴 Error in onFeatureStarted: $e\n$st');
+        logLine('🔴 Error in onFeatureStarted: $e\n$st');
       }
     }
   }
@@ -45,7 +46,7 @@ class LifecycleManager {
       try {
         await listener.onBeforeScenario(scenario);
       } catch (e, st) {
-        print('🔴 Error in onBeforeScenario("${scenario.scenarioName}"): $e\n$st');
+        logLine('🔴 Error in onBeforeScenario("${scenario.scenarioName}"): $e\n$st');
       }
     }
   }
@@ -55,7 +56,7 @@ class LifecycleManager {
       try {
         await listener.onAfterScenario(scenarioName);
       } catch (e, st) {
-        print('🔴 Error in onAfterScenario("$scenarioName"): $e\n$st');
+        logLine('🔴 Error in onAfterScenario("$scenarioName"): $e\n$st');
       }
     }
   }
@@ -65,7 +66,7 @@ class LifecycleManager {
       try {
         await listener.onBeforeStep(stepText, world);
       } catch (e, st) {
-        print('🔴 Error in onBeforeStep("$stepText"): $e\n$st');
+        logLine('🔴 Error in onBeforeStep("$stepText"): $e\n$st');
       }
     }
   }
@@ -75,7 +76,7 @@ class LifecycleManager {
       try {
         await listener.onAfterStep(result, world);
       } catch (e, st) {
-        print('🔴 Error in onAfterStep("${result.stepText}"): $e\n$st');
+        logLine('🔴 Error in onAfterStep("${result.stepText}"): $e\n$st');
       }
     }
   }

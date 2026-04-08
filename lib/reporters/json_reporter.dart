@@ -7,9 +7,8 @@ import 'package:flutter_bdd_suite/models/scenario_model.dart';
 import 'package:flutter_bdd_suite/reporters/integration_reporter.dart';
 import 'package:flutter_bdd_suite/server/integration_endpoints.dart';
 import 'package:flutter_bdd_suite/steps/step_result.dart';
+import 'package:flutter_bdd_suite/utils/log_writer.dart';
 import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
-
-import '../models/integration_server_result_model.dart';
 
 /// Creates a JSON file with the results of the test run.
 ///
@@ -109,17 +108,25 @@ class JsonReporter extends IntegrationReporter {
   @override
   Future<void> onAfterAll() async {
     final jsonString = jsonEncode(_features.map((f) => f.toJson()).toList());
+    logLine('[JsonReporter] onAfterAll started. features=${_features.length} path=$path');
 
-    IntegrationServerResult result = await saveReport(ReportBody(
+    final result = await saveReport(ReportBody(
       content: jsonString,
       path: path,
     ));
 
+    final rawMessage = result.message ?? '';
+    final message = rawMessage.length > 300
+        ? '${rawMessage.substring(0, 300)}...'
+        : rawMessage;
+
     if (result.success) {
-      print('🟢 Report saved successfully');
+      logLine('[JsonReporter] Report saved successfully. status=${result.statusCode}');
     } else {
-      print('🔴 Failed to save report ${result.message}');
+      logLine('[JsonReporter] Failed to save report. status=${result.statusCode} message=$message');
     }
+
+    logLine('[JsonReporter] onAfterAll finished.');
   }
 
   @override Future<void> onBeforeAll() async {}

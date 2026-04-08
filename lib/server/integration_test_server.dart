@@ -1,4 +1,3 @@
-// ignore_for_file: avoid_print
 import 'dart:convert';
 import 'dart:io';
 
@@ -67,6 +66,7 @@ class IntegrationTestServer {
         final handlers = {
           'POST': {
             '/save-report': _handleReport,
+            '/log': _handleLog,
             ...?_custom['POST'],
           },
           'GET': {
@@ -89,7 +89,7 @@ class IntegrationTestServer {
         await req.response.close();
       }
     });
-    print('[IntegrationTestServer] Listening on port $port');
+    stdout.writeln('[IntegrationTestServer] Listening on port $port');
   }
 
   Future<void> _handleReport(HttpRequest req) async {
@@ -112,7 +112,7 @@ class IntegrationTestServer {
       await file.create(recursive: true);
       await file.writeAsString(data['content']);
 
-      print('[IntegrationTestServer] Report saved at: $absolutePath');
+      stdout.writeln('[IntegrationTestServer] Report saved at: $absolutePath');
 
       req.response
         ..statusCode = 200
@@ -126,9 +126,28 @@ class IntegrationTestServer {
     }
   }
 
+  Future<void> _handleLog(HttpRequest req) async {
+    try {
+      final data = jsonDecode(await utf8.decoder.bind(req).join());
+      final rawMessage = data['message'];
+      final message = rawMessage == null ? '' : rawMessage.toString();
+
+      stdout.writeln(message);
+      req.response
+        ..statusCode = 200
+        ..write('ok');
+    } catch (e) {
+      req.response
+        ..statusCode = 500
+        ..write('Failed to write log: $e');
+    } finally {
+      await req.response.close();
+    }
+  }
+
   /// Stops the server and closes all active connections.
   Future<void> stop() async {
     await _server?.close(force: true);
-    print('[IntegrationTestServer] Closed');
+    stdout.writeln('[IntegrationTestServer] Closed');
   }
 }

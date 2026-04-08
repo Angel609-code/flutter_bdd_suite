@@ -1,46 +1,59 @@
 import 'dart:io';
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter_bdd_suite/runner/generation_pipeline.dart';
 import 'package:flutter_bdd_suite/server/integration_test_server.dart';
 
 Future<void> main(List<String> args) async {
+  final delimiterIndex = args.indexOf('--');
+  final myArgs = delimiterIndex >= 0 ? args.sublist(0, delimiterIndex) : args;
+  final passthroughArgs = delimiterIndex >= 0 ? args.sublist(delimiterIndex + 1) : <String>[];
+
   final cwd = Directory.current.path;
 
-  final configPath = _readArg(args, '--config');
+  final configPath = _readArg(myArgs, '--config');
   if (configPath == null || configPath.trim().isEmpty) {
     stderr.writeln('Error: --config <file> is required');
     exitCode = 1;
     return;
   }
 
-  final mode = (_readArg(args, '--mode') ?? 'test').toLowerCase();
+  final misplacedFlutterArgs = _collectMisplacedFlutterArgs(myArgs);
+  if (misplacedFlutterArgs.isNotEmpty) {
+    stderr.writeln(
+      'Error: Flutter command flags must be passed after "--". '
+      'Move these arguments after "--": ${misplacedFlutterArgs.join(' ')}',
+    );
+    exitCode = 1;
+    return;
+  }
+
+  final mode = (_readArg(myArgs, '--mode') ?? 'test').toLowerCase();
   if (mode != 'test' && mode != 'drive') {
     stderr.writeln('Error: --mode must be either test or drive');
     exitCode = 1;
     return;
   }
 
-  final order = _readArg(args, '--order') ?? 'none';
-  final pattern = _readArg(args, '--pattern');
-  final tags = _readArg(args, '--tags');
-  final command = _readArg(args, '--command');
-  final dryRun = args.contains('--dry-run');
-  final coverage = args.contains('--coverage');
-  final generateOnly = args.contains('--generate-only');
+  final order = _readArg(myArgs, '--order') ?? 'none';
+  final pattern = _readArg(myArgs, '--pattern');
+  final tags = _readArg(myArgs, '--tags');
+  final command = _readArg(myArgs, '--command');
+  final dryRun = myArgs.contains('--dry-run');
+  final generateOnly = myArgs.contains('--generate-only');
 
-  final bridgeConfig = _resolveBridgeConfig(args: args);
-  final forceNoBridge = args.contains('--no-bridge');
-  final bridgeScriptPath = _readArg(args, '--bridge-script') ?? 'integration_test/integration_test_server.dart';
-  final bridgeSetupPath = _readArg(args, '--bridge-setup') ?? 'integration_test/bridge_setup.dart';
+  final bridgeConfig = _resolveBridgeConfig(args: myArgs);
+  final forceNoBridge = myArgs.contains('--no-bridge');
+  final bridgeScriptPath = _readArg(myArgs, '--bridge-script') ?? 'integration_test/integration_test_server.dart';
+  final bridgeSetupPath = _readArg(myArgs, '--bridge-setup') ?? 'integration_test/bridge_setup.dart';
   final bridgeMode = forceNoBridge ? 'plain' : bridgeConfig.mode;
+
   if (!{'plain', 'auto', 'bridge'}.contains(bridgeMode)) {
     stderr.writeln('Error: --bridge-mode must be plain, auto, or bridge');
     exitCode = 1;
     return;
   }
-
-  final flutterArgs = _readRepeatedArg(args, '--flutter-arg');
 
   try {
     final result = await runGeneratePipeline(GeneratePipelineOptions(
@@ -71,6 +84,13 @@ Future<void> main(List<String> args) async {
       return;
     }
 
+    if (delimiterIndex >= 0 && command == null && passthroughArgs.isEmpty) {
+      stderr.writeln(
+        'Warning: no passthrough args were received after "--". '
+        'If using multiple lines, keep "--" on the same line as the first passthrough arg or use "\\" before line breaks.',
+      );
+    }
+
     _ManagedBridgeRuntime? runtime;
     var bridgeActive = false;
     try {
@@ -88,17 +108,21 @@ Future<void> main(List<String> args) async {
             'Bridge client was not able to run: $error. Continuing test run without bridge.',
           );
         }
+
+        if (!bridgeActive) {
+          _printBridgeWarning(
+            'Bridge is inactive. Reporter mirrored logs and host report endpoints will be unavailable for this run.',
+          );
+        }
       }
 
       final commandData = _buildExecutionCommand(
         mode: mode,
-        target: result.masterRunnerPath,
-        args: args,
-        coverage: coverage,
-        flutterArgs: flutterArgs,
+        testFilePath: result.masterRunnerPath,
         commandOverride: command,
         bridgeConfig: bridgeConfig,
         includeBridgeDefines: bridgeActive,
+        passthroughArgs: passthroughArgs,
       );
 
       stdout.writeln('Execution command: ${commandData.display}');
@@ -113,9 +137,124 @@ Future<void> main(List<String> args) async {
       await runtime?.stop();
     }
   } catch (error) {
-    stderr.writeln('run_test failed: $error');
+    stderr.writeln('cli failed: $error');
     exitCode = 1;
   }
+}
+
+_ExecutionCommand _buildExecutionCommand({
+  required String mode,
+  required String testFilePath,
+  required String? commandOverride,
+  required _ResolvedBridgeConfig bridgeConfig,
+  required bool includeBridgeDefines,
+  List<String> passthroughArgs = const [],
+}) {
+  if (commandOverride != null && commandOverride.trim().isNotEmpty) {
+    if (includeBridgeDefines) {
+      stdout.writeln(
+        'Warning: --command mode cannot inject automatic --dart-define bridge values. '
+        'Add FGP_BRIDGE_HOST/FGP_BRIDGE_PORT defines manually in your command if needed.',
+      );
+    }
+    return _ExecutionCommand.shell(commandOverride.trim());
+  }
+
+  final normalizedPassthroughArgs = _normalizePassthroughArgs(passthroughArgs);
+
+  final bridgeDefines = <String>[
+    if (includeBridgeDefines && bridgeConfig.host != null) '--dart-define=FGP_BRIDGE_HOST=${bridgeConfig.host}',
+    if (includeBridgeDefines) '--dart-define=FGP_BRIDGE_PORT=${bridgeConfig.port}',
+    if (includeBridgeDefines) '--dart-define=FGP_BRIDGE_LOGS=true',
+  ];
+
+  if (mode == 'drive') {
+    return _ExecutionCommand.process(
+      executable: 'flutter',
+      arguments: [
+        'drive',
+        ...bridgeDefines,
+        ...normalizedPassthroughArgs,
+      ],
+    );
+  }
+
+  final hasExplicitTestTarget = normalizedPassthroughArgs.any(_looksLikeTestTarget);
+
+  return _ExecutionCommand.process(
+    executable: 'flutter',
+    arguments: [
+      'test',
+      ...bridgeDefines,
+      ...normalizedPassthroughArgs,
+      if (!hasExplicitTestTarget) testFilePath,
+    ],
+  );
+}
+
+List<String> _normalizePassthroughArgs(List<String> passthroughArgs) {
+  final normalized = <String>[];
+
+  for (final arg in passthroughArgs) {
+    if (arg == '--device') {
+      normalized.add('-d');
+      continue;
+    }
+
+    if (arg.startsWith('--device=')) {
+      normalized
+        ..add('-d')
+        ..add(arg.substring('--device='.length));
+      continue;
+    }
+
+    normalized.add(arg);
+  }
+
+  return normalized;
+}
+
+bool _looksLikeTestTarget(String arg) {
+  if (arg.startsWith('-')) {
+    return false;
+  }
+
+  final normalized = arg.replaceAll('\\', '/');
+  return normalized.endsWith('.dart') ||
+      normalized == 'integration_test' ||
+      normalized.startsWith('integration_test/') ||
+      normalized == 'test' ||
+      normalized.startsWith('test/');
+}
+
+List<String> _collectMisplacedFlutterArgs(List<String> args) {
+  const blocked = <String>{
+    '--coverage',
+    '--device',
+    '-d',
+    '--target',
+    '--driver',
+    '--flutter-arg',
+    '--web-renderer',
+    '--dart-define',
+  };
+
+  final found = <String>[];
+  for (final arg in args) {
+    if (blocked.contains(arg)) {
+      found.add(arg);
+      continue;
+    }
+
+    for (final flag in blocked) {
+      if (arg.startsWith('$flag=')) {
+        found.add(arg);
+        break;
+      }
+    }
+  }
+
+  return found;
 }
 
 Future<bool> _shouldStartBridge({
@@ -178,7 +317,7 @@ Future<_ManagedBridgeRuntime> _startBridgeRuntime({
       [bridgeScriptPath],
       workingDirectory: cwd,
       environment: environment,
-      runInShell: true,
+      runInShell: Platform.isWindows,
     );
 
     late final List<StreamSubscription<List<int>>> subscriptions;
@@ -216,7 +355,7 @@ Future<_ManagedBridgeRuntime> _startBridgeRuntime({
       [generated],
       workingDirectory: cwd,
       environment: environment,
-      runInShell: true,
+      runInShell: Platform.isWindows,
     );
 
     late final List<StreamSubscription<List<int>>> subscriptions;
@@ -248,11 +387,21 @@ Future<List<StreamSubscription<List<int>>>> _attachBridgeProcessSubscriptions({
   final stdoutStream = process.stdout.asBroadcastStream();
   final stderrStream = process.stderr.asBroadcastStream();
 
-  // Keep bridge process output drained silently for the whole lifecycle.
-  // This avoids stdout/stderr binding conflicts while flutter commands stream output.
+  // Keep bridge process output drained and forwarded for the whole lifecycle.
+  // This makes bridge-side logs visible even when flutter drive suppresses app stdout.
   final silentSubscriptions = <StreamSubscription<List<int>>>[
-    stdoutStream.listen((_) {}),
-    stderrStream.listen((_) {}),
+    stdoutStream.listen((data) {
+      final text = utf8.decode(data, allowMalformed: true).trimRight();
+      if (text.isNotEmpty) {
+        stdout.writeln('[bridge] $text');
+      }
+    }),
+    stderrStream.listen((data) {
+      final text = utf8.decode(data, allowMalformed: true).trimRight();
+      if (text.isNotEmpty) {
+        stderr.writeln('[bridge] $text');
+      }
+    }),
   ];
 
   await _waitForBridgeReadiness(
@@ -339,63 +488,6 @@ Future<bool> _isPortReachable(int port) async {
   }
 }
 
-_ExecutionCommand _buildExecutionCommand({
-  required String mode,
-  required String target,
-  required List<String> args,
-  required bool coverage,
-  required List<String> flutterArgs,
-  required String? commandOverride,
-  required _ResolvedBridgeConfig bridgeConfig,
-  required bool includeBridgeDefines,
-}) {
-  if (commandOverride != null && commandOverride.trim().isNotEmpty) {
-    if (includeBridgeDefines) {
-      stdout.writeln(
-        'Warning: --command mode cannot inject automatic --dart-define bridge values. '
-        'Add FGP_BRIDGE_HOST/FGP_BRIDGE_PORT defines manually in your command if needed.',
-      );
-    }
-    return _ExecutionCommand.shell(commandOverride.trim());
-  }
-
-  final bridgeDefines = <String>[
-    if (includeBridgeDefines && bridgeConfig.host != null) '--dart-define=FGP_BRIDGE_HOST=${bridgeConfig.host}',
-    if (includeBridgeDefines) '--dart-define=FGP_BRIDGE_PORT=${bridgeConfig.port}',
-  ];
-
-  if (mode == 'drive') {
-    final driver = _readArg(args, '--driver') ?? 'test_driver/integration_test.dart';
-    final device = _readArg(args, '--device') ?? 'chrome';
-    final explicitTarget = _readArg(args, '--target') ?? target;
-
-    return _ExecutionCommand.process(
-      executable: 'flutter',
-      arguments: [
-        'drive',
-        '--driver=$driver',
-        '--target=$explicitTarget',
-        '-d',
-        device,
-        ...bridgeDefines,
-        ...flutterArgs,
-      ],
-    );
-  }
-
-  final explicitTarget = _readArg(args, '--target') ?? target;
-  return _ExecutionCommand.process(
-    executable: 'flutter',
-    arguments: [
-      'test',
-      explicitTarget,
-      if (coverage) '--coverage',
-      ...bridgeDefines,
-      ...flutterArgs,
-    ],
-  );
-}
-
 _ResolvedBridgeConfig _resolveBridgeConfig({
   required List<String> args,
 }) {
@@ -457,29 +549,28 @@ Future<void> main() async {
 }
 
 Future<int> _runCommand(_ExecutionCommand command) async {
-  if (command.isShell) {
-    late final Process process;
+  late final Process process;
 
+  if (command.isShell) {
     if (Platform.isWindows) {
       process = await Process.start('cmd', ['/c', command.shellCommand!]);
     } else {
       process = await Process.start('/bin/sh', ['-c', command.shellCommand!]);
     }
-
-    await stdout.addStream(process.stdout);
-    await stderr.addStream(process.stderr);
-    return await process.exitCode;
+  } else {
+    process = await Process.start(
+      command.executable!,
+      command.arguments!,
+      runInShell: Platform.isWindows,
+    );
   }
 
-  final process = await Process.start(
-    command.executable!,
-    command.arguments!,
-    runInShell: true,
-  );
-
-  await stdout.addStream(process.stdout);
-  await stderr.addStream(process.stderr);
-  return await process.exitCode;
+  final stdoutDone = process.stdout.listen(stdout.add).asFuture<void>();
+  final stderrDone = process.stderr.listen(stderr.add).asFuture<void>();
+  
+  final exitCode = await process.exitCode;
+  await Future.wait([stdoutDone, stderrDone]);
+  return exitCode;
 }
 
 String? _readArg(List<String> args, String name) {
@@ -494,25 +585,6 @@ String? _readArg(List<String> args, String name) {
   }
 
   return null;
-}
-
-List<String> _readRepeatedArg(List<String> args, String name) {
-  final values = <String>[];
-
-  for (var i = 0; i < args.length; i++) {
-    final a = args[i];
-    if (a.startsWith('$name=')) {
-      values.add(a.substring(name.length + 1));
-      continue;
-    }
-
-    if (a == name && i + 1 < args.length) {
-      values.add(args[i + 1]);
-      i++;
-    }
-  }
-
-  return values;
 }
 
 class _ExecutionCommand {

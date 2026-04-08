@@ -7,6 +7,7 @@ import 'package:flutter_bdd_suite/server/integration_test_server.dart';
 import 'package:flutter_bdd_suite/steps/step_result.dart';
 import 'package:flutter_bdd_suite/steps/steps_registry.dart';
 import 'package:flutter_bdd_suite/bootstrap.dart';
+import 'package:flutter_bdd_suite/utils/log_writer.dart';
 import 'package:flutter_bdd_suite/utils/terminal_colors.dart';
 import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
 
@@ -158,7 +159,7 @@ class IntegrationTestHelper {
         table: table,
       );
 
-      print('$red➔ [${_featureInfo?.uri}:${step.line}] Skipping ${isBackground ? 'background step' : 'step'}: ${step.text}$reset');
+      logLine('$red➔ [${_featureInfo?.uri}:${step.line}] Skipping ${isBackground ? 'background step' : 'step'}: ${step.text}$reset');
 
       await _hookManager.onAfterStep(result, _world);
       await _reporterManager.onAfterStep(result, _world);
@@ -168,7 +169,7 @@ class IntegrationTestHelper {
 
     if (stepFunction != null) {
       try {
-        print('$green➔ [${_featureInfo?.uri}:${step.line}] ${isBackground ? orange : yellow}Executing${isBackground ? ' background ' : ' '}step: ${step.text}$reset');
+        logLine('$green➔ [${_featureInfo?.uri}:${step.line}] ${isBackground ? orange : yellow}Executing${isBackground ? ' background ' : ' '}step: ${step.text}$reset');
         await stepFunction(_world);
 
         final duration = DateTime.now().microsecondsSinceEpoch - start;
@@ -187,7 +188,7 @@ class IntegrationTestHelper {
     } else {
       final duration = DateTime.now().microsecondsSinceEpoch - start;
       final String error = 'Step not defined';
-      print('${red}Step not defined: ${step.text}$reset');
+      logLine('${red}Step not defined: ${step.text}$reset');
       result = StepFailure(
         stepText,
         step.line,
@@ -229,9 +230,9 @@ class IntegrationTestHelper {
       _world.binding.resetEpoch();
       _world.binding.resetFirstFrameSent();
 
-      print('${green}Test cleanup completed.$reset');
+      logLine('${green}Test cleanup completed.$reset');
     } catch (error) {
-      print('${red}Failed during test cleanup: $error.$reset');
+      logLine('${red}Failed during test cleanup: $error.$reset');
     }
   }
 
@@ -239,7 +240,7 @@ class IntegrationTestHelper {
     Object error,
     StackTrace stackTrace,
   ) async {
-    print('${red}Error in ${_errorOnBackground ? 'background' : 'scenario "$_scenarioName"'}:\n$error.$reset');
+    logLine('${red}Error in ${_errorOnBackground ? 'background' : 'scenario "$_scenarioName"'}:\n$error.$reset');
 
     const blockedPrefixes = [
       'flutter_bdd_suite',
@@ -260,7 +261,7 @@ class IntegrationTestHelper {
     }
 
     for (final line in lastByFile.values) {
-      print('$red$line$reset');
+      logLine('$red$line$reset');
     }
 
     final String errorMessage = '${red}Error on step, skipping remaining steps for ${_errorOnBackground ? 'background' : 'scenario: "$_scenarioName"'}$reset';
