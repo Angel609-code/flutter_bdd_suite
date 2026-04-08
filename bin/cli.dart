@@ -165,7 +165,6 @@ _ExecutionCommand _buildExecutionCommand({
   final bridgeDefines = <String>[
     if (includeBridgeDefines && bridgeConfig.host != null) '--dart-define=FGP_BRIDGE_HOST=${bridgeConfig.host}',
     if (includeBridgeDefines) '--dart-define=FGP_BRIDGE_PORT=${bridgeConfig.port}',
-    if (includeBridgeDefines) '--dart-define=FGP_BRIDGE_LOGS=true',
   ];
 
   if (mode == 'drive') {

@@ -56,6 +56,7 @@ class IntegrationTestServer {
       req.response.headers.set('Access-Control-Allow-Origin', '*');
       req.response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
       req.response.headers.set('Access-Control-Allow-Headers', '*');
+      req.response.headers.set('Access-Control-Allow-Private-Network', 'true');
       if (req.method == 'OPTIONS') {
         req.response.statusCode = 200;
         await req.response.close();
@@ -66,7 +67,6 @@ class IntegrationTestServer {
         final handlers = {
           'POST': {
             '/save-report': _handleReport,
-            '/log': _handleLog,
             ...?_custom['POST'],
           },
           'GET': {
@@ -121,25 +121,6 @@ class IntegrationTestServer {
       req.response
         ..statusCode = 500
         ..write('Failed to save report: $e');
-    } finally {
-      await req.response.close();
-    }
-  }
-
-  Future<void> _handleLog(HttpRequest req) async {
-    try {
-      final data = jsonDecode(await utf8.decoder.bind(req).join());
-      final rawMessage = data['message'];
-      final message = rawMessage == null ? '' : rawMessage.toString();
-
-      stdout.writeln(message);
-      req.response
-        ..statusCode = 200
-        ..write('ok');
-    } catch (e) {
-      req.response
-        ..statusCode = 500
-        ..write('Failed to write log: $e');
     } finally {
       await req.response.close();
     }

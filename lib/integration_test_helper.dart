@@ -1,13 +1,12 @@
-// ignore_for_file: avoid_print
 import 'dart:convert' show jsonDecode;
 import 'package:flutter_bdd_suite/integration_test_config.dart';
 import 'package:flutter_bdd_suite/lifecycle_manager.dart';
+import 'package:flutter_bdd_suite/logger.dart';
 import 'package:flutter_bdd_suite/models/models.dart';
 import 'package:flutter_bdd_suite/server/integration_test_server.dart';
 import 'package:flutter_bdd_suite/steps/step_result.dart';
 import 'package:flutter_bdd_suite/steps/steps_registry.dart';
 import 'package:flutter_bdd_suite/bootstrap.dart';
-import 'package:flutter_bdd_suite/utils/log_writer.dart';
 import 'package:flutter_bdd_suite/utils/terminal_colors.dart';
 import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
 

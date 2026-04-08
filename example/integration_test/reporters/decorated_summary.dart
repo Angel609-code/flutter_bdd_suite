@@ -1,5 +1,5 @@
-// ignore_for_file: avoid_print
 import 'dart:math';
+import 'package:flutter_bdd_suite/logger.dart';
 import 'package:wcwidth/wcwidth.dart';
 import 'package:flutter_bdd_suite/models/feature_model.dart';
 import 'package:flutter_bdd_suite/models/scenario_model.dart';
@@ -108,16 +108,16 @@ class DecoratedSummaryReporter extends IntegrationReporter {
       final noAnsi = raw.replaceAll(_ansiEscape, '');
       final actual = _visibleWidth(noAnsi);
       if (actual != expected) {
-        print('DEBUG MISMATCH: got $actual, expected $expected → "$noAnsi"');
+        logLine('DEBUG MISMATCH: got $actual, expected $expected → "$noAnsi"');
       }
     }
 
-    print('');
+    logLine('');
     for (var l in lines) {
-      print(l.replaceAllMapped(RegExp(r'^[╔╠╚║]'), (m) => '$cyan${m[0]}$reset'));
+      logLine(l.replaceAllMapped(RegExp(r'^[╔╠╚║]'), (m) => '$cyan${m[0]}$reset'));
     }
-    print(reset);
-    print('');
+    logLine(reset);
+    logLine('');
   }
 
   @override Future<void> onBeforeStep(String _, WidgetTesterWorld __) async {}

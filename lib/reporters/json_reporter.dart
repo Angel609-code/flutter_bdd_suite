@@ -1,5 +1,5 @@
-// ignore_for_file: avoid_print
 import 'dart:convert';
+import 'package:flutter_bdd_suite/logger.dart';
 import 'package:flutter_bdd_suite/models/feature_model.dart';
 import 'package:flutter_bdd_suite/models/json_step_model.dart';
 import 'package:flutter_bdd_suite/models/report_model.dart';
@@ -7,7 +7,6 @@ import 'package:flutter_bdd_suite/models/scenario_model.dart';
 import 'package:flutter_bdd_suite/reporters/integration_reporter.dart';
 import 'package:flutter_bdd_suite/server/integration_endpoints.dart';
 import 'package:flutter_bdd_suite/steps/step_result.dart';
-import 'package:flutter_bdd_suite/utils/log_writer.dart';
 import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
 
 /// Creates a JSON file with the results of the test run.

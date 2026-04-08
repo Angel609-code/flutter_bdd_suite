@@ -14,10 +14,10 @@ String resolveBridgeHost() {
   }
 
   if (kIsWeb) {
-    return 'localhost';
+    return '127.0.0.1';
   }
 
-  return Platform.isAndroid ? '10.0.2.2' : 'localhost';
+  return Platform.isAndroid ? '10.0.2.2' : '127.0.0.1';
 }
 
 int resolveBridgePort() {

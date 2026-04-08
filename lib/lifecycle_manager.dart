@@ -1,9 +1,8 @@
-// ignore_for_file: avoid_print
 import 'package:flutter_bdd_suite/lifecycle_listener.dart';
+import 'package:flutter_bdd_suite/logger.dart';
 import 'package:flutter_bdd_suite/models/feature_model.dart';
 import 'package:flutter_bdd_suite/models/scenario_model.dart';
 import 'package:flutter_bdd_suite/steps/step_result.dart';
-import 'package:flutter_bdd_suite/utils/log_writer.dart';
 import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
 
 class LifecycleManager {
