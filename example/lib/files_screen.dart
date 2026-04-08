@@ -248,23 +248,19 @@ class _FilesList extends StatelessWidget {
           if (files.isEmpty)
             const Text(key: Key('empty_files_text'), 'Empty list')
           else
-            ListView.builder(
+            Wrap(
               key: const Key('imported_files_list'),
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: files.length,
-              itemBuilder: (context, index) {
-                final f = files[index];
-                return Card(
+              children: [
+                ...files.map((f) => Card(
                   child: ListTile(
-                    key: Key('file_item_$index'),
+                    key: Key('file_item_${files.indexOf(f)}'),
                     leading: const Icon(Icons.insert_drive_file),
                     title: Text(f.name),
                     subtitle: Text('${f.rowCount} data rows'),
                   ),
-                );
-              },
-            ),
+                )),
+              ],
+            )
         ],
       ),
     );
