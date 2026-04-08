@@ -49,13 +49,10 @@ class SummaryReporter extends IntegrationReporter {
     switch (_currentStatus) {
       case ScenarioStatus.passed:
         _passedScenarios++;
-        break;
       case ScenarioStatus.failed:
         _failedScenarios++;
-        break;
       case ScenarioStatus.skipped:
         _skippedScenarios++;
-        break;
       default:
         break;
     }

@@ -44,30 +44,23 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
 
-  int _nextId = 4;
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  final List<Employee> _employees = [
-    const Employee(
+  /// Seed data shared between the field initializer and [_nextId].
+  static const List<Employee> _kInitialEmployees = [
+    Employee(
       id: 1,
       name: 'Alice Johnson',
       role: 'Engineer',
       age: 30,
       biography: 'Senior software engineer with 8 years of experience.',
     ),
-    const Employee(
+    Employee(
       id: 2,
       name: 'Bob Martinez',
       role: 'Designer',
       age: 27,
       biography: 'UX/UI designer passionate about inclusive design.',
     ),
-    const Employee(
+    Employee(
       id: 3,
       name: 'Carol White',
       role: 'Manager',
@@ -75,6 +68,18 @@ class _HomeScreenState extends State<HomeScreen> {
       biography: 'Department manager with a background in agile coaching.',
     ),
   ];
+
+  /// The next auto-incremented ID for newly added employees.
+  /// Derived from the initial list so adding/removing seed entries stays correct.
+  int _nextId = _kInitialEmployees.length + 1;
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  final List<Employee> _employees = List.of(_kInitialEmployees);
 
   String _searchQuery = '';
 

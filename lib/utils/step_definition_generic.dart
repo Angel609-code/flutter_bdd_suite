@@ -229,6 +229,25 @@ StepDefinitionGeneric generic1<T, W>(
   });
 }
 
+/// Resolves [count] raw capture-group strings from [args] against [tokens],
+/// applying each token's placeholder parser when applicable.
+///
+/// This helper is shared by [generic2] through [generic6] to avoid duplicating
+/// the identical parsing loop in every overload.
+List<dynamic> _parseArgs(List<String> args, List<CaptureToken> tokens, int count) {
+  final parsedArgs = <dynamic>[];
+  for (var i = 0; i < count; i++) {
+    final raw = args[i].toString();
+    final token = tokens[i];
+    if (token.kind == CaptureKind.placeholder) {
+      parsedArgs.add(token.placeholderDef!.parser(raw));
+    } else {
+      parsedArgs.add(raw);
+    }
+  }
+  return parsedArgs;
+}
+
 /// Defines a step with exactly two captures.
 StepDefinitionGeneric generic2<T1, T2, W>(
   String rawPattern,
@@ -236,17 +255,8 @@ StepDefinitionGeneric generic2<T1, T2, W>(
 ) {
   final parsed = _buildStepRegex(rawPattern, 2);
   return StepDefinitionGeneric(parsed.regex, 2, (args, context) async {
-    final parsedArgs = <dynamic>[];
-    for (var i = 0; i < 2; i++) {
-      final raw = args[i].toString();
-      final token = parsed.tokens[i];
-      if (token.kind == CaptureKind.placeholder) {
-        parsedArgs.add(token.placeholderDef!.parser(raw));
-      } else {
-        parsedArgs.add(raw);
-      }
-    }
-    await fn(parsedArgs[0] as T1, parsedArgs[1] as T2, context as W);
+    final p = _parseArgs(args, parsed.tokens, 2);
+    await fn(p[0] as T1, p[1] as T2, context as W);
   });
 }
 
@@ -257,17 +267,8 @@ StepDefinitionGeneric generic3<T1, T2, T3, W>(
 ) {
   final parsed = _buildStepRegex(rawPattern, 3);
   return StepDefinitionGeneric(parsed.regex, 3, (args, context) async {
-    final parsedArgs = <dynamic>[];
-    for (var i = 0; i < 3; i++) {
-      final raw = args[i].toString();
-      final token = parsed.tokens[i];
-      if (token.kind == CaptureKind.placeholder) {
-        parsedArgs.add(token.placeholderDef!.parser(raw));
-      } else {
-        parsedArgs.add(raw);
-      }
-    }
-    await fn(parsedArgs[0] as T1, parsedArgs[1] as T2, parsedArgs[2] as T3, context as W);
+    final p = _parseArgs(args, parsed.tokens, 3);
+    await fn(p[0] as T1, p[1] as T2, p[2] as T3, context as W);
   });
 }
 
@@ -278,17 +279,8 @@ StepDefinitionGeneric generic4<T1, T2, T3, T4, W>(
 ) {
   final parsed = _buildStepRegex(rawPattern, 4);
   return StepDefinitionGeneric(parsed.regex, 4, (args, context) async {
-    final parsedArgs = <dynamic>[];
-    for (var i = 0; i < 4; i++) {
-      final raw = args[i].toString();
-      final token = parsed.tokens[i];
-      if (token.kind == CaptureKind.placeholder) {
-        parsedArgs.add(token.placeholderDef!.parser(raw));
-      } else {
-        parsedArgs.add(raw);
-      }
-    }
-    await fn(parsedArgs[0] as T1, parsedArgs[1] as T2, parsedArgs[2] as T3, parsedArgs[3] as T4, context as W);
+    final p = _parseArgs(args, parsed.tokens, 4);
+    await fn(p[0] as T1, p[1] as T2, p[2] as T3, p[3] as T4, context as W);
   });
 }
 
@@ -299,17 +291,8 @@ StepDefinitionGeneric generic5<T1, T2, T3, T4, T5, W>(
 ) {
   final parsed = _buildStepRegex(rawPattern, 5);
   return StepDefinitionGeneric(parsed.regex, 5, (args, context) async {
-    final parsedArgs = <dynamic>[];
-    for (var i = 0; i < 5; i++) {
-      final raw = args[i].toString();
-      final token = parsed.tokens[i];
-      if (token.kind == CaptureKind.placeholder) {
-        parsedArgs.add(token.placeholderDef!.parser(raw));
-      } else {
-        parsedArgs.add(raw);
-      }
-    }
-    await fn(parsedArgs[0] as T1, parsedArgs[1] as T2, parsedArgs[2] as T3, parsedArgs[3] as T4, parsedArgs[4] as T5, context as W);
+    final p = _parseArgs(args, parsed.tokens, 5);
+    await fn(p[0] as T1, p[1] as T2, p[2] as T3, p[3] as T4, p[4] as T5, context as W);
   });
 }
 
@@ -320,16 +303,7 @@ StepDefinitionGeneric generic6<T1, T2, T3, T4, T5, T6, W>(
 ) {
   final parsed = _buildStepRegex(rawPattern, 6);
   return StepDefinitionGeneric(parsed.regex, 6, (args, context) async {
-    final parsedArgs = <dynamic>[];
-    for (var i = 0; i < 6; i++) {
-      final raw = args[i].toString();
-      final token = parsed.tokens[i];
-      if (token.kind == CaptureKind.placeholder) {
-        parsedArgs.add(token.placeholderDef!.parser(raw));
-      } else {
-        parsedArgs.add(raw);
-      }
-    }
-    await fn(parsedArgs[0] as T1, parsedArgs[1] as T2, parsedArgs[2] as T3, parsedArgs[3] as T4, parsedArgs[4] as T5, parsedArgs[5] as T6, context as W);
+    final p = _parseArgs(args, parsed.tokens, 6);
+    await fn(p[0] as T1, p[1] as T2, p[2] as T3, p[3] as T4, p[4] as T5, p[5] as T6, context as W);
   });
 }

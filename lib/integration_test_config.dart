@@ -34,11 +34,18 @@ class IntegrationTestConfig {
   /// Hooks are composable and executed in order of descending [priority].
   final List<IntegrationHook> hooks;
 
+  /// List of reporters that receive lifecycle events and produce output
+  /// (e.g. [SummaryReporter], [JsonReporter]).
+  ///
+  /// Reporters are sorted by descending [IntegrationReporter.priority] and
+  /// notified at every lifecycle point alongside hooks.
   final List<IntegrationReporter> reporters;
 
-  /// [Future Feature] Optional list of step definitions to override or extend the registry.
+  /// Optional list of additional step definitions to register on top of the
+  /// built-in defaults supplied by [StepsRegistry].
   ///
-  /// Leave empty for now.
+  /// Each entry is created with one of the `genericN` factory functions.
+  /// Steps provided here are appended to the registry in the order given.
   final List<StepDefinitionGeneric> steps;
 
   IntegrationTestConfig({

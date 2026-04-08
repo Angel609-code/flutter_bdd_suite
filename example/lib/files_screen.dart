@@ -210,16 +210,20 @@ class _CsvPreview extends StatelessWidget {
                         columns: headers
                             .map((h) => DataColumn(label: Text(h)))
                             .toList(),
-                        rows: rows
-                            .map((row) => DataRow(
-                                  key: ValueKey('csv_row_${rows.indexOf(row)}'),
-                                  cells: [
-                                    for (final cell in row) DataCell(
-                                      Text(cell, key: Key('csv_cell_${rows.indexOf(row)}_${row.indexOf(cell)}')),
-                                    ),
-                                  ],
-                                ))
-                            .toList(),
+                        rows: List.generate(rows.length, (rowIdx) {
+                          final row = rows[rowIdx];
+                          return DataRow(
+                            key: ValueKey('csv_row_$rowIdx'),
+                            cells: List.generate(row.length, (cellIdx) {
+                              return DataCell(
+                                Text(
+                                  row[cellIdx],
+                                  key: Key('csv_cell_${rowIdx}_$cellIdx'),
+                                ),
+                              );
+                            }),
+                          );
+                        }),
                       ),
                     ),
                   ),
@@ -250,16 +254,17 @@ class _FilesList extends StatelessWidget {
           else
             Wrap(
               key: const Key('imported_files_list'),
-              children: [
-                ...files.map((f) => Card(
+              children: List.generate(files.length, (i) {
+                final f = files[i];
+                return Card(
                   child: ListTile(
-                    key: Key('file_item_${files.indexOf(f)}'),
+                    key: Key('file_item_$i'),
                     leading: const Icon(Icons.insert_drive_file),
                     title: Text(f.name),
                     subtitle: Text('${f.rowCount} data rows'),
                   ),
-                )),
-              ],
+                );
+              }),
             )
         ],
       ),

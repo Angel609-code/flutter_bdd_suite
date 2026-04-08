@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
 
+/// Demo credentials used by the example application.
+///
+/// These constants are intentionally visible so that BDD feature files can
+/// reference the same values without repeating the literal strings.
+const String kDemoUsername = 'admin';
+const String kDemoPassword = 'password123';
+
 /// A screen that allows users to authenticate into the application.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -28,7 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         _errorMessage = 'Username and password are required.';
       });
-    } else if (username == 'admin' && password == 'password123') {
+    } else if (username == kDemoUsername && password == kDemoPassword) {
       setState(() {
         _errorMessage = '';
       });

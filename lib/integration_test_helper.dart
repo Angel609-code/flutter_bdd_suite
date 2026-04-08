@@ -71,7 +71,7 @@ class IntegrationTestHelper {
 
   LifecycleManager get hookManager => _hookManager;
 
-  LifecycleManager get reporterManger => _reporterManager;
+  LifecycleManager get reporterManager => _reporterManager;
 
   WidgetTesterWorld get world => _world;
 
