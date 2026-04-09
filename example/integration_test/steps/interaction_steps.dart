@@ -8,11 +8,11 @@ import 'common_steps.dart';
 StepDefinitionGeneric iEnterText() {
   return generic4<String, String, String, String, WidgetTesterWorld>(
     r'I (enter|fill) the (.+?)(?: field with)? {string}',
-    (_, type, _, value, world) async {
+    (action, type, suffix, value, world) async {
       final key = resolveKey(type);
 
       await world.tester.enterText(find.byKey(Key(key)), value);
-      await world.tester.pump();
+      await world.tester.pumpAndSettle();
     },
   );
 }

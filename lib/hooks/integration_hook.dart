@@ -24,6 +24,10 @@ abstract class IntegrationHook implements LifecycleListener {
   @override
   Future<void> onFeatureStarted(FeatureInfo feature) async {}
 
+  /// Invoked after the execution of a specific [FeatureInfo].
+  @override
+  Future<void> onAfterFeature(FeatureInfo feature) async {}
+
   /// Invoked once after the entire test suite completes execution.
   @override
   Future<void> onAfterAll() async {}
@@ -33,8 +37,11 @@ abstract class IntegrationHook implements LifecycleListener {
   Future<void> onBeforeScenario(ScenarioInfo scenario) async {}
 
   /// Invoked after a given scenario finishes execution.
+  ///
+  /// Use [result.status] to branch on [ScenarioExecutionStatus.passed],
+  /// [ScenarioExecutionStatus.failed], or [ScenarioExecutionStatus.skipped].
   @override
-  Future<void> onAfterScenario(String scenarioName) async {}
+  Future<void> onAfterScenario(ScenarioResult result) async {}
 
   /// Invoked immediately before a step executes. Provides the raw [stepText] and the current [world].
   @override

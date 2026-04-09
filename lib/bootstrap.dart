@@ -6,11 +6,16 @@ bool _bootstrapped = false;
 
 /// Ensure the integration binding is initialized exactly once,
 /// and invoke the config callback exactly once.
-void bootstrap(IntegrationTestConfig config) {
+///
+/// This function is `async` so that [IntegrationTestConfig.onBindingInitialized]
+/// is fully awaited before the caller proceeds. Forgetting to `await` this
+/// function means any async setup work (e.g. channel registrations, dependency
+/// injection bootstrapping) will race with the first test.
+Future<void> bootstrap(IntegrationTestConfig config) async {
   if (_bootstrapped) return;
 
   _binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-  config.onBindingInitialized?.call(_binding!);
+  await config.onBindingInitialized?.call(_binding!);
 
   _bootstrapped = true;
 }

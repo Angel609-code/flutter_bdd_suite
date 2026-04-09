@@ -12,9 +12,11 @@ abstract class LifecycleListener {
 
   Future<void> onFeatureStarted(FeatureInfo feature) async {}
 
+  Future<void> onAfterFeature(FeatureInfo feature) async {}
+
   Future<void> onBeforeScenario(ScenarioInfo scenario) async {}
 
-  Future<void> onAfterScenario(String scenarioName) async {}
+  Future<void> onAfterScenario(ScenarioResult result) async {}
 
   Future<void> onBeforeStep(String stepText, WidgetTesterWorld world) async {}
 

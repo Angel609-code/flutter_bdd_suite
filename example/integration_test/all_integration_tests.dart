@@ -5,9 +5,13 @@ import 'test_config.dart';
 import 'generated/auth/login.dart' as login;
 import 'generated/dashboard/employee_directory.dart' as employee_directory;
 
-void main() {
-  IntegrationTestHelper(config: config);
+void main() async {
+  final helper = await IntegrationTestHelper.create(config: config);
 
-  login.main();
-  employee_directory.main();
+  // Register suite-level setUpAll/tearDownAll exactly once for all features.
+  // Individual feature runners do not call registerSuiteHooks themselves.
+  helper.registerSuiteHooks();
+
+  login.run(helper);
+  employee_directory.run(helper);
 }

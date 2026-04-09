@@ -15,10 +15,7 @@ class GherkinKeywords {
 
   static const String docStringTripleQuote = '"""';
   static const String docStringBackticks = '```';
-  static const String docStringMarker = '<<<DOCSTRING:';
 
-  static const String jsonTableMarker = '<<<JSON>>>';
-
-  /// Regex to detect a “pure table row” (a line that starts and ends with '|')
+  /// Regex to detect a "pure table row" (a line that starts and ends with '|')
   static final RegExp tableRowRegex = RegExp(r'^\s*\|.*\|\s*$');
 }

@@ -37,7 +37,7 @@ class DecoratedSummaryReporter extends IntegrationReporter {
   }
 
   @override
-  Future<void> onAfterScenario(String _) async {
+  Future<void> onAfterScenario(ScenarioResult result) async {
     switch (_currentStatus) {
       case ScenarioStatus.passed:
         _passedScenarios++; break;
@@ -122,5 +122,6 @@ class DecoratedSummaryReporter extends IntegrationReporter {
 
   @override Future<void> onBeforeStep(String _, WidgetTesterWorld __) async {}
   @override Future<void> onFeatureStarted(FeatureInfo _) async {}
+  @override Future<void> onAfterFeature(FeatureInfo _) async {}
   @override Map<String, dynamic> toJson() => {};
 }

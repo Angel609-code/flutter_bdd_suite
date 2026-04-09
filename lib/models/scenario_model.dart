@@ -42,3 +42,36 @@ class ScenarioInfo {
     this.steps = const [],
   });
 }
+
+/// The execution outcome of a scenario after all its steps have run.
+enum ScenarioExecutionStatus {
+  /// Every step in the scenario completed without error.
+  passed,
+
+  /// At least one step threw an error or assertion failure.
+  failed,
+
+  /// The scenario was skipped, typically because a prior background step failed.
+  skipped,
+}
+
+/// Rich context object passed to [LifecycleListener.onAfterScenario].
+///
+/// Provides both the original [ScenarioInfo] and the final [status] so that
+/// hooks and reporters can react to the outcome without having to track per-step
+/// state themselves.
+class ScenarioResult {
+  /// The scenario that just finished executing.
+  final ScenarioInfo scenario;
+
+  /// The overall outcome of the scenario.
+  final ScenarioExecutionStatus status;
+
+  const ScenarioResult({
+    required this.scenario,
+    required this.status,
+  });
+
+  /// Convenience accessor – mirrors [ScenarioInfo.scenarioName].
+  String get scenarioName => scenario.scenarioName;
+}

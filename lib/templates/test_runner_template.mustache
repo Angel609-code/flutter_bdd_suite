@@ -5,19 +5,24 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_bdd_suite/integration_test_helper.dart';
 
 void main() async {
-  final helper = IntegrationTestHelper(
+  final helper = await IntegrationTestHelper.create(
     config: config,
-    {{#features}}
-    {{#hasBackgroundSteps}}
-    backgroundSteps: _backgroundSteps,
-    {{/hasBackgroundSteps}}
-    {{/features}}
   );
+
+  run(helper);
+}
+
+void run(IntegrationTestHelper helper) {
   {{#features}}
 
   group('Feature: {{name}}', () {
     setUpAll(() async {
-      await helper.setUpFeature(featureInfo: _featureInfo);
+      await helper.setUpFeature(
+        featureInfo: _featureInfo,
+        {{#hasBackgroundSteps}}
+        backgroundSteps: _backgroundSteps,
+        {{/hasBackgroundSteps}}
+      );
     });
 
     {{#scenarios}}

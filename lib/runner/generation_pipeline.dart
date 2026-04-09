@@ -230,7 +230,7 @@ Future<GeneratePipelineResult> runGeneratePipeline(
     usedSoFar[base] = idx;
     final alias = cnt > 1 ? '${base}_$idx' : base;
     importLines.add("import '$rel' as $alias;");
-    callLines.add('  $alias.main();');
+    callLines.add('  $alias.run(helper);');
   }
 
   final masterConfigImport = "import '${p.relative(
@@ -250,8 +250,12 @@ Future<GeneratePipelineResult> runGeneratePipeline(
 
   buffer
     ..writeln()
-    ..writeln('void main() {')
-    ..writeln('  IntegrationTestHelper(config: config);')
+    ..writeln('void main() async {')
+    ..writeln('  final helper = await IntegrationTestHelper.create(config: config);')
+    ..writeln()
+    ..writeln('  // Register suite-level setUpAll/tearDownAll exactly once for all features.')
+    ..writeln('  // Individual feature runners do not call registerSuiteHooks themselves.')
+    ..writeln('  helper.registerSuiteHooks();')
     ..writeln();
 
   for (final line in callLines) {

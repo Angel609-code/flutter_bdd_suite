@@ -110,11 +110,46 @@ class GherkinTable {
   List<Map<String, dynamic>> toJsonRows() {
     final out = <Map<String, dynamic>>[];
     if (header != null) {
-      out.add({ 'cells': header!.toList() });
+      out.add({'cells': header!.toList()});
     }
     for (final row in rows) {
-      out.add({ 'cells': row.toList() });
+      out.add({'cells': row.toList()});
     }
     return out;
+  }
+
+  /// Serialize to a [Map] suitable for embedding inside a parent JSON object.
+  ///
+  /// Unlike [toJson] (which returns a JSON-encoded [String]), this returns the
+  /// raw map so callers can nest it without double-encoding.
+  ///
+  /// Format:
+  /// ```json
+  /// { "header": ["col1", "col2"], "rows": [["a", "b"], ["c", "d"]] }
+  /// ```
+  Map<String, dynamic> toJsonMap() {
+    final map = <String, dynamic>{};
+    if (header != null) {
+      map['header'] = header!.toJson();
+    }
+    map['rows'] = rows.map((r) => r.toJson()).toList();
+    return map;
+  }
+
+  /// Reconstruct a [GherkinTable] from a [Map] embedded in a parent JSON object.
+  ///
+  /// The counterpart to [toJsonMap]. Use [fromJson] when the source is a
+  /// standalone JSON string.
+  factory GherkinTable.fromJsonMap(Map<String, dynamic> decoded) {
+    TableRow? header;
+    if (decoded.containsKey('header')) {
+      final headerList = (decoded['header'] as List<dynamic>).cast<dynamic>();
+      header = TableRow.fromJson(headerList);
+    }
+    final rowsList = decoded['rows'] as List<dynamic>;
+    final dataRows = rowsList
+        .map((r) => TableRow.fromJson(r as List<dynamic>))
+        .toList();
+    return GherkinTable(dataRows, header);
   }
 }

@@ -57,7 +57,7 @@ class JsonReporter extends IntegrationReporter {
     _currentFeature!.elements.add(_currentScenario!);
   }
 
-  @override Future<void> onAfterScenario(String scenarioName) async {
+  @override Future<void> onAfterScenario(ScenarioResult result) async {
     _inBackground = true;
     _background = null;
   }
@@ -130,6 +130,7 @@ class JsonReporter extends IntegrationReporter {
 
   @override Future<void> onBeforeAll() async {}
   @override Future<void> onBeforeStep(String stepText, WidgetTesterWorld world) async {}
+  @override Future<void> onAfterFeature(FeatureInfo feature) async {}
 
   @override
   int get priority => 0;

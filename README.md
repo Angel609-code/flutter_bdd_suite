@@ -52,7 +52,7 @@ Built natively on Flutter's `integration_test` package, it gives you direct acce
 - **Native Integration Test:** Built on Flutter's `integration_test` package — no `flutter_driver` dependencies.
 - **Automatic Code Generation:** Converts `.feature` files into executable Dart integration test files with a single CLI command.
 - **Rich Gherkin Parsing:** Full support for Scenario Outlines, Background, Rules, data tables, doc strings, and tags.
-- **Flexible Step Definitions:** Typed step builders (`generic` through `generic6`) with `{string}`, `{table}` placeholders and arbitrary regex captures.
+- **Flexible Step Definitions:** Typed step builders (`generic` through `generic6`) with `{string}`, `{int}`, `{float}`, `{word}` placeholders and arbitrary regex captures. Data tables and doc-strings are accessible via the `TestWorld` context object.
 - **Lifecycle Hooks:** Before/after hooks at the All, Feature, Scenario, and Step levels with priority-based execution.
 - **Extensible Reporters:** Built-in summary and Cucumber-compatible JSON reporters. Compose your own by extending `IntegrationReporter`.
 - **Host Bridge Server:** A built-in local HTTP server runs on your host machine while tests execute on any platform (Android, iOS, macOS, Linux, Windows, or Web). Device-side tests call it via HTTP to perform host-side actions that are impossible from inside the test process — for example, saving report files to disk (including from web where the device has no access to the host file system), seeding or resetting a database, calling external APIs, triggering CI scripts, or any other operation that requires the host environment.
@@ -199,7 +199,7 @@ Scenario: Add multiple employees
     | Bob     | Designer  | 80000  |
 ```
 
-In your step definition, access the table via the `{table}` placeholder (see [Working with Tables in Steps](#working-with-tables-in-steps)).
+In your step definition, access the table via the `world.table` property (see [Working with Tables in Steps](#working-with-tables-in-steps)).
 
 ### Doc Strings
 
@@ -582,7 +582,9 @@ Patterns are strings that get compiled to `RegExp` for matching. The following c
 | Syntax | Example | Description |
 |---|---|---|
 | `{string}` | `fill the {string} field` | Captures a double-quoted value. The quotes are stripped. |
-| `{table}` | `with data: {table}` | Captures an embedded Gherkin table (passed as `GherkinTable`). |
+| `{int}` | `I wait {int} seconds` | Captures an unquoted integer and parses it to `int`. |
+| `{float}` | `price is {float}` | Captures an unquoted decimal and parses it to `double`. |
+| `{word}` | `status is {word}` | Captures a single non-whitespace word. |
 | `(foo\|bar)` | `I (enable\|disable) the feature` | Manual capturing group — value passed as a `String`. |
 | `(\d+)` | `I wait (\d+) seconds` | Manual regex capture — value passed as a `String`. |
 | `(?:optional)?` | `I tap the (?:big )?button` | Non-capturing optional literal — not passed to the step function. |
@@ -592,19 +594,42 @@ Patterns are strings that get compiled to `RegExp` for matching. The following c
 
 ### Working with Tables in Steps
 
-When a Gherkin step has an attached data table, it is serialized and embedded in the step text as a JSON string during code generation. Use the `{table}` placeholder to receive it as a typed `GherkinTable` object:
+Data tables are **first-class properties** on the `Step` model — they are never embedded in the step text string. When the runner matches a step, it attaches the table or doc-string to the `WidgetTesterWorld` context object.
+
+You can access them inside any `generic` (and `genericN`) builder via the `table` and `docString` properties.
 
 ```dart
-StepDefinitionGeneric givenEmployeesExist() => generic1(
-  'the following employees exist: {table}',
-  (GherkinTable table, WidgetTesterWorld world) async {
+// Step with no string captures, but accesses the attached table
+StepDefinitionGeneric givenEmployeesExist() => generic<WidgetTesterWorld>(
+  'the following employees exist',
+  (WidgetTesterWorld world) async {
+    // Access the table directly from the world context
+    final table = world.table;
+    
     // Iterate rows as Map<String, String?>
-    for (final row in table.asMap()) {
+    // (the Gherkin spec ensures table! will not be null if the step has a table)
+    for (final row in table!.asMap()) {
       print('Name: ${row['name']}, Role: ${row['role']}');
     }
   },
 );
+
+// Step with captures AND multiline content
+StepDefinitionGeneric givenDataForEntity() => generic1<String, WidgetTesterWorld>(
+  'the following data exists for {string}',
+  (String entity, WidgetTesterWorld world) async {
+    // Access via world.multilineArg (the raw union type) if needed,
+    // or use the shortcuts:
+    if (world.table != null) {
+      print('Handling table for $entity');
+    } else if (world.docString != null) {
+      print('Handling docstring: ${world.docString}');
+    }
+  },
+);
 ```
+
+The `world.table` and `world.docString` properties are `null` when the step in the feature file has no attached data. Since they are properties of the context object, you don't need to change your function signature to use them.
 
 `GherkinTable` API:
 
@@ -802,7 +827,7 @@ class MyReporter extends IntegrationReporter {
 
 ## Bridge Server
 
-Flutter integration tests execute **inside the tested app process**, which runs on the target platform — an Android device or emulator, an iOS simulator, a desktop window, or a browser tab. In all of these environments the test code cannot directly access the host machine's file system, run host-level processes, or talk to services that are bound to the host's `localhost`.
+Flutter integration tests execute **inside the tested app process**, which runs on the target platform — an Android device or emulator, an iOS simulator, a desktop window, or a browser tab. In all of these environments the test code cannot directly access the host machine's file system, run host-level processes, or talk to services that are bound to the host's `127.0.0.1`.
 
 The Bridge solves this by running a lightweight HTTP server **on the host machine** (your development computer or CI agent) while the tests run. Device-side code calls it using the helper functions `bridgeGet` and `bridgePostJson`. Because the server is a plain Dart `HttpServer`, its handlers can use any Dart `dart:io` API — read and write files, spawn processes, connect to local databases, call external REST APIs, or anything else.
 
@@ -816,7 +841,7 @@ This works uniformly across **all supported platforms**: Android, iOS, macOS, Li
 | Reset or seed a database before a scenario | Call `bridgePostJson('/db/reset')` from a `onBeforeScenario` hook. |
 | Read a fixture file from the host file system | Register a `GET /fixture` endpoint that reads the file and returns its content. |
 | Trigger a host-side script or CI action | Register a `POST /run-script` endpoint that uses `dart:io` `Process.run`. |
-| Call a service bound to host `localhost` | Forward the call through the bridge — the bridge handler reaches `localhost` from the host. |
+| Call a service bound to host `127.0.0.1` | Forward the call through the bridge — the bridge handler reaches `127.0.0.1` from the host. |
 
 ### Host-Side Server
 
@@ -886,7 +911,7 @@ dart run flutter_bdd_suite:cli \
 
 #### macOS App Sandbox Requirement
 
-If your test app runs with macOS sandbox entitlements, the app must be allowed to make outbound network calls to reach the local bridge (`http://localhost:9876`).
+If your test app runs with macOS sandbox entitlements, the app must be allowed to make outbound network calls to reach the local bridge (`http://127.0.0.1:9876`).
 
 In `macos/Runner/DebugProfile.entitlements` (and optionally `Release.entitlements`), include:
 
@@ -946,11 +971,11 @@ The bridge client automatically picks the right address so you never need to har
 
 | Platform | Default host |
 |---|---|
-| Android emulator | `10.0.2.2` (routes to host `localhost`) |
+| Android emulator | `10.0.2.2` (routes to host `127.0.0.1`) |
 | Android physical device | Set `FGP_BRIDGE_HOST` env var or `--bridge-host` to the host's network IP. |
-| iOS simulator | `localhost` |
-| macOS / Linux / Windows desktop | `localhost` |
-| Web (Chrome) | `localhost` |
+| iOS simulator | `127.0.0.1` |
+| macOS / Linux / Windows desktop | `127.0.0.1` |
+| Web (Chrome) | `127.0.0.1` |
 
 Override with the `FGP_BRIDGE_HOST` / `FGP_BRIDGE_PORT` environment variables, or the `--bridge-host` / `--bridge-port` CLI flags.
 

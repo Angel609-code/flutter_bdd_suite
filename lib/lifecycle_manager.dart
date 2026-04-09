@@ -40,6 +40,16 @@ class LifecycleManager {
     }
   }
 
+  Future<void> onAfterFeature(FeatureInfo feature) async {
+    for (final listener in _listeners) {
+      try {
+        await listener.onAfterFeature(feature);
+      } catch (e, st) {
+        logLine('Error in onAfterFeature: $e\n$st');
+      }
+    }
+  }
+
   Future<void> onBeforeScenario(ScenarioInfo scenario) async {
     for (final listener in _listeners) {
       try {
@@ -50,12 +60,12 @@ class LifecycleManager {
     }
   }
 
-  Future<void> onAfterScenario(String scenarioName) async {
+  Future<void> onAfterScenario(ScenarioResult result) async {
     for (final listener in _listeners) {
       try {
-        await listener.onAfterScenario(scenarioName);
+        await listener.onAfterScenario(result);
       } catch (e, st) {
-        logLine('Error in onAfterScenario("$scenarioName"): $e\n$st');
+        logLine('Error in onAfterScenario("${result.scenarioName}"): $e\n$st');
       }
     }
   }

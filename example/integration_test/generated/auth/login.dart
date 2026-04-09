@@ -5,14 +5,21 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_bdd_suite/integration_test_helper.dart';
 
 void main() async {
-  final helper = IntegrationTestHelper(
+  final helper = await IntegrationTestHelper.create(
     config: config,
-    backgroundSteps: _backgroundSteps,
   );
+
+  run(helper);
+}
+
+void run(IntegrationTestHelper helper) {
 
   group('Feature: User Authentication', () {
     setUpAll(() async {
-      await helper.setUpFeature(featureInfo: _featureInfo);
+      await helper.setUpFeature(
+        featureInfo: _featureInfo,
+        backgroundSteps: _backgroundSteps,
+      );
     });
 
     testWidgets('Scenario: Login with different credential combinations (Example 1)', (WidgetTester tester) async {

@@ -138,6 +138,8 @@ class FeatureParser {
                   substitutedScenario.steps.add(Step(
                     text: bgStep.text,
                     line: bgStep.line,
+                    table: bgStep.table,
+                    docString: bgStep.docString,
                   ));
                 }
               }
@@ -152,6 +154,9 @@ class FeatureParser {
                 substitutedScenario.steps.add(Step(
                   text: substitutedText,
                   line: step.line,
+                  // Tables and doc-strings on outline steps are preserved as-is.
+                  table: step.table,
+                  docString: step.docString,
                 ));
               }
               feature?.scenarios.add(substitutedScenario);
@@ -180,6 +185,8 @@ class FeatureParser {
             currentScenario.steps.add(Step(
               text: bgStep.text,
               line: bgStep.line,
+              table: bgStep.table,
+              docString: bgStep.docString,
             ));
           }
         }
@@ -189,46 +196,51 @@ class FeatureParser {
         continue;
       }
 
-      // Skip pure “table row” lines—they will be consumed below, not treated as separate steps
+      // Skip pure "table row" lines—they will be consumed below, not treated as separate steps
       if (GherkinKeywords.tableRowRegex.hasMatch(rawLine)) {
         continue;
       }
 
       // If it matches a stepLinePattern, create a Step
       if (stepLinePattern.hasMatch(line)) {
-        // By default, stepText is just “line”
-        String stepText = line;
+        // stepText is the bare keyword + description.
+        final String stepText = line;
 
-        // Check for Doc Strings
+        // Accumulated doc-string and table for this step — set at most once each.
+        String? docString;
+        GherkinTable? table;
+
+        // ── Doc-string detection ──────────────────────────────────────────────
+        // A doc-string opens with `"""` or ` ``` ` on the very next non-blank
+        // line. Its content is stored verbatim in [docString]; it is never
+        // appended to [stepText].
         if (i + 1 < rawLines.length) {
           final nextLineTrimmed = rawLines[i + 1].trim();
-          if (nextLineTrimmed.startsWith(GherkinKeywords.docStringTripleQuote) || nextLineTrimmed.startsWith(GherkinKeywords.docStringBackticks)) {
-            final docStringDelimiter = nextLineTrimmed.substring(0, 3);
+          if (nextLineTrimmed.startsWith(GherkinKeywords.docStringTripleQuote) ||
+              nextLineTrimmed.startsWith(GherkinKeywords.docStringBackticks)) {
+            final delimiter = nextLineTrimmed.substring(0, 3);
             i++; // skip the opening delimiter line
-            final docStringLines = <String>[];
+            final docLines = <String>[];
             while (i + 1 < rawLines.length) {
               i++;
               final l = rawLines[i];
-              if (l.trim().startsWith(docStringDelimiter)) {
-                break;
-              }
-              docStringLines.add(l);
+              if (l.trim().startsWith(delimiter)) break;
+              docLines.add(l);
             }
-            final docStringContent = docStringLines.join('\n');
-            // We serialize Doc Strings with <<<DOCSTRING:content>>> marker.
-            // Escape any quotes or special chars inside JSON encode or just use raw content?
-            // Actually, we can just dump it inside the stepText like we do JSON.
-            // But we need to make sure we don't break JSON generation.
-            // Let's just encode the docstring as JSON string to be safe.
-            stepText = '$stepText "${GherkinKeywords.docStringMarker}${docStringContent.replaceAll('"', r'\"').replaceAll('\n', r'\n')}>>>"';
+            // Preserve the raw content (including any internal whitespace /
+            // newlines) exactly as written in the feature file.
+            docString = docLines.join('\n');
           }
         }
 
-        // Check if the next line(s) form a Gherkin table
+        // ── Gherkin data-table detection ──────────────────────────────────────
+        // A table immediately follows the step line (after any doc-string has
+        // been consumed above). Its parsed form is stored in [table]; it is
+        // never serialised into [stepText].
         if (i + 1 < rawLines.length && GherkinKeywords.tableRowRegex.hasMatch(rawLines[i + 1])) {
           final rows = <TableRow>[];
 
-          // Consume all consecutive tableRowRegex lines
+          // Consume all consecutive table-row lines.
           while (i + 1 < rawLines.length && GherkinKeywords.tableRowRegex.hasMatch(rawLines[i + 1])) {
             i++;
             final tableLine = rawLines[i].trim();
@@ -236,7 +248,7 @@ class FeatureParser {
             rows.add(TableRow(cells));
           }
 
-          // Determine header vs data rows
+          // Determine header vs data rows.
           TableRow? header;
           Iterable<TableRow> dataRows;
 
@@ -248,18 +260,15 @@ class FeatureParser {
             dataRows = rows;
           }
 
-          final table = GherkinTable(dataRows.toList(), header);
-
-          // Serialize to JSON and append to stepText with a unique delimiter
-          final tableJson = table.toJson();
-          // Use “<<<JSON>>>” as a marker. We guarantee that no normal step text will contain “<<<” or “>>>”.
-          stepText = '$stepText "<<<$tableJson>>>"';
+          table = GherkinTable(dataRows.toList(), header);
         }
 
-        // Now create the Step with the combined text
+        // Build the Step with table and docString as first-class properties.
         final step = Step(
           text: stepText,
           line: i + 1,
+          table: table,
+          docString: docString,
         );
 
         if (inBackground) {

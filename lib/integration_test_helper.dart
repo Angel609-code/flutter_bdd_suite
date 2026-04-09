@@ -12,15 +12,26 @@ import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 
-bool _managersRegistered = false;
-
 class IntegrationTestHelper {
   final IntegrationTestConfig config;
-  final List<String> backgroundSteps;
+  List<Step> _backgroundSteps = [];
+  List<Step> get backgroundSteps => _backgroundSteps;
+
 
   late final LifecycleManager _hookManager;
   late final LifecycleManager _reporterManager;
   late final WidgetTesterWorld _world;
+
+  /// Per-instance registry built from [IntegrationTestConfig.steps].
+  ///
+  /// Created once in the factory and never mutated, ensuring full isolation
+  /// between concurrent or sequential test suites.
+  late final StepsRegistry _stepsRegistry;
+
+  /// Guards [registerSuiteHooks] so that `setUpAll`/`tearDownAll` are
+  /// registered at most once per instance, even if [registerSuiteHooks] is
+  /// called more than once.
+  bool _suiteHooksRegistered = false;
 
   FeatureInfo? _featureInfo;
 
@@ -30,44 +41,86 @@ class IntegrationTestHelper {
   String _scenarioName = '';
   Object? _firstError;
   StackTrace? _firstStackTrace;
+  ScenarioExecutionStatus _scenarioStatus = ScenarioExecutionStatus.passed;
 
-  void _registerGlobalHooks() {
-    if (!_managersRegistered) {
-      setUpAll(() async {
-        await _hookManager.onBeforeAll();
-        await _reporterManager.onBeforeAll();
-      });
+  // ── Suite-level lifecycle ───────────────────────────────────────────────────
 
-      tearDownAll(() async {
-        await _hookManager.onAfterAll();
-        await _reporterManager.onAfterAll();
-      });
+  /// Register `setUpAll` / `tearDownAll` callbacks for the global hook and
+  /// reporter lifecycle.
+  ///
+  /// Call this **exactly once** at the suite level, before any `group` or
+  /// `testWidgets` call — typically from the entry-point that orchestrates
+  /// all feature runners.
+  ///
+  /// Subsequent calls on the same instance are silently ignored (idempotent),
+  /// so it is safe to call from multiple code paths.
+  ///
+  /// ```dart
+  /// // all_integration_tests.dart (master runner)
+  /// void main() async {
+  ///   final helper = await IntegrationTestHelper.create(config: config);
+  ///   helper.registerSuiteHooks(); // ← call once here
+  ///
+  ///   login.main();
+  ///   dashboard.main();
+  /// }
+  /// ```
+  void registerSuiteHooks() {
+    if (_suiteHooksRegistered) return;
 
-      _managersRegistered = true;
-    }
+    setUpAll(() async {
+      await _hookManager.onBeforeAll();
+      await _reporterManager.onBeforeAll();
+    });
+
+    tearDownAll(() async {
+      await _hookManager.onAfterAll();
+      await _reporterManager.onAfterAll();
+    });
+
+    _suiteHooksRegistered = true;
   }
 
-  factory IntegrationTestHelper({
+  /// Documented counterpart to [registerSuiteHooks] for explicit lifecycle
+  /// bookending.
+  ///
+  /// Currently a no-op — Flutter's test framework owns `tearDownAll`
+  /// scheduling once it has been registered via [registerSuiteHooks].
+  /// Reserved for future use (e.g. force-flushing async reporters).
+  void disposeSuiteHooks() {
+    // Intentionally empty.
+    // Teardown is handled by the tearDownAll callback registered in
+    // registerSuiteHooks(). This method exists as an explicit API bookend
+    // for callers that want symmetric open/close semantics.
+  }
+
+  // ── Factory ─────────────────────────────────────────────────────────────────
+
+  static Future<IntegrationTestHelper> create({
     required IntegrationTestConfig config,
     List<String> backgroundSteps = const [],
     IntegrationTestServer? server,
-  }) {
-    bootstrap(config);
-    return IntegrationTestHelper._(config, backgroundSteps);
+  }) async {
+    await bootstrap(config);
+    final helper = IntegrationTestHelper._(config);
+    helper._backgroundSteps = helper._parseStepsFromJsonList(backgroundSteps);
+
+    return helper;
   }
 
-  IntegrationTestHelper._(this.config, this.backgroundSteps) {
+  IntegrationTestHelper._(this.config) {
     _hookManager = LifecycleManager(config.hooks);
     _reporterManager = LifecycleManager(config.reporters);
 
     _world = WidgetTesterWorld();
     _world.setBinding(binding);
 
-    StepsRegistry.resetToDefaults();
-    StepsRegistry.addAll(config.steps);
-
-    _registerGlobalHooks();
+    // Build a per-execution registry from the built-in defaults plus any
+    // custom steps declared in the config. No static mutation occurs.
+    _stepsRegistry = StepsRegistry(extraSteps: config.steps);
   }
+
+  // ── Public accessors ────────────────────────────────────────────────────────
 
   LifecycleManager get hookManager => _hookManager;
 
@@ -75,31 +128,62 @@ class IntegrationTestHelper {
 
   WidgetTesterWorld get world => _world;
 
-  Future<void> setUpFeature({required FeatureInfo featureInfo}) async {
+  // ── Feature / scenario lifecycle ────────────────────────────────────────────
+
+  Future<void> setUpFeature({
+    required FeatureInfo featureInfo,
+    List<String>? backgroundSteps,
+  }) async {
+    _featureInfo = featureInfo;
+    if (backgroundSteps != null) {
+      _backgroundSteps = _parseStepsFromJsonList(backgroundSteps);
+    } else {
+      _backgroundSteps = [];
+    }
+
+    // Reset feature-level state for orchestrated runs where the helper is shared.
+    _skipRemaining = false;
+    _errorOnBackground = false;
+    _scenarioName = '';
+    _firstError = null;
+    _firstStackTrace = null;
+    _scenarioStatus = ScenarioExecutionStatus.passed;
+    _executedError = false;
+
     await _hookManager.onFeatureStarted(featureInfo);
     await _reporterManager.onFeatureStarted(featureInfo);
-    _featureInfo = featureInfo;
   }
 
   Future<void> setUp(WidgetTester tester, ScenarioInfo scenario) async {
+    _skipRemaining = false;
+    _errorOnBackground = false;
+
     await _world.setTester(tester);
 
-    await config.setUp?.call(_world.tester);
+    // If an explicit setUp is provided, call it.
+    if (config.setUp != null) {
+      await config.setUp!.call(_world.tester);
+    } else {
+      // Safety guard: if no custom setUp is provided, the app MUST be mounted
+      // before execution proceeds. This prevents generic 'No widget' failures.
+      if (tester.allElements.isEmpty) {
+        throw StateError(
+          'No widget is mounted in the widget tree. You must either provide a '
+          '"setUp" callback in your "IntegrationTestConfig" that calls '
+          '"tester.pumpWidget(...)", or include a step in your feature file '
+          'that launches the application (e.g. "Given the app is launched").',
+        );
+      }
+    }
 
-    final steps = _parseStepsFromJsonList(backgroundSteps);
-
-    if (steps.isNotEmpty) {
-      for (final step in steps) {
+    if (backgroundSteps.isNotEmpty) {
+      for (final step in backgroundSteps) {
         await _executeStep(step, true);
       }
     }
   }
 
   Future<void> runStepsForScenario(ScenarioInfo scenario) async {
-    if (_skipRemaining && !_errorOnBackground) {
-      _skipRemaining = false;
-    }
-
     await _hookManager.onBeforeScenario(scenario);
     await _reporterManager.onBeforeScenario(scenario);
 
@@ -121,8 +205,13 @@ class IntegrationTestHelper {
     } catch (e, st) {
       await _handleTestError(e, st);
     } finally {
-      await _hookManager.onAfterScenario(scenario.scenarioName);
-      await _reporterManager.onAfterScenario(scenario.scenarioName);
+      final scenarioResult = ScenarioResult(
+        scenario: scenario,
+        status: _scenarioStatus,
+      );
+
+      await _hookManager.onAfterScenario(scenarioResult);
+      await _reporterManager.onAfterScenario(scenarioResult);
     }
   }
 
@@ -131,115 +220,149 @@ class IntegrationTestHelper {
     await runStepsForScenario(scenario);
   }
 
-  Future<void> _executeStep(Step step, bool isBackground, {ScenarioInfo? scenario}) async {
+  // ── Step execution ──────────────────────────────────────────────────────────
+
+  /// Constructs the [StepMultilineArg] from the step's first-class fields.
+  ///
+  /// Returns a [StepTable] if the step has a data table, a [StepDocString] if
+  /// it has a doc-string, or `null` if it has neither. The Gherkin spec
+  /// guarantees that both can never be set simultaneously.
+  StepMultilineArg? _buildMultilineArg(Step step) {
+    if (step.table != null) return StepTable(step.table!);
+    if (step.docString != null) return StepDocString(step.docString!);
+    return null;
+  }
+
+  Future<void> _executeStep(
+    Step step,
+    bool isBackground, {
+    ScenarioInfo? scenario,
+  }) async {
     final start = DateTime.now().microsecondsSinceEpoch;
     late StepResult result;
+
     await _hookManager.onBeforeStep(step.text, _world);
-    await _reporterManager.onBeforeStep(step.text, world);
+    await _reporterManager.onBeforeStep(step.text, _world);
 
-    final stepFunction = StepsRegistry.getStep(step.text);
-    final raw = extractTableJson(step.text);
-    GherkinTable? table;
-
-    if (raw != null) {
-      table = GherkinTable.fromJson(raw);
+    // Reset per-scenario status at the start of the first step.
+    if (!_skipRemaining && !isBackground) {
+      _scenarioStatus = ScenarioExecutionStatus.passed;
     }
 
-    final tableRegex = RegExp(r'\s*"<<<[\s\S]*?>>>"\s*');
-    final String stepText = step.text.replaceAll(tableRegex, ' ').trim();
+    // Resolve the step function from the per-execution registry. The
+    // multiline argument (table or doc-string) is constructed once from the
+    // step's first-class fields and forwarded as a single typed value.
+    final stepFunction = _stepsRegistry.getStep(step.text);
+    final multilineArg = _buildMultilineArg(step);
 
     if (_skipRemaining) {
       final duration = DateTime.now().microsecondsSinceEpoch - start;
-
-      result =  StepSkipped(
-        stepText,
+      result = StepSkipped(
+        step.text,
         step.line,
         duration,
-        table: table,
+        table: step.table,
+        docString: step.docString,
       );
 
-      logLine('$red➔ [${_featureInfo?.uri}:${step.line}] Skipping ${isBackground ? 'background step' : 'step'}: ${step.text}$reset');
+      if (!isBackground) _scenarioStatus = ScenarioExecutionStatus.skipped;
+
+      logLine(
+        '$red➔ [${_featureInfo?.uri}:${step.line}] '
+        'Skipping ${isBackground ? 'background step' : 'step'}: ${step.text}$reset',
+      );
 
       await _hookManager.onAfterStep(result, _world);
       await _reporterManager.onAfterStep(result, _world);
-
       return;
     }
 
     if (stepFunction != null) {
       try {
-        logLine('$green➔ [${_featureInfo?.uri}:${step.line}] ${isBackground ? orange : yellow}Executing${isBackground ? ' background ' : ' '}step: ${step.text}$reset');
-        await stepFunction(_world);
+        logLine(
+          '$green➔ [${_featureInfo?.uri}:${step.line}] '
+          '${isBackground ? orange : yellow}'
+          'Executing${isBackground ? ' background ' : ' '}step: ${step.text}$reset',
+        );
+
+        // Inject the multiline argument into the world context before execution.
+        _world.setMultilineArg(multilineArg);
+
+        try {
+          // Forward execution to the step implementation.
+          await stepFunction(_world);
+        } finally {
+          // Clear current step data to prevent leakage.
+          _world.setMultilineArg(null);
+        }
 
         final duration = DateTime.now().microsecondsSinceEpoch - start;
-        result = StepSuccess(stepText, step.line, duration, table: table);
+        result = StepSuccess(
+          step.text,
+          step.line,
+          duration,
+          table: step.table,
+          docString: step.docString,
+        );
       } catch (e, st) {
         final duration = DateTime.now().microsecondsSinceEpoch - start;
-        result =  StepFailure(
-          stepText,
+        result = StepFailure(
+          step.text,
           step.line,
           duration,
           error: e,
           stackTrace: st,
-          table: table,
+          table: step.table,
+          docString: step.docString,
         );
       }
     } else {
       final duration = DateTime.now().microsecondsSinceEpoch - start;
-      final String error = 'Step not defined';
-      logLine('${red}Step not defined: ${step.text}$reset');
-      result = StepFailure(
-        stepText,
+      logLine('${red}Step not implemented: ${step.text}$reset');
+      result = StepPending(
+        step.text,
         step.line,
         duration,
-        error: error,
-        table: table,
+        table: step.table,
+        docString: step.docString,
       );
     }
 
     await _hookManager.onAfterStep(result, _world);
     await _reporterManager.onAfterStep(result, _world);
 
-    if (result is StepFailure) {
+    if (result is StepFailure || result is StepPending) {
       _skipRemaining = true;
       _errorOnBackground = isBackground;
+      _scenarioStatus = ScenarioExecutionStatus.failed;
 
       if (!_errorOnBackground) {
         _scenarioName = scenario!.scenarioName;
       }
 
-      if (result.stackTrace != null) {
-        _firstError = result.error;
-        _firstStackTrace =  result.stackTrace!;
+      if (result is StepFailure) {
+        if (result.stackTrace != null) {
+          _firstError = result.error;
+          _firstStackTrace = result.stackTrace!;
+        } else {
+          _firstError = result.error;
+        }
       } else {
-        _firstError = result.error;
+        // StepPending — treat like a soft-failure so the test still fails.
+        _firstError = 'Step not implemented: ${step.text}';
       }
     }
   }
 
-  String? extractTableJson(String stepText) {
-    final tableRe = RegExp(r'<<<\s*(\{[\s\S]*?\})\s*>>>');
-    final match = tableRe.firstMatch(stepText);
-    return match?.group(1);
-  }
-
-  Future<void> performTestCleanup() async {
-    try {
-      _world.binding.reset();
-      _world.binding.resetEpoch();
-      _world.binding.resetFirstFrameSent();
-
-      logLine('${green}Test cleanup completed.$reset');
-    } catch (error) {
-      logLine('${red}Failed during test cleanup: $error.$reset');
-    }
-  }
+  // ── Error Handling ─────────────────────────────────────────────────────────
 
   Future<void> _handleTestError(
     Object error,
     StackTrace stackTrace,
   ) async {
-    logLine('${red}Error in ${_errorOnBackground ? 'background' : 'scenario "$_scenarioName"'}:\n$error.$reset');
+    logLine(
+      '${red}Error in ${_errorOnBackground ? 'background' : 'scenario "$_scenarioName"'}:\n$error.$reset',
+    );
 
     const blockedPrefixes = [
       'flutter_bdd_suite',
@@ -250,7 +373,8 @@ class IntegrationTestHelper {
 
     for (final line in lines) {
       final trimmed = line.trim();
-      if (trimmed.contains('package') && !blockedPrefixes.any((prefix) => trimmed.contains(prefix))) {
+      if (trimmed.contains('package') &&
+          !blockedPrefixes.any((prefix) => trimmed.contains(prefix))) {
         final match = RegExp(r'^(.*\.dart)').firstMatch(trimmed);
         if (match != null) {
           final file = match.group(1)!;
@@ -263,7 +387,9 @@ class IntegrationTestHelper {
       logLine('$red$line$reset');
     }
 
-    final String errorMessage = '${red}Error on step, skipping remaining steps for ${_errorOnBackground ? 'background' : 'scenario: "$_scenarioName"'}$reset';
+    final String errorMessage =
+        '${red}Error on step, skipping remaining steps for '
+        '${_errorOnBackground ? 'background' : 'scenario: "$_scenarioName"'}$reset';
 
     fail(errorMessage);
   }

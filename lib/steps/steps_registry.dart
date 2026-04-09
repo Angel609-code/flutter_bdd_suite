@@ -3,45 +3,77 @@ import 'package:flutter_bdd_suite/utils/step_definition_generic.dart';
 import 'package:flutter_bdd_suite/utils/steps_keywords.dart';
 import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
 
-/// Type definition for step functions
-typedef StepFunction = Future<void> Function(WidgetTesterWorld);
-
-/// A registry that manages the mapping between Gherkin steps and their corresponding Dart implementations.
+/// Type definition for resolved step functions.
 ///
-/// This registry holds the standard, built-in steps provided by the package as well as any
-/// custom user-defined steps. When executing a test, the framework queries this registry
-/// to find the correct Dart function for each step string defined in the feature files.
+/// Receive the active [world]. Any attached data (table or doc-string) can be
+/// accessed via [world.multilineArg] or the convenience shortcuts [world.table]
+/// and [world.docString].
+typedef StepFunction = Future<void> Function(WidgetTesterWorld world);
+
+/// A per-execution registry that maps Gherkin step patterns to their Dart
+/// implementations.
+///
+/// Create one [StepsRegistry] instance per [IntegrationTestHelper] execution.
+/// Custom steps are supplied at construction time via the `extraSteps`
+/// parameter, which is populated from [IntegrationTestConfig.steps].
+/// This fully isolates step state between test suites running in the same
+/// process.
+///
+/// **Migration note:** The old static API (`StepsRegistry.addAll`,
+/// `StepsRegistry.resetToDefaults`, `StepsRegistry.getStep`) has been removed.
+/// Custom steps should be declared in [IntegrationTestConfig.steps]; the
+/// helper creates the registry automatically.
+///
+/// Example:
+/// ```dart
+/// final registry = StepsRegistry(extraSteps: config.steps);
+/// final fn = registry.getStep('I fill the "email" field with "bob@example.com"');
+/// if (fn != null) await fn(world);
+/// ```
 class StepsRegistry {
-  /// All built‐in steps shipped with the library.
+  /// All built-in steps shipped with the library.
+  ///
+  /// A read-only list; never mutated at runtime. Custom steps are merged at
+  /// construction time into [_steps].
   static final List<StepDefinitionGeneric> defaultSteps = [
     whenFillFieldStep(),
   ];
 
-  /// The active list of steps. Starts as a copy of [defaultSteps].
-  /// You can append additional steps by adding those in the IntegrationTestConfig.
-  static List<StepDefinitionGeneric> steps = List.from(defaultSteps);
+  /// The active step definitions for this registry instance.
+  ///
+  /// Initialized as `[...defaultSteps, ...extraSteps]` and never mutated
+  /// after construction.
+  final List<StepDefinitionGeneric> _steps;
 
-  /// Looks up a matching step by [stepText], or returns null if none found.
-  static StepFunction? getStep(String stepText) {
+  /// Creates a registry seeded with [defaultSteps] plus any [extraSteps].
+  ///
+  /// Steps are matched in declaration order: [defaultSteps] are checked first,
+  /// then [extraSteps]. An [StateError] is thrown at lookup time if more than
+  /// one step matches (ambiguous match).
+  StepsRegistry({List<StepDefinitionGeneric> extraSteps = const []})
+      : _steps = [...defaultSteps, ...extraSteps];
+
+  /// Looks up a matching step by [stepText], or returns `null` if none found.
+  ///
+  /// Throws a [StateError] if more than one registered step definition
+  /// matches [stepText] (ambiguous match).
+  StepFunction? getStep(String stepText) {
     final cleanedStepText = cleanStepText(stepText);
 
-    for (final stepDef in steps) {
-      if (stepDef.matches(cleanedStepText)) {
-        return (world) => stepDef.run(cleanedStepText, world);
-      }
+    final matches = _steps
+        .where((stepDef) => stepDef.matches(cleanedStepText))
+        .toList();
+
+    if (matches.length > 1) {
+      final patterns = matches.map((s) => s.pattern.pattern).join('\n  ');
+      throw StateError(
+        'Ambiguous match: ${matches.length} step definitions matched "$cleanedStepText":\n  $patterns',
+      );
     }
 
-    return null;
-  }
+    if (matches.isEmpty) return null;
 
-  /// Append additional steps on top of existing ones:
-  ///   StepsRegistry.addAll([stepA(), stepB()]);
-  static void addAll(List<StepDefinitionGeneric> moreSteps) {
-    steps.addAll(moreSteps);
-  }
-
-  /// Restore the active list back to the built‐in defaults.
-  static void resetToDefaults() {
-    steps = List.from(defaultSteps);
+    final stepDef = matches.first;
+    return (world) => stepDef.run(cleanedStepText, world);
   }
 }
