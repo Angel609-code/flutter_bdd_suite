@@ -15,7 +15,7 @@ class LifecycleManager {
       try {
         await listener.onBeforeAll();
       } catch (e, st) {
-        logLine('🔴 Error in onBeforeAll: $e\n$st');
+        logLine('Error in onBeforeAll: $e\n$st');
       }
     }
   }
@@ -25,7 +25,7 @@ class LifecycleManager {
       try {
         await listener.onAfterAll();
       } catch (e, st) {
-        logLine('🔴 Error in onAfterAll: $e\n$st');
+        logLine('Error in onAfterAll: $e\n$st');
       }
     }
   }
@@ -35,7 +35,7 @@ class LifecycleManager {
       try {
         await listener.onFeatureStarted(feature);
       } catch (e, st) {
-        logLine('🔴 Error in onFeatureStarted: $e\n$st');
+        logLine('Error in onFeatureStarted: $e\n$st');
       }
     }
   }
@@ -45,7 +45,7 @@ class LifecycleManager {
       try {
         await listener.onBeforeScenario(scenario);
       } catch (e, st) {
-        logLine('🔴 Error in onBeforeScenario("${scenario.scenarioName}"): $e\n$st');
+        logLine('Error in onBeforeScenario("${scenario.scenarioName}"): $e\n$st');
       }
     }
   }
@@ -55,7 +55,7 @@ class LifecycleManager {
       try {
         await listener.onAfterScenario(scenarioName);
       } catch (e, st) {
-        logLine('🔴 Error in onAfterScenario("$scenarioName"): $e\n$st');
+        logLine('Error in onAfterScenario("$scenarioName"): $e\n$st');
       }
     }
   }
@@ -65,7 +65,7 @@ class LifecycleManager {
       try {
         await listener.onBeforeStep(stepText, world);
       } catch (e, st) {
-        logLine('🔴 Error in onBeforeStep("$stepText"): $e\n$st');
+        logLine('Error in onBeforeStep("$stepText"): $e\n$st');
       }
     }
   }
@@ -75,7 +75,7 @@ class LifecycleManager {
       try {
         await listener.onAfterStep(result, world);
       } catch (e, st) {
-        logLine('🔴 Error in onAfterStep("${result.stepText}"): $e\n$st');
+        logLine('Error in onAfterStep("${result.stepText}"): $e\n$st');
       }
     }
   }

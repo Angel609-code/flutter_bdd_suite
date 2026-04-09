@@ -14,41 +14,41 @@ class DebugLifecycleHook extends IntegrationHook {
   Future<void> onBeforeAll() async {
     final greeting = await sayHello();
     if (greeting.success) {
-      logLine('🟢 Server says: ${greeting.message}');
+      logLine('Server says: ${greeting.message}');
     } else {
-      logLine('🔴 Could not reach hello endpoint: ${greeting.message}');
+      logLine('Could not reach hello endpoint: ${greeting.message}');
     }
 
-    logLine('[DEBUG HOOK] 🟡 onBeforeAll');
+    logLine('[DEBUG HOOK] onBeforeAll');
   }
 
   @override
   Future<void> onAfterAll() async {
-    logLine('[DEBUG HOOK] 🔴 onAfterAll');
+    logLine('[DEBUG HOOK] onAfterAll');
   }
 
   @override
   Future<void> onFeatureStarted(FeatureInfo feature) async {
-    logLine('[DEBUG HOOK] 🟠 onFeatureStarted');
+    logLine('[DEBUG HOOK] onFeatureStarted');
   }
 
   @override
   Future<void> onBeforeScenario(ScenarioInfo scenario) async {
-    logLine('[DEBUG HOOK] 🟡 onBeforeScenario: ${scenario.scenarioName}');
+    logLine('[DEBUG HOOK] onBeforeScenario: ${scenario.scenarioName}');
   }
 
   @override
   Future<void> onAfterScenario(String scenarioName) async {
-    logLine('[DEBUG HOOK] 🔵 onAfterScenario: $scenarioName');
+    logLine('[DEBUG HOOK] onAfterScenario: $scenarioName');
   }
 
   @override
   Future<void> onBeforeStep(String stepText, WidgetTesterWorld world) async {
-    logLine('[DEBUG HOOK] 🟡 onBeforeStep: $stepText');
+    logLine('[DEBUG HOOK] onBeforeStep: $stepText');
   }
 
   @override
   Future<void> onAfterStep(StepResult result, WidgetTesterWorld world) async {
-    logLine('[DEBUG HOOK] 🟢 onAfterStep: ${result.stepText}');
+    logLine('[DEBUG HOOK] onAfterStep: ${result.stepText}');
   }
 }
