@@ -6,7 +6,7 @@ Initial release of `flutter_bdd_suite`.
 
 - **Gherkin Parser:** Full English Gherkin syntax support including `Feature`, `Scenario`, `Scenario Outline`, `Background`, `Rule`, `Examples`, `Given`/`When`/`Then`/`And`/`But`/`*` step keywords, data tables, doc strings, and `@` tags.
 - **Automatic Code Generation:** CLI command (`dart run flutter_bdd_suite:cli`) discovers `.feature` files, parses them, and generates one Dart `testWidgets` call per scenario using a Mustache template. A master runner (`all_integration_tests.dart`) is also generated to aggregate all tests.
-- **`IntegrationTestConfig`:** Central configuration object accepting an `appLauncher`, optional `onBindingInitialized` callback, custom steps, hooks, and reporters.
+- **`IntegrationTestConfig`:** Central configuration object accepting optional per-scenario `setUp`, optional `onBindingInitialized` callback, custom steps, hooks, and reporters.
 - **Step Definition Framework:** Typed builder functions `generic` through `generic6` (0–6 captures) with support for `{string}` and `{table}` placeholders as well as arbitrary manual regex captures and non-capturing groups.
 - **Built-in Step:** `I fill the {string} field with {string}` — enters text into a widget found by `ValueKey`.
 - **`WidgetTesterWorld`:** Context object passed to every step, providing access to `WidgetTester`, `IntegrationTestWidgetsFlutterBinding`, and a key-value attachment store for sharing state between steps.

@@ -10,6 +10,11 @@ Future<void> main(List<String> args) async {
   final myArgs = delimiterIndex >= 0 ? args.sublist(0, delimiterIndex) : args;
   final passthroughArgs = delimiterIndex >= 0 ? args.sublist(delimiterIndex + 1) : <String>[];
 
+  if (_hasHelpFlag(myArgs)) {
+    _printUsage();
+    return;
+  }
+
   final cwd = Directory.current.path;
 
   final configPath = _readArg(myArgs, '--config');
@@ -584,6 +589,54 @@ String? _readArg(List<String> args, String name) {
   }
 
   return null;
+}
+
+bool _hasHelpFlag(List<String> args) {
+  return args.contains('--help') || args.contains('-h');
+}
+
+void _printUsage() {
+  stdout.writeln(r'''flutter_bdd_suite CLI
+
+Usage:
+  dart run flutter_bdd_suite:cli [cli options] -- [native flutter options]
+
+What this command does:
+  1) Generates integration bindings from .feature files.
+  2) Executes native Flutter tooling based on --mode.
+
+Wrapper options (consumed before --):
+  --config <file>                     Required. File under integration_test/ (e.g. test_config.dart)
+  --mode <test|drive>                 Selects internal command: flutter test or flutter drive
+  --order <none|alphabetically|basename|reverse|random[:seed]>
+  --pattern <regex>
+  --tags <expression>
+  --dry-run
+  --generate-only
+  --command <shell>
+  --bridge-mode <plain|auto|bridge>
+  --bridge-host <host>
+  --bridge-port <port>
+  --no-bridge
+  --bridge-script <path>
+  --bridge-setup <path>
+  -h, --help
+
+Forwarded options (after --):
+  All arguments after -- are passed to native Flutter unchanged.
+  Put flutter test/drive flags there, such as:
+    --coverage, -d <device>, --web-renderer=html, --driver=..., --target=...
+
+Examples:
+  Web (drive mode)
+    dart run flutter_bdd_suite:cli --config test_config.dart --mode drive -- \
+      --driver test_driver/integration_test.dart \
+      --target integration_test/all_integration_tests.dart \
+      -d chrome
+
+  Android/iOS/macOS/Linux/Windows (test mode)
+    dart run flutter_bdd_suite:cli --mode test --config test_config.dart -- -d macos --coverage
+''');
 }
 
 class _ExecutionCommand {

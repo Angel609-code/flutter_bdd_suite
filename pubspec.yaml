@@ -1,5 +1,5 @@
 name: flutter_bdd_suite
-description: "A new Flutter package project."
+description: "A BDD test runner and Gherkin parser for Flutter."
 version: 0.0.1
 homepage:
 

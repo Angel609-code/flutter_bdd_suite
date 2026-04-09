@@ -78,8 +78,8 @@ class IntegrationTestServer {
           await handler(req);
         } else {
           req.response
-            ..statusCode = handler != null ? 405 : 404
-            ..write(handler != null ? 'Method not allowed' : 'Endpoint not found');
+            ..statusCode = 404
+            ..write('Endpoint not found');
           await req.response.close();
         }
       } catch (e) {

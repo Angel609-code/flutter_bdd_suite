@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// A screen to demonstrate various dialog and interaction types.
 class DialogsScreen extends StatelessWidget {
   const DialogsScreen({super.key});
 

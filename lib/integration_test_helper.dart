@@ -71,7 +71,7 @@ class IntegrationTestHelper {
 
   LifecycleManager get hookManager => _hookManager;
 
-  LifecycleManager get reporterManger => _reporterManager;
+  LifecycleManager get reporterManager => _reporterManager;
 
   WidgetTesterWorld get world => _world;
 
@@ -84,7 +84,7 @@ class IntegrationTestHelper {
   Future<void> setUp(WidgetTester tester, ScenarioInfo scenario) async {
     await _world.setTester(tester);
 
-    await config.appLauncher.call(_world.tester);
+    await config.setUp?.call(_world.tester);
 
     final steps = _parseStepsFromJsonList(backgroundSteps);
 

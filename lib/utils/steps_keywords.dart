@@ -1,7 +1,6 @@
 import 'dart:core';
 
 /// List of valid Gherkin step keywords.
-/// If you need to add another keyword (e.g. “ButAlso”), update this list.
 const List<String> _stepKeywords = [
   'Given',
   'When',

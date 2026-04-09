@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'app_theme.dart';
 
+/// A screen where the user can modify application settings.
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 

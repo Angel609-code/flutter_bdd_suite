@@ -252,8 +252,8 @@ import 'hooks/my_hook.dart';
 import 'steps/my_steps.dart';
 
 final config = IntegrationTestConfig(
-  // Required: pump your app into the widget tester
-  appLauncher: (WidgetTester tester) async {
+  // Optional: run once per scenario before Background/Scenario steps
+  setUp: (WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
   },
@@ -284,11 +284,57 @@ final config = IntegrationTestConfig(
 
 | Property | Type | Description |
 |---|---|---|
-| `appLauncher` | `Future<void> Function(WidgetTester)` | **Required.** Launches your app for each scenario. |
+| `setUp` | `Future<void> Function(WidgetTester)?` | Optional callback run once per scenario before Background and Scenario steps. Use this to reset state and optionally mount the app. |
 | `onBindingInitialized` | `Future<void> Function(IntegrationTestWidgetsFlutterBinding)?` | Optional setup hook run once after binding initialization. |
 | `steps` | `List<StepDefinitionGeneric>` | Custom step definitions to add to the registry. |
 | `hooks` | `List<IntegrationHook>` | Lifecycle hooks executed around tests. |
 | `reporters` | `List<IntegrationReporter>` | Result reporters. |
+
+### Scenario Setup Strategies
+
+The framework supports two valid startup styles. Choose one and apply it consistently.
+
+1. **Config-Driven Startup**
+
+Use `setUp` to reset state and mount the app before each scenario.
+
+```dart
+final config = IntegrationTestConfig(
+  setUp: (WidgetTester tester) async {
+    // Example: reset in-memory state before each scenario.
+    // getIt.reset();
+
+    app.main();
+    await tester.pumpAndSettle();
+  },
+);
+```
+
+2. **Step-Driven Startup**
+
+Leave `setUp` as `null` (or keep it only for memory/state resets) and mount the UI in an explicit Gherkin step.
+
+```dart
+StepDefinitionGeneric theAppIsLaunched() {
+  return generic<WidgetTesterWorld>(
+    r'the application is launched',
+    (world) async {
+      await world.tester.pumpWidget(const BddExampleApp());
+      await world.tester.pumpAndSettle();
+    },
+  );
+}
+```
+
+### Execution Order
+
+For each scenario, execution order is:
+
+1. `IntegrationTestConfig.setUp` (if provided)
+2. Background steps
+3. Scenario steps
+
+This keeps setup separate from hook lifecycle callbacks like `onBeforeScenario` / `onAfterScenario`.
 
 ---
 
@@ -297,39 +343,54 @@ final config = IntegrationTestConfig(
 The `cli` command is a thin orchestration wrapper. It handles two things:
 
 1. **Generation** — Discovers `.feature` files, applies any filters (`--tags`, `--pattern`, `--order`), and generates the Dart test bindings.
-2. **Execution** — Delegates to the standard Flutter tooling. Under the hood it runs exactly:
+2. **Execution** — Runs native Flutter tooling (`flutter test` or `flutter drive`) based on `--mode`.
 
-   - **Test mode:** `flutter test integration_test/all_integration_tests.dart [--coverage] [extra flutter args]`
-   - **Drive mode:** `flutter drive --driver=test_driver/integration_test.dart --target=integration_test/all_integration_tests.dart -d chrome [extra flutter args]`
+### How Argument Forwarding Works
 
-Flags such as `--config`, `--mode`, `--tags`, `--pattern`, `--order`, `--dry-run`, and `--bridge-*` are consumed by `cli` itself. Any `--flutter-arg` values are forwarded verbatim to the underlying `flutter` command.
+- Arguments **before** `--` are consumed by `flutter_bdd_suite:cli`.
+- Arguments **after** `--` are forwarded to the underlying Flutter command.
+- `--mode` is a wrapper flag and selects which native command is executed internally:
+  - `--mode test` -> `flutter test ...`
+  - `--mode drive` -> `flutter drive ...`
+
+In other words, this wrapper chooses the Flutter command, and the passthrough part after `--` is where you place normal/native Flutter flags.
+
+Command shapes used internally:
+
+- **Test mode:** `flutter test [bridge dart-defines] [passthrough args] [generated target if none provided]`
+- **Drive mode:** `flutter drive [bridge dart-defines] [passthrough args]`
+
+For drive mode, pass required Flutter drive flags yourself (typically `--driver` and `--target`) after `--`.
 
 ### Test Mode (Mobile & Desktop)
 
 The default mode. Works on Android, iOS, macOS, Linux, and Windows — any platform supported by `flutter test`.
 
 ```bash
-dart run flutter_bdd_suite:cli --config integration_test/test_config.dart
+dart run flutter_bdd_suite:cli --mode test --config test_config.dart -- -d macos --coverage
 ```
 
-This is equivalent to running the following after generating test bindings:
+This runs generation, then executes native Flutter test with your passthrough flags:
 
 ```bash
-flutter test integration_test/all_integration_tests.dart
+flutter test -d macos --coverage integration_test/all_integration_tests.dart
 ```
 
 ### Drive Mode (Web)
 
-Web integration tests require `flutter drive`. This mode wraps `flutter drive --driver=test_driver/integration_test.dart`.
+Web integration tests require `flutter drive`.
 
 ```bash
 dart run flutter_bdd_suite:cli \
-  --config integration_test/test_config.dart \
+  --config test_config.dart \
   --mode drive \
-  -- -d chrome
+  -- \
+  --driver test_driver/integration_test.dart \
+  --target integration_test/all_integration_tests.dart \
+  -d chrome
 ```
 
-This is equivalent to running the following after generating test bindings:
+This runs generation, then executes native Flutter drive with the forwarded flags:
 
 ```bash
 flutter drive \
@@ -355,7 +416,7 @@ dart run flutter_bdd_suite:cli [options]
 | Flag | Default | Description |
 |---|---|---|
 | `--config <path>` | _(required)_ | Path to your `IntegrationTestConfig` Dart file. |
-| `--mode test\|drive` | `test` | Test mode for mobile/desktop; drive mode for web. |
+| `--mode test\|drive` | `test` | Wrapper mode that chooses native `flutter test` or `flutter drive`. |
 | `--order none\|alphabetically\|basename\|reverse\|random[:seed]` | `none` | Order in which feature files are executed. |
 | `--pattern <regex>` | _(none)_ | Filter feature files by a regex on their file path. |
 | `--tags <expression>` | _(none)_ | Run only scenarios matching a boolean tag expression. |
@@ -376,22 +437,26 @@ Use `--` to pass native Flutter command arguments (for example `--coverage`, `-d
 ```bash
 # Run only @smoke scenarios, randomized, with coverage
 dart run flutter_bdd_suite:cli \
-  --config integration_test/test_config.dart \
+  --config test_config.dart \
   --tags "@smoke" \
   --order random \
   -- --coverage
 
 # Run only feature files matching 'auth', generate without running
 dart run flutter_bdd_suite:cli \
-  --config integration_test/test_config.dart \
+  --config test_config.dart \
   --pattern auth \
   --dry-run
 
 # Web run on Chrome, pass extra flutter args
 dart run flutter_bdd_suite:cli \
-  --config integration_test/test_config.dart \
+  --config test_config.dart \
   --mode drive \
-  -- -d chrome --web-renderer=html
+  -- \
+  --driver test_driver/integration_test.dart \
+  --target integration_test/all_integration_tests.dart \
+  -d chrome \
+  --web-renderer=html
 ```
 
 ---
@@ -414,7 +479,7 @@ The generated files are **deterministic** and can be committed to version contro
 
 ```bash
 dart run flutter_bdd_suite:cli \
-  --config integration_test/test_config.dart \
+  --config test_config.dart \
   -- --coverage
 ```
 
@@ -498,7 +563,7 @@ Register your steps in the config:
 
 ```dart
 final config = IntegrationTestConfig(
-  appLauncher: ...,
+  setUp: ...,
   steps: [
     tapLoginButton(),
     iSeeText(),
@@ -795,7 +860,7 @@ Then pass the file with `--bridge-setup`:
 
 ```bash
 dart run flutter_bdd_suite:cli \
-  --config integration_test/test_config.dart \
+  --config test_config.dart \
   --bridge-setup integration_test/bridge_setup.dart
 ```
 
@@ -813,7 +878,7 @@ Example:
 ```bash
 dart run flutter_bdd_suite:cli \
   --mode drive \
-  --config integration_test/test_config.dart \
+  --config test_config.dart \
   -- --driver=test_driver/integration_test.dart \
      --target=integration_test/app_test.dart \
      -d chrome
@@ -916,7 +981,7 @@ Use the `--tags` CLI flag with a boolean tag expression to run only matching sce
 ```bash
 # Run only smoke tests that are not WIP
 dart run flutter_bdd_suite:cli \
-  --config integration_test/test_config.dart \
+  --config test_config.dart \
   --tags "(@smoke or @auth) and not @wip"
 ```
 

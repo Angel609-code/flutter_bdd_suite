@@ -33,6 +33,7 @@ class Employee {
   }
 }
 
+/// The main dashboard of the application, displaying a list of employees.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -43,24 +44,23 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
 
-  int _nextId = 4;
-
-  final List<Employee> _employees = [
-    const Employee(
+  /// Seed data shared between the field initializer and [_nextId].
+  static const List<Employee> _kInitialEmployees = [
+    Employee(
       id: 1,
       name: 'Alice Johnson',
       role: 'Engineer',
       age: 30,
       biography: 'Senior software engineer with 8 years of experience.',
     ),
-    const Employee(
+    Employee(
       id: 2,
       name: 'Bob Martinez',
       role: 'Designer',
       age: 27,
       biography: 'UX/UI designer passionate about inclusive design.',
     ),
-    const Employee(
+    Employee(
       id: 3,
       name: 'Carol White',
       role: 'Manager',
@@ -68,6 +68,18 @@ class _HomeScreenState extends State<HomeScreen> {
       biography: 'Department manager with a background in agile coaching.',
     ),
   ];
+
+  /// The next auto-incremented ID for newly added employees.
+  /// Derived from the initial list so adding/removing seed entries stays correct.
+  int _nextId = _kInitialEmployees.length + 1;
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  final List<Employee> _employees = List.of(_kInitialEmployees);
 
   String _searchQuery = '';
 
@@ -84,130 +96,22 @@ class _HomeScreenState extends State<HomeScreen> {
   // ── Add / Edit dialog ─────────────────────────────────────────────────────
 
   void _openEmployeeDialog({Employee? existing}) {
-    final nameCtrl =
-        TextEditingController(text: existing?.name ?? '');
-    final roleCtrl =
-        TextEditingController(text: existing?.role ?? '');
-    final ageCtrl =
-        TextEditingController(text: existing != null ? '${existing.age}' : '');
-    final bioCtrl =
-        TextEditingController(text: existing?.biography ?? '');
-    final formKey = GlobalKey<FormState>();
-
     showDialog(
       context: context,
       builder: (ctx) {
-        return AlertDialog(
-          title: Text(
-            existing == null ? 'Add Employee' : 'Edit Employee',
-            key: const Key('employee_dialog_title'),
-          ),
-          content: SizedBox(
-            width: 400,
-            child: Form(
-              key: formKey,
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextFormField(
-                      key: const Key('employee_name_field'),
-                      controller: nameCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Full Name *',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.person),
-                      ),
-                      validator: (v) =>
-                          (v == null || v.trim().isEmpty)
-                              ? 'Name is required'
-                              : null,
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      key: const Key('employee_role_field'),
-                      controller: roleCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Role / Job Title *',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.work),
-                      ),
-                      validator: (v) =>
-                          (v == null || v.trim().isEmpty)
-                              ? 'Role is required'
-                              : null,
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      key: const Key('employee_age_field'),
-                      controller: ageCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Age *',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.cake),
-                      ),
-                      keyboardType: TextInputType.number,
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) {
-                          return 'Age is required';
-                        }
-                        final parsed = int.tryParse(v.trim());
-                        if (parsed == null) return 'Age must be a number';
-                        if (parsed < 18) {
-                          return 'Employee must be at least 18 years old';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      key: const Key('employee_bio_field'),
-                      controller: bioCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Biography / Notes',
-                        border: OutlineInputBorder(),
-                        alignLabelWithHint: true,
-                        prefixIcon: Icon(Icons.notes),
-                      ),
-                      maxLines: 4,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              key: const Key('cancel_employee_button'),
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              key: const Key('save_employee_button'),
-              onPressed: () {
-                if (formKey.currentState!.validate()) {
-                  final employee = Employee(
-                    id: existing?.id ?? _nextId++,
-                    name: nameCtrl.text.trim(),
-                    role: roleCtrl.text.trim(),
-                    age: int.parse(ageCtrl.text.trim()),
-                    biography: bioCtrl.text.trim(),
-                  );
-                  setState(() {
-                    if (existing == null) {
-                      _employees.add(employee);
-                    } else {
-                      final idx =
-                          _employees.indexWhere((e) => e.id == existing.id);
-                      if (idx != -1) _employees[idx] = employee;
-                    }
-                  });
-                  Navigator.pop(ctx);
-                }
-              },
-              child: const Text('Save'),
-            ),
-          ],
+        return _EmployeeDialog(
+          existing: existing,
+          onSave: (employee) {
+            setState(() {
+              if (existing == null) {
+                employee = employee.copyWith(id: _nextId++);
+                _employees.add(employee);
+              } else {
+                final idx = _employees.indexWhere((e) => e.id == existing.id);
+                if (idx != -1) _employees[idx] = employee;
+              }
+            });
+          },
         );
       },
     );
@@ -463,6 +367,149 @@ class _HomeScreenState extends State<HomeScreen> {
         icon: const Icon(Icons.person_add),
         label: const Text('Add Employee'),
       ),
+    );
+  }
+}
+
+// ── Employee Dialog ─────────────────────────────────────────────────────────
+
+class _EmployeeDialog extends StatefulWidget {
+  final Employee? existing;
+  final ValueChanged<Employee> onSave;
+
+  const _EmployeeDialog({this.existing, required this.onSave});
+
+  @override
+  State<_EmployeeDialog> createState() => _EmployeeDialogState();
+}
+
+class _EmployeeDialogState extends State<_EmployeeDialog> {
+  late final TextEditingController nameCtrl;
+  late final TextEditingController roleCtrl;
+  late final TextEditingController ageCtrl;
+  late final TextEditingController bioCtrl;
+  final formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    nameCtrl = TextEditingController(text: widget.existing?.name ?? '');
+    roleCtrl = TextEditingController(text: widget.existing?.role ?? '');
+    ageCtrl = TextEditingController(
+        text: widget.existing != null ? '${widget.existing!.age}' : '');
+    bioCtrl = TextEditingController(text: widget.existing?.biography ?? '');
+  }
+
+  @override
+  void dispose() {
+    nameCtrl.dispose();
+    roleCtrl.dispose();
+    ageCtrl.dispose();
+    bioCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(
+        widget.existing == null ? 'Add Employee' : 'Edit Employee',
+        key: const Key('employee_dialog_title'),
+      ),
+      content: SizedBox(
+        width: 400,
+        child: Form(
+          key: formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  key: const Key('employee_name_field'),
+                  controller: nameCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Full Name *',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.person),
+                  ),
+                  validator: (v) =>
+                      (v == null || v.trim().isEmpty) ? 'Name is required' : null,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  key: const Key('employee_role_field'),
+                  controller: roleCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Role / Job Title *',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.work),
+                  ),
+                  validator: (v) =>
+                      (v == null || v.trim().isEmpty) ? 'Role is required' : null,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  key: const Key('employee_age_field'),
+                  controller: ageCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Age *',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.cake),
+                  ),
+                  keyboardType: TextInputType.number,
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) {
+                      return 'Age is required';
+                    }
+                    final parsed = int.tryParse(v.trim());
+                    if (parsed == null) return 'Age must be a number';
+                    if (parsed < 18) {
+                      return 'Employee must be at least 18 years old';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  key: const Key('employee_bio_field'),
+                  controller: bioCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Biography / Notes',
+                    border: OutlineInputBorder(),
+                    alignLabelWithHint: true,
+                    prefixIcon: Icon(Icons.notes),
+                  ),
+                  maxLines: 4,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          key: const Key('cancel_employee_button'),
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          key: const Key('save_employee_button'),
+          onPressed: () {
+            if (formKey.currentState!.validate()) {
+              final employee = Employee(
+                id: widget.existing?.id ?? 0,
+                name: nameCtrl.text.trim(),
+                role: roleCtrl.text.trim(),
+                age: int.parse(ageCtrl.text.trim()),
+                biography: bioCtrl.text.trim(),
+              );
+              widget.onSave(employee);
+              Navigator.pop(context);
+            }
+          },
+          child: const Text('Save'),
+        ),
+      ],
     );
   }
 }

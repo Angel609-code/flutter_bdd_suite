@@ -11,7 +11,7 @@ import 'steps/common_steps.dart';
 import 'steps/interaction_steps.dart';
 
 final config = IntegrationTestConfig(
-  appLauncher: (WidgetTester tester) async {
+  setUp: (WidgetTester tester) async {
     await tester.binding.reassembleApplication();
   },
   onBindingInitialized: (IntegrationTestWidgetsFlutterBinding binding) async {
