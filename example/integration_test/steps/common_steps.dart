@@ -97,9 +97,16 @@ StepDefinitionGeneric theElementIsVisible() {
     (ctx) async {
       final (type, value) = ctx.args.two<String, String?>();
       final key = resolveKey(type);
-      if (value == 'visible' || value == 'present') {
+
+      // Because `visible` and `present` are in a non-capturing group `(?:...)`,
+      // they do not produce a capture. `value` is only populated if the
+      // `"(.+?)"` capturing group matches.
+      // Therefore, if `value` is null, it means `visible` or `present` was used.
+      if (value == null) {
         expect(find.byKey(Key(key)), findsOneWidget);
       } else {
+        // Here, it matched the string inside quotes, meaning we expect it to
+        // NOT be visible (or whatever custom semantics the string implied in the old logic).
         expect(find.byKey(Key(key)), findsNothing);
       }
     },
