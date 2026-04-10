@@ -57,16 +57,17 @@ StepDefinitionGeneric iShouldSeeTextOrElement() {
       r'I should (not )?see (?:multiple )?(?:(.+?) element|"(.+?)")(?: texts)?',
     ),
     (ctx) async {
-      final (notMatch, type, text) =
-          ctx.args.three<String?, String?, String?>();
+      final (notMatch, stateRaw, quoted) =
+          ctx.args.three<String?, String, String?>();
       final shouldNot = notMatch != null && notMatch.isNotEmpty;
 
       Finder finder;
 
-      if (text != null && text.isNotEmpty) {
-        finder = find.textContaining(text);
+      if (quoted != null && quoted.isNotEmpty) {
+        finder = find.textContaining(quoted);
       } else {
-        final key = resolveKey(type!);
+        final type = stateRaw.replaceAll(' element', '');
+        final key = resolveKey(type);
         finder = find.byKey(Key(key));
       }
 
@@ -93,7 +94,7 @@ StepDefinitionGeneric theLoginUIIsVisible() {
 
 StepDefinitionGeneric theElementIsVisible() {
   return stepRegExp(
-    RegExp(r'(.+?) element(?:s)? (?:is|are) (?:visible|present|"(.+?)")'),
+    RegExp(r'(.+?) element(?:s)? (?:is|are) (visible|present|"(.+?)")'),
     (ctx) async {
       final (type, value) = ctx.args.two<String, String?>();
       final key = resolveKey(type);
