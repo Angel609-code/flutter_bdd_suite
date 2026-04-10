@@ -5,15 +5,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_bdd_suite/integration_test_helper.dart';
 
 void main() async {
-  final helper = await IntegrationTestHelper.create(
-    config: config,
-  );
+  final helper = await IntegrationTestHelper.create(config: config);
 
   run(helper);
 }
 
 void run(IntegrationTestHelper helper) {
-
   group('Feature: User Authentication', () {
     setUpAll(() async {
       await helper.setUpFeature(
@@ -22,58 +19,72 @@ void run(IntegrationTestHelper helper) {
       );
     });
 
-    testWidgets('Scenario: Login with different credential combinations (Example 1)', (WidgetTester tester) async {
-      await helper.testScenario(
-        tester,
-        ScenarioInfo(
-          scenarioName: 'Login with different credential combinations (Example 1)',
-          line: 11,
-          steps: [
-            r'''{"text":"When I enter the username \"wrong\"","line":12}''',
-            r'''{"text":"And I enter the password \"pass\"","line":13}''',
-            r'''{"text":"And I tap the login button","line":14}''',
-            r'''{"text":"Then I should see \"Invalid credentials.\"","line":15}''',
-            r'''{"text":"And I should not reach the dashboard","line":16}''',
-          ],
-        ),
-      );
-    });
+    testWidgets(
+      'Scenario: Login with different credential combinations (Example 1)',
+      (WidgetTester tester) async {
+        await helper.testScenario(
+          tester,
+          ScenarioInfo(
+            scenarioName:
+                'Login with different credential combinations (Example 1)',
+            line: 11,
+            steps: [
+              r'''{"text":"When I fill the username field with \"wrong\"","line":12}''',
+              r'''{"text":"And I fill the password field with \"pass\"","line":13}''',
+              r'''{"text":"And I tap the login button","line":14}''',
+              r'''{"text":"Then I should see \"Invalid credentials.\"","line":15}''',
+              r'''{"text":"And I should not reach the dashboard","line":16}''',
+            ],
+          ),
+        );
+      },
+    );
 
-    testWidgets('Scenario: Login with different credential combinations (Example 2)', (WidgetTester tester) async {
-      await helper.testScenario(
-        tester,
-        ScenarioInfo(
-          scenarioName: 'Login with different credential combinations (Example 2)',
-          line: 11,
-          steps: [
-            r'''{"text":"When I enter the username \"\"","line":12}''',
-            r'''{"text":"And I enter the password \"\"","line":13}''',
-            r'''{"text":"And I tap the login button","line":14}''',
-            r'''{"text":"Then I should see \"Username and password are required.\"","line":15}''',
-            r'''{"text":"And I should not reach the dashboard","line":16}''',
-          ],
-        ),
-      );
-    });
+    testWidgets(
+      'Scenario: Login with different credential combinations (Example 2)',
+      (WidgetTester tester) async {
+        await helper.testScenario(
+          tester,
+          ScenarioInfo(
+            scenarioName:
+                'Login with different credential combinations (Example 2)',
+            line: 11,
+            steps: [
+              r'''{"text":"When I fill the username field with \"\"","line":12}''',
+              r'''{"text":"And I fill the password field with \"\"","line":13}''',
+              r'''{"text":"And I tap the login button","line":14}''',
+              r'''{"text":"Then I should see \"Username and password are required.\"","line":15}''',
+              r'''{"text":"And I should not reach the dashboard","line":16}''',
+            ],
+          ),
+        );
+      },
+    );
 
-    testWidgets('Scenario: Login with different credential combinations (Example 3)', (WidgetTester tester) async {
-      await helper.testScenario(
-        tester,
-        ScenarioInfo(
-          scenarioName: 'Login with different credential combinations (Example 3)',
-          line: 11,
-          steps: [
-            r'''{"text":"When I enter the username \"admin\"","line":12}''',
-            r'''{"text":"And I enter the password \"password123\"","line":13}''',
-            r'''{"text":"And I tap the login button","line":14}''',
-            r'''{"text":"Then I should see \"Welcome to the Dashboard!\"","line":15}''',
-            r'''{"text":"And I should reach the dashboard","line":16}''',
-          ],
-        ),
-      );
-    });
+    testWidgets(
+      'Scenario: Login with different credential combinations (Example 3)',
+      (WidgetTester tester) async {
+        await helper.testScenario(
+          tester,
+          ScenarioInfo(
+            scenarioName:
+                'Login with different credential combinations (Example 3)',
+            line: 11,
+            steps: [
+              r'''{"text":"When I fill the username field with \"admin\"","line":12}''',
+              r'''{"text":"And I fill the password field with \"password123\"","line":13}''',
+              r'''{"text":"And I tap the login button","line":14}''',
+              r'''{"text":"Then I should see \"Welcome to the Dashboard!\"","line":15}''',
+              r'''{"text":"And I should reach the dashboard","line":16}''',
+            ],
+          ),
+        );
+      },
+    );
 
-    testWidgets('Scenario: Login screen displays the TeamSync branding', (WidgetTester tester) async {
+    testWidgets('Scenario: Login screen displays the TeamSync branding', (
+      WidgetTester tester,
+    ) async {
       await helper.testScenario(
         tester,
         ScenarioInfo(
@@ -82,7 +93,8 @@ void run(IntegrationTestHelper helper) {
           steps: [
             r'''{"text":"Then I should see \"TeamSync\"","line":25}''',
             r'''{"text":"And I should see \"Employee Directory\"","line":26}''',
-            r'''{"text":"And the login form fields are present","line":27}''',
+            r'''{"text":"And the username field is visible","line":27}''',
+            r'''{"text":"And the password field is visible","line":28}''',
           ],
         ),
       );
@@ -101,4 +113,3 @@ final List<String> _backgroundSteps = <String>[
   r'''{"text":"Given the application is launched","line":8}''',
   r'''{"text":"And the login screen is visible","line":9}''',
 ];
-

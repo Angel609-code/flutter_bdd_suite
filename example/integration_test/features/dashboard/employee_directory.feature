@@ -6,14 +6,14 @@ Feature: Employee Directory Dashboard
 
   Background:
     Given the application is launched
-    And I enter the username "admin"
-    And I enter the password "password123"
+    And I fill the username field with "admin"
+    And I fill the password field with "password123"
     And I tap the login button
     Then I should see "Welcome to the Dashboard!"
 
   Scenario: Dashboard shows welcome message and employee table
     Then I should see "Welcome to the Dashboard!"
-    And I should see the employee table element
+    And I should see the employee table is visible
     And I should see "Alice Johnson"
     And I should see "Bob Martinez"
     And I should see "Carol White"
@@ -28,22 +28,22 @@ Feature: Employee Directory Dashboard
       When I tap the add employee button
       Then I should see the employee dialog title element
       And I should see "Add Employee"
-      When I fill the employee name field with "David Kim"
-      And I fill the employee role field with "Analyst"
-      And I fill the employee age field with "35"
-      And I fill the employee bio field with "Business analyst with expertise in data.\nSix years experience."
+      When I fill the Employee Name field with "David Kim"
+      And I fill the Employee Role field with "Analyst"
+      And I fill the Employee Age field with "35"
+      And I fill the Employee Bio field with "Business analyst with expertise in data.\nSix years experience."
       And I tap the save employee button
-      Then I should not see the employee dialog title element
+      Then the employee dialog title is hidden
       And I should see "David Kim"
       And I should see "Analyst"
 
     Scenario Outline: Adding employees with boundary ages
       When I tap the add employee button
-      And I fill the employee name field with "<name>"
-      And I fill the employee role field with "Tester"
-      And I fill the employee age field with "<age>"
+      And I fill the Employee Name field with "<name>"
+      And I fill the Employee Role field with "Tester"
+      And I fill the Employee Age field with "<age>"
       And I tap the save employee button
-      Then the employee dialog title element is "<dialog_state>"
+      Then the employee dialog title is "<dialog_state>"
       And I should see "<expected_text>"
 
       Examples:
@@ -54,17 +54,17 @@ Feature: Employee Directory Dashboard
 
     Scenario: Empty name shows validation error
       When I tap the add employee button
-      And I fill the employee role field with "Developer"
-      And I fill the employee age field with "25"
+      And I fill the Employee Role field with "Developer"
+      And I fill the Employee Age field with "25"
       And I tap the save employee button
       Then I should see "Name is required"
       And I should see the employee dialog title element
 
     Scenario: Non-numeric age shows validation error
       When I tap the add employee button
-      And I fill the employee name field with "Test User"
-      And I fill the employee role field with "QA"
-      And I fill the employee age field with "abc"
+      And I fill the Employee Name field with "Test User"
+      And I fill the Employee Role field with "QA"
+      And I fill the Employee Age field with "abc"
       And I tap the save employee button
       Then I should see "Age must be a number"
 
@@ -84,7 +84,7 @@ Feature: Employee Directory Dashboard
       And I tap the delete employee 0 button
       Then I should see the delete confirm message element
       When I tap the delete cancel button
-      Then I should not see the delete confirm message element
+      Then I should not see "Delete Employee"
       And I should see "Alice Johnson"
 
   Rule: Employee records can be updated via the edit dialog
@@ -93,7 +93,7 @@ Feature: Employee Directory Dashboard
       When I scroll to the edit employee 1 button
       And I tap the edit employee 1 button
       Then I should see "Edit Employee"
-      When I fill the employee name field with "Robert Martinez"
+      When I fill the Employee Name field with "Robert Martinez"
       And I tap the save employee button
       Then I should see "Robert Martinez"
       And I should not see "Bob Martinez"
@@ -125,7 +125,7 @@ Feature: Employee Directory Dashboard
   Scenario: Cancelling the Add Employee dialog saves nothing
     Given I should see "Alice Johnson"
     When I tap the add employee button
-    And I fill the employee name field with "Ghost Employee"
+    And I fill the Employee Name field with "Ghost Employee"
     And I tap the cancel employee button
-    Then I should not see the employee dialog title element
+    Then the employee dialog title is hidden
     And I should not see "Ghost Employee"

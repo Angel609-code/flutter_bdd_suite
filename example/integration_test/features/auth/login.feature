@@ -9,8 +9,8 @@ Feature: User Authentication
     And the login screen is visible
 
   Scenario Outline: Login with different credential combinations
-    When I enter the username "<username>"
-    And I enter the password "<password>"
+    When I fill the username field with "<username>"
+    And I fill the password field with "<password>"
     And I tap the login button
     Then I should see "<expectedText>"
     And I <dashboardOutcome> reach the dashboard
@@ -24,4 +24,5 @@ Feature: User Authentication
   Scenario: Login screen displays the TeamSync branding
     Then I should see "TeamSync"
     And I should see "Employee Directory"
-    And the login form fields are present
+    And the username field is visible
+    And the password field is visible

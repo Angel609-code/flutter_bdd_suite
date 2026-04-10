@@ -4,45 +4,6 @@ import 'package:example/app_theme.dart';
 import 'package:flutter_bdd_suite/utils/step_definition_generic.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-String resolveKey(String type) {
-  final map = {
-    'the employee table': 'employee_table',
-    'the employee dialog title': 'employee_dialog_title',
-    'the delete confirm message': 'delete_confirm_message',
-    'the empty employee text': 'empty_employee_text',
-
-    'username': 'username_field',
-    'password': 'password_field',
-
-    'employee name': 'employee_name_field',
-    'employee role': 'employee_role_field',
-    'employee age': 'employee_age_field',
-    'employee bio': 'employee_bio_field',
-    'search': 'search_field',
-
-    'login': 'login_button',
-    'add employee': 'add_employee_fab',
-    'save employee': 'save_employee_button',
-    'cancel employee': 'cancel_employee_button',
-    'delete confirm': 'delete_confirm_button',
-    'delete cancel': 'delete_cancel_button',
-  };
-
-  if (map.containsKey(type)) return map[type]!;
-
-  if (type.startsWith('delete employee ')) {
-    final i = type.split(' ').last;
-    return 'delete_employee_$i';
-  }
-
-  if (type.startsWith('edit employee ')) {
-    final i = type.split(' ').last;
-    return 'edit_employee_$i';
-  }
-
-  throw Exception('Unknown element: $type');
-}
-
 StepDefinitionGeneric theApplicationIsLaunched() {
   return step('the application is launched', (ctx) async {
     themeNotifier.value = ThemeMode.light;
@@ -51,128 +12,197 @@ StepDefinitionGeneric theApplicationIsLaunched() {
   });
 }
 
-StepDefinitionGeneric iShouldSeeTextOrElement() {
-  return stepRegExp(RegExp(r'I should (not )?see (.+)'), (ctx) async {
-    final (notMatch, raw) = ctx.args.two<String?, String>();
+Future<void> expectTextVisible(String text) async {
+  expect(find.textContaining(text), findsWidgets);
+}
 
-    final shouldNot = notMatch != null && notMatch.isNotEmpty;
+Future<void> expectTextHidden(String text) async {
+  expect(find.textContaining(text), findsNothing);
+}
 
-    Finder finder;
+Future<void> expectElementVisible(String key) async {
+  expect(find.byKey(Key(key)), findsOneWidget);
+}
 
-    final multipleMatch = RegExp(r'^multiple "([^"]*)" texts$').firstMatch(raw);
+Future<void> expectElementHidden(String key) async {
+  expect(find.byKey(Key(key)), findsNothing);
+}
 
-    if (multipleMatch != null) {
-      final text = multipleMatch.group(1)!;
-      finder = find.text(text);
+StepDefinitionGeneric iShouldSeeText() {
+  return step('I should see {string}', (ctx) async {
+    final (text,) = ctx.args.one<String>();
+    await expectTextVisible(text);
+  });
+}
 
-      final count = int.tryParse(text);
+StepDefinitionGeneric iShouldNotSeeText() {
+  return step('I should not see {string}', (ctx) async {
+    final (text,) = ctx.args.one<String>();
+    await expectTextHidden(text);
+  });
+}
 
-      if (shouldNot) {
-        expect(finder, findsNothing);
-      } else if (count != null) {
-        expect(finder, findsNWidgets(count));
-      } else {
-        expect(finder, findsWidgets);
-      }
-      return;
-    }
+StepDefinitionGeneric iShouldSeeMultipleTexts() {
+  return step('I should see multiple {int} texts', (ctx) async {
+    final (count,) = ctx.args.one<int>();
+    expect(find.text(count.toString()), findsWidgets);
+  });
+}
 
-    if (raw.startsWith('"') && raw.endsWith('"')) {
-      final text = raw.substring(1, raw.length - 1);
-      finder = find.textContaining(text);
-    } else if (raw.endsWith(' element')) {
-      final type = raw.replaceAll(' element', '');
-      final key = resolveKey(type);
-      finder = find.byKey(Key(key));
+StepDefinitionGeneric iShouldSeeMultipleSpecificTexts() {
+  return step('I should see multiple {int} {string} texts', (ctx) async {
+    final (count, text) = ctx.args.two<int, String>();
+    expect(find.textContaining(text), findsNWidgets(count));
+  });
+}
+
+StepDefinitionGeneric theLoginScreenIsVisible() {
+  return step('the login screen is visible', (ctx) async {
+    await expectElementVisible('username_field');
+    await expectElementVisible('password_field');
+  });
+}
+
+StepDefinitionGeneric theLoginButtonIsVisible() {
+  return step('the login button is visible', (ctx) async {
+    await expectElementVisible('login_button');
+  });
+}
+
+StepDefinitionGeneric theAddEmployeeButtonIsVisible() {
+  return step('the add employee button is visible', (ctx) async {
+    await expectElementVisible('add_employee_fab');
+  });
+}
+
+StepDefinitionGeneric theUsernameFieldIsVisible() {
+  return step('the username field is visible', (ctx) async {
+    await expectElementVisible('username_field');
+  });
+}
+
+StepDefinitionGeneric thePasswordFieldIsVisible() {
+  return step('the password field is visible', (ctx) async {
+    await expectElementVisible('password_field');
+  });
+}
+
+StepDefinitionGeneric theEmployeeTableIsVisible() {
+  return step('the employee table is visible', (ctx) async {
+    await expectElementVisible('employee_table');
+  });
+}
+
+StepDefinitionGeneric theEmployeeDialogTitleIsVisible() {
+  return step('the employee dialog title is visible', (ctx) async {
+    await expectElementVisible('employee_dialog_title');
+  });
+}
+
+StepDefinitionGeneric theEmployeeDialogTitleIsHidden() {
+  return step('the employee dialog title is hidden', (ctx) async {
+    await expectElementHidden('employee_dialog_title');
+  });
+}
+
+StepDefinitionGeneric theEmployeeDialogTitleIsState() {
+  return step('the employee dialog title is {string}', (ctx) async {
+    final (state,) = ctx.args.one<String>();
+    if (state == 'visible') {
+      await expectElementVisible('employee_dialog_title');
     } else {
-      throw Exception('Invalid step format: $raw');
-    }
-
-    if (shouldNot) {
-      expect(finder, findsNothing);
-    } else {
-      expect(finder, findsWidgets);
+      await expectElementHidden('employee_dialog_title');
     }
   });
 }
 
-StepDefinitionGeneric theLoginUIIsVisible() {
-  // We use non-capturing groups `(?:screen|form fields)` and `(?:is|are)`
-  // to avoid passing useless words as step arguments.
-  return stepRegExp(
-    RegExp(r'the login (?:screen|form fields) (?:is|are) (?:visible|present)'),
-    (ctx) async {
-      expect(find.byKey(const Key('username_field')), findsOneWidget);
-      expect(find.byKey(const Key('password_field')), findsOneWidget);
-    },
-  );
+StepDefinitionGeneric theDeleteConfirmMessageIsVisible() {
+  return step('the delete confirm message is visible', (ctx) async {
+    await expectElementVisible('delete_confirm_message');
+  });
 }
 
-StepDefinitionGeneric theElementIsVisible() {
-  return stepRegExp(
-    // This regex supports BOTH:
-    //   is visible
-    //   is "visible"
-    //
-    // Breakdown:
-    // (.+?)                  → Captures the element type (e.g. "employee dialog title")
-    // element(?:s)?          → Matches "element" or "elements"
-    // (?:is|are)             → Matches "is" or "are"
-    // "?([^"]+)"?            → Captures the state, with OPTIONAL quotes
-    //
-    // Key idea:
-    // "?        → optional opening quote
-    // ([^"]+)   → capture ANY text that is NOT a quote
-    // "?        → optional closing quote
-    //
-    // This means BOTH of these produce the SAME captured value:
-    //   visible   → stateRaw = "visible"
-    //   "visible" → stateRaw = "visible"
-    //
-    RegExp(r'(.+?) element(?:s)? (?:is|are) "?([^"]+)"?'),
-    (ctx) async {
-      // We always get exactly TWO values:
-      // type     → "employee dialog title"
-      // stateRaw → "visible" OR "hidden" (quotes already stripped by regex)
-      final (type, stateRaw) = ctx.args.two<String, String>();
+StepDefinitionGeneric theDeleteConfirmMessageIsHidden() {
+  return step('the delete confirm message is hidden', (ctx) async {
+    await expectElementHidden('delete_confirm_message');
+  });
+}
 
-      // Normalize just in case (defensive programming)
-      final state = stateRaw.toLowerCase().trim();
+StepDefinitionGeneric theEmptyEmployeeTextIsVisible() {
+  return step('the empty employee text is visible', (ctx) async {
+    await expectElementVisible('empty_employee_text');
+  });
+}
 
-      final key = resolveKey(type);
-      final finder = find.byKey(Key(key));
+StepDefinitionGeneric theCsvTableIsVisible() {
+  return step('the csv table is visible', (ctx) async {
+    await expectElementVisible('csv_table');
+  });
+}
 
-      // Interpret the meaning of the state
-      switch (state) {
-        case 'visible':
-        case 'present':
-          // Widget must exist in the widget tree
-          expect(finder, findsOneWidget);
-          break;
+StepDefinitionGeneric theCsvTableIsHidden() {
+  return step('the csv table is hidden', (ctx) async {
+    await expectElementHidden('csv_table');
+  });
+}
 
-        case 'hidden':
-          // Widget must NOT exist in the widget tree
-          expect(finder, findsNothing);
-          break;
+StepDefinitionGeneric theRawCsvIsHidden() {
+  return step('the raw csv is hidden', (ctx) async {
+    await expectElementHidden('raw_csv');
+  });
+}
 
-        default:
-          throw Exception('Invalid state: $state');
-      }
-    },
-  );
+StepDefinitionGeneric theNotificationsSwitchIsVisible() {
+  return step('the notifications switch is visible', (ctx) async {
+    await expectElementVisible('notifications');
+  });
+}
+
+StepDefinitionGeneric theNotificationsSwitchIsState() {
+  return step('the notifications switch is {string}', (ctx) async {
+    final (state,) = ctx.args.one<String>();
+    final finder = find.byKey(const Key('notifications'));
+    final Switch switchWidget = ctx.tester.widget(finder) as Switch;
+    expect(switchWidget.value.toString(), state);
+  });
+}
+
+StepDefinitionGeneric theDarkModeCheckboxIsVisible() {
+  return step('the dark mode checkbox is visible', (ctx) async {
+    await expectElementVisible('dark mode');
+  });
+}
+
+StepDefinitionGeneric theDarkModeCheckboxIsState() {
+  return step('the dark mode checkbox is {string}', (ctx) async {
+    final (state,) = ctx.args.one<String>();
+    final finder = find.byKey(const Key('dark mode'));
+    final Checkbox checkboxWidget = ctx.tester.widget(finder) as Checkbox;
+    expect(checkboxWidget.value.toString(), state);
+  });
+}
+
+StepDefinitionGeneric theVolumeSliderIsVisible() {
+  return step('the volume slider is visible', (ctx) async {
+    await expectElementVisible('volume_slider');
+  });
+}
+
+StepDefinitionGeneric theTermsTextIsVisible() {
+  return step('the terms text is visible', (ctx) async {
+    await expectElementVisible('terms_text');
+  });
 }
 
 StepDefinitionGeneric iShouldReachDashboard() {
-  return stepRegExp(RegExp(r'I should (not )?reach the dashboard'), (
+  return stepRegExp(RegExp(r'^I (should |should not )reach the dashboard$'), (
     ctx,
   ) async {
-    final (notMatch,) = ctx.args.one<String?>();
-    final shouldReach = notMatch == null || notMatch.isEmpty;
-
-    if (shouldReach) {
-      expect(find.byKey(const Key('add_employee_fab')), findsOneWidget);
+    final (match,) = ctx.args.one<String>();
+    if (match.trim() == 'should') {
+      await expectElementVisible('add_employee_fab');
     } else {
-      expect(find.byKey(const Key('login_button')), findsOneWidget);
+      await expectElementVisible('login_button');
     }
   });
 }
