@@ -1,90 +1,171 @@
-/// Associates a regex fragment with a parser function for a placeholder token.
+/// Describes a single Cucumber parameter type.
 ///
-/// Each placeholder is identified by a name such as `string` or `int`. The
-/// `regexPart` defines how to capture the relevant content from the step text.
-/// The `parser` function transforms that captured raw value into the target
-/// type (for example, converting a string to an `int`).
+/// A parameter type connects a named placeholder — e.g. `{color}` — to a
+/// regex fragment that captures its value and a parser that converts the raw
+/// captured string to a Dart value.
 ///
-/// Data tables and doc-strings are **no longer placeholder tokens**. They are
-/// first-class properties on [Step] and are forwarded to step functions as
-/// named arguments (`table:` and `docString:`). See [StepDefinitionGeneric]
-/// for details.
-class PlaceholderDef {
-  /// Fragment of a regular expression that captures the placeholder's content.
-  ///
-  /// For instance, `r'"(.*?)"'` captures any characters inside double quotes.
+/// Built-in types (`{string}`, `{int}`, `{float}`, `{word}`) are pre-loaded
+/// into every [ParameterTypeRegistry]. Custom types are registered either
+/// globally via [ParameterTypes.register] or per-suite via
+/// [ParameterTypeRegistry.new].
+///
+/// The [regexPart] **must** include the outer capture group, e.g.
+/// `r'(red|blue|green)'`. The engine splices this fragment directly into the
+/// compiled regex, so the group's content is passed to [parser].
+final class ParameterType<T> {
+  /// The placeholder name without braces, e.g. `'color'`.
+  final String name;
+
+  /// A regex fragment — including the outer capture group — that matches this
+  /// type inside a step, e.g. `r'"(.*?)"'` for `{string}`.
   final String regexPart;
 
-  /// Function that converts the captured raw string into the desired type.
-  ///
-  /// Called with the text matched by [regexPart] (without outer quotes where
-  /// applicable) to produce the strongly-typed argument passed to the step
-  /// implementation.
-  final dynamic Function(String) parser;
+  /// Converts the raw captured string to [T].
+  final T Function(String raw) parser;
 
-  const PlaceholderDef({required this.regexPart, required this.parser});
+  const ParameterType({
+    required this.name,
+    required this.regexPart,
+    required this.parser,
+  });
 }
 
-/// Defines which placeholder tokens are supported and how to handle them.
+// ---------------------------------------------------------------------------
+// ParameterTypeRegistry
+// ---------------------------------------------------------------------------
+
+/// An immutable registry of Cucumber parameter types scoped to a test suite.
 ///
-/// The key is the placeholder name (without braces), e.g. `'string'`.
-/// Each entry specifies a regex fragment and a parser function. To support a
-/// new token, add its name as a key with the appropriate [PlaceholderDef].
+/// Every registry starts with the four built-in types:
+/// | Token      | Matches                          | Dart type  |
+/// |------------|----------------------------------|------------|
+/// | `{string}` | `"..."` (double-quoted text)     | `String`   |
+/// | `{int}`    | optional `-` then digits         | `int`      |
+/// | `{float}`  | optional `-`, digits, `.` digits | `double`   |
+/// | `{word}`   | one or more non-whitespace chars | `String`   |
 ///
-/// **Removed tokens:**
-/// - The former `table` token has been removed. Data tables are no longer
-///   matched as regex placeholders. They are first-class properties on the
-///   [Step] model and are delivered to step functions via the named `multilineArg:`
-///   parameter on [StepFunction]. Use the unified [generic] or [genericN]
-///   builders to receive them in your step implementation.
-final Map<String, PlaceholderDef> placeholders = {
-  'string': PlaceholderDef(
-    /// Matches any sequence of characters (non-greedy) between double quotes.
-    regexPart: r'"(.*?)"',
-
-    /// Returns the exact text captured between the quotes.
-    parser: (raw) => raw,
-  ),
-  'int': PlaceholderDef(
-    /// Matches an optional leading minus sign followed by one or more digits.
-    regexPart: r'(-?\d+)',
-
-    /// Parses the captured string to a Dart [int].
-    parser: (raw) => int.parse(raw),
-  ),
-  'float': PlaceholderDef(
-    /// Matches an optional leading minus sign, digits, an optional decimal
-    /// point and fractional digits, covering both integers and decimals.
-    regexPart: r'(-?\d+(?:\.\d+)?)',
-
-    /// Parses the captured string to a Dart [double].
-    parser: (raw) => double.parse(raw),
-  ),
-  'word': PlaceholderDef(
-    /// Matches one or more non-whitespace characters — a single word.
-    regexPart: r'(\S+)',
-
-    /// Returns the captured word as-is.
-    parser: (raw) => raw,
-  ),
-};
-
-/// A public registry to expose custom parameter type registration to users.
+/// For project-wide custom types use [ParameterTypes.register], which adds to
+/// the shared [defaultParameterTypes] registry. For per-suite isolation, create
+/// a dedicated registry and pass it to [step]:
 ///
-/// Using this registry, users can define custom tokens, e.g. `{employee}`,
-/// and provide a parser so that steps can be strongly typed for their own models.
-class ParameterTypes {
-  /// Registers a new custom parameter type.
+/// ```dart
+/// final registry = ParameterTypeRegistry(additionalTypes: [
+///   ParameterType(
+///     name: 'color',
+///     regexPart: r'(red|blue|green)',
+///     parser: Color.fromName,
+///   ),
+/// ]);
+///
+/// final myStep = step('I pick {color}', action, registry: registry);
+/// ```
+final class ParameterTypeRegistry {
+  static const List<ParameterType<dynamic>> _builtins = [
+    ParameterType(
+      name: 'string',
+      regexPart: r'"(.*?)"',
+      parser: _identity,
+    ),
+    ParameterType(
+      name: 'int',
+      regexPart: r'(-?\d+)',
+      parser: int.parse,
+    ),
+    ParameterType(
+      name: 'float',
+      regexPart: r'(-?\d+(?:\.\d+)?)',
+      parser: double.parse,
+    ),
+    ParameterType(
+      name: 'word',
+      regexPart: r'(\S+)',
+      parser: _identity,
+    ),
+  ];
+
+  static String _identity(String s) => s;
+
+  final Map<String, ParameterType<dynamic>> _types;
+
+  /// Creates a registry seeded with built-in types plus any [additionalTypes].
   ///
-  /// For example:
-  /// ```dart
-  /// ParameterTypes.register('color', r'(red|blue|green)', (val) => Color.parse(val));
-  /// ```
+  /// [additionalTypes] are applied in order; later entries win on name
+  /// conflicts, and they always override a built-in with the same name.
+  ParameterTypeRegistry({
+    List<ParameterType<dynamic>> additionalTypes = const [],
+  }) : _types = {
+         for (final t in [..._builtins, ...additionalTypes]) t.name: t,
+       };
+
+  /// Internal named constructor: creates a mutable registry for the global
+  /// default instance. Only used by [defaultParameterTypes].
+  ParameterTypeRegistry._mutable()
+    : _types = {for (final t in _builtins) t.name: t};
+
+  /// Library-private entry point for [ParameterTypes.register].
+  ///
+  /// Mutates the registry in place. Only [defaultParameterTypes] exposes this
+  /// to the outside world through [ParameterTypes.register]; all other
+  /// [ParameterTypeRegistry] instances are fully immutable after construction.
+  void _add(ParameterType<dynamic> type) => _types[type.name] = type;
+
+  /// Resolves [name] to its [ParameterType], or throws an [ArgumentError].
+  ParameterType<dynamic> resolve(String name) {
+    final t = _types[name];
+    if (t == null) {
+      throw ArgumentError(
+        'Unknown parameter type "{$name}".\n'
+        'Registered types: ${_types.keys.join(", ")}.\n'
+        'To add a custom type, use ParameterTypes.register() for global scope '
+        'or supply a ParameterTypeRegistry to step().',
+      );
+    }
+    return t;
+  }
+
+  /// Whether [name] is registered in this registry.
+  bool contains(String name) => _types.containsKey(name);
+}
+
+/// The shared default registry used by [step] when no explicit `registry:`
+/// argument is supplied.
+///
+/// Custom types added via [ParameterTypes.register] are stored here and are
+/// visible to every [step] call in the same process.
+final ParameterTypeRegistry defaultParameterTypes =
+    ParameterTypeRegistry._mutable();
+
+// ---------------------------------------------------------------------------
+// ParameterTypes — public, backward-compatible API
+// ---------------------------------------------------------------------------
+
+/// Registers custom parameter types into the global [defaultParameterTypes].
+///
+/// Types added here are available to every [step] call that does not supply an
+/// explicit `registry:` argument. Call this once during application startup,
+/// before step definitions are evaluated.
+///
+/// For per-suite isolation (e.g. conflicting type names across test suites in
+/// the same process) create a [ParameterTypeRegistry] and pass it directly to
+/// [step] instead.
+///
+/// Example:
+/// ```dart
+/// ParameterTypes.register('color', r'(red|blue|green)', (v) => v);
+/// step('I pick {color}', (ctx) async { ... });
+/// ```
+abstract final class ParameterTypes {
+  /// Adds a parameter type named [name] to the global default registry.
+  ///
+  /// [regexPart] must include the outer capture group (e.g. `r'(red|green)'`).
+  /// [parser] converts the captured string to [T].
   static void register<T>(
     String name,
     String regexPart,
     T Function(String) parser,
   ) {
-    placeholders[name] = PlaceholderDef(regexPart: regexPart, parser: parser);
+    defaultParameterTypes._add(
+      ParameterType<T>(name: name, regexPart: regexPart, parser: parser),
+    );
   }
 }

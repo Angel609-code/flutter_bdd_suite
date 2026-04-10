@@ -84,125 +84,226 @@ class StepDefinitionGeneric {
 
 class _ParsedStepRegex {
   final RegExp regex;
-  final List<PlaceholderDef> tokens;
+  final List<ParameterType<dynamic>> tokens;
 
   _ParsedStepRegex(this.regex, this.tokens);
 }
 
-void _validateStrictExpression(String pattern) {
-  final forbidden = [
-    '(?:',
-    '|',
-    '^',
-    '\$',
-    '\\d',
-    '\\w',
-    '[',
-    ']',
-    '(?=',
-    '(?!',
+/// Rejects raw regex syntax that has no meaning in Cucumber Expressions.
+///
+/// Called at registration time so the error surfaces immediately, not at
+/// match time deep inside a test run.
+void _validateCucumberExpression(String pattern) {
+  // Sequences that are unambiguously regex and never valid Cucumber text.
+  const regexOnlySequences = [
+    '(?:',  // non-capturing group
+    '(?=',  // positive lookahead
+    '(?!',  // negative lookahead
+    r'\d',  // digit shorthand
+    r'\w',  // word shorthand
+    r'\s',  // whitespace shorthand
+    '[',    // character class
+    '|',    // alternation — use stepRegExp() for alternatives
   ];
-  for (final f in forbidden) {
-    if (pattern.contains(f)) {
+  for (final seq in regexOnlySequences) {
+    if (pattern.contains(seq)) {
       throw ArgumentError(
         'Invalid Cucumber expression: "$pattern".\n'
-        'Expression steps should not contain raw regular expression features like "$f".\n'
-        'If you need advanced matching (alternations, lookarounds, etc.), use `stepRegExp()` instead of `step()`.',
+        'The sequence "$seq" is regex syntax and is not allowed in step().\n'
+        'For advanced patterns, use stepRegExp() instead.',
       );
     }
   }
 
-  // Check for unescaped parentheses (a simple heuristic)
+  // Anchors at the boundaries mean the user is writing regex, not a
+  // Cucumber Expression. The engine adds anchors automatically.
+  if (pattern.startsWith('^')) {
+    throw ArgumentError(
+      'Invalid Cucumber expression: "$pattern".\n'
+      'Expressions must not start with ^; the engine anchors them automatically.\n'
+      'Use stepRegExp() if you need explicit anchoring.',
+    );
+  }
+  if (pattern.endsWith('\$')) {
+    throw ArgumentError(
+      'Invalid Cucumber expression: "$pattern".\n'
+      'Expressions must not end with \$; the engine anchors them automatically.\n'
+      'Use stepRegExp() if you need explicit anchoring.',
+    );
+  }
+
+  // Unescaped parentheses are not valid in Cucumber Expression syntax.
   if (RegExp(r'(?<!\\)[()]').hasMatch(pattern)) {
     throw ArgumentError(
       'Invalid Cucumber expression: "$pattern".\n'
-      'Expression steps should not contain unescaped parentheses.\n'
-      'If you are trying to capture groups, use `stepRegExp()` instead of `step()`.',
+      'Unescaped parentheses are not allowed in step().\n'
+      'Use stepRegExp() for capturing groups.',
+    );
+  }
+}
+
+/// Rejects Cucumber Expression placeholders accidentally used inside stepRegExp.
+void _validateRawRegExp(RegExp pattern) {
+  final cucumberToken = RegExp(r'\{[A-Za-z]\w*\}');
+  if (cucumberToken.hasMatch(pattern.pattern)) {
+    final found = cucumberToken
+        .allMatches(pattern.pattern)
+        .map((m) => m.group(0)!)
+        .join(', ');
+    throw ArgumentError(
+      'stepRegExp() received Cucumber Expression token(s): $found\n'
+      'Use step() for {placeholder} patterns, or replace them with '
+      'explicit regex capture groups in stepRegExp().',
     );
   }
 }
 
 /// Compiles a Cucumber-style expression (with `{...}` placeholders) into a RegExp.
-_ParsedStepRegex _compileExpression(String rawPattern) {
-  _validateStrictExpression(rawPattern);
-  final tokens = <PlaceholderDef>[];
+_ParsedStepRegex _compileExpression(
+  String rawPattern,
+  ParameterTypeRegistry registry,
+) {
+  _validateCucumberExpression(rawPattern);
+  final tokens = <ParameterType<dynamic>>[];
 
-  // Escape the pattern first, but temporarily un-escape our {} blocks so we can process them
+  // Escape the literal parts of the pattern so that dots, parens, etc. in
+  // the user's step text are treated as literals and not as regex syntax.
   var escapedPattern = RegExp.escape(rawPattern);
+
+  // RegExp.escape turns `{word}` into `\{word\}`. Un-escape those braces so
+  // the substitution loop below can recognise them.
   escapedPattern = escapedPattern.replaceAllMapped(
     RegExp(r'\\\{([A-Za-z]\w*)\\\}'),
-    (m) => '{w\$m.group(1)!}',
+    (m) => '{${m.group(1)!}}',
   );
 
+  // Replace each `{name}` with the corresponding regex fragment.
   final regexBody = escapedPattern.replaceAllMapped(
     RegExp(r'\{([A-Za-z]\w*)\}'),
     (match) {
       final name = match.group(1)!;
-      final def = placeholders[name];
-      if (def == null) {
-        throw ArgumentError(
-          'Unsupported placeholder "{$name}". '
-          'Supported tokens: ${placeholders.keys.join(", ")}.',
-        );
-      }
-      tokens.add(def);
-      return def.regexPart;
+      final type = registry.resolve(name); // throws a clear error if unknown
+      tokens.add(type);
+      return type.regexPart;
     },
   );
 
-  final finalRegex = RegExp('^$regexBody\$');
-  return _ParsedStepRegex(finalRegex, tokens);
+  return _ParsedStepRegex(RegExp('^$regexBody\$'), tokens);
 }
 
 /// Registers a step using Cucumber Expression semantics (`{string}`, `{int}`, etc.).
-StepDefinitionGeneric step(String pattern, StepAction action) {
-  final compiled = _compileExpression(pattern);
+///
+/// The [pattern] is compiled to a [RegExp] once at registration time — never at
+/// match time — so there is no per-scenario compilation cost.
+///
+/// **Custom parameter types** can be supplied in two ways:
+///
+/// 1. **Global (default):** call [ParameterTypes.register] before any step
+///    definitions are evaluated. All [step] calls that omit `registry:` share
+///    the global [defaultParameterTypes].
+///
+/// 2. **Per-suite (isolated):** pass an explicit [ParameterTypeRegistry] to
+///    `registry:`. Types in this registry are completely independent of the
+///    global one.
+///
+/// Example:
+/// ```dart
+/// // Globally registered type — no registry: argument needed.
+/// ParameterTypes.register('color', r'(red|blue|green)', (v) => v);
+/// step('I pick {color}', (ctx) async { ... });
+///
+/// // Per-suite isolated type.
+/// final reg = ParameterTypeRegistry(additionalTypes: [
+///   ParameterType(name: 'role', regexPart: r'(admin|guest)', parser: Role.parse),
+/// ]);
+/// step('I log in as {role}', action, registry: reg);
+/// ```
+StepDefinitionGeneric step(
+  String pattern,
+  StepAction action, {
+  ParameterTypeRegistry? registry,
+}) {
+  final compiled = _compileExpression(pattern, registry ?? defaultParameterTypes);
   return StepDefinitionGeneric(compiled.regex, (rawArgs, world) async {
-    final parsedArgs = <dynamic>[];
-    for (int i = 0; i < compiled.tokens.length; i++) {
-      parsedArgs.add(compiled.tokens[i].parser(rawArgs[i]));
-    }
+    final parsedArgs = [
+      for (int i = 0; i < compiled.tokens.length; i++)
+        compiled.tokens[i].parser(rawArgs[i]),
+    ];
     final ctx = StepContext(
       tester: world.tester,
       world: world,
       args: StepArgs(parsedArgs, debugSource: 'Pattern: $pattern'),
-      multilineArg: null /* multiline arg is injected at runner */,
+      multilineArg: null /* injected by the runner */,
     );
     await action(ctx);
   });
 }
 
-/// Registers a step using standard Dart RegExp semantics.
+/// Registers a step using standard Dart [RegExp] semantics.
 ///
-/// Capture groups `(...)` become `ctx.args`. Non-capturing groups `(?:...)` are ignored.
+/// Use this for patterns that require regex features not supported by Cucumber
+/// Expressions: alternations (`a|b`), lookaheads, character classes, etc.
+///
+/// Capture groups `(...)` become positional entries in `ctx.args`. Pass
+/// [converters] to type-cast each captured string — the list must match the
+/// number of capture groups exactly. Non-capturing groups `(?:...)` do not
+/// produce args entries.
+///
+/// The pattern is automatically anchored (`^…$`) if it is not already, so
+/// partial matches are never returned.
+///
+/// Example:
+/// ```dart
+/// stepRegExp(
+///   RegExp(r'I wait (\d+) (second|minute)s?'),
+///   (ctx) async {
+///     final (amount, unit) = ctx.args.two<int, String>();
+///     ...
+///   },
+///   converters: [int.parse, (s) => s],
+/// );
+/// ```
 StepDefinitionGeneric stepRegExp(
   RegExp pattern,
   StepAction action, {
   List<dynamic Function(String)>? converters,
 }) {
-  // Ensure the regex is anchored if it isn't already to match full lines correctly.
-  var regexPattern = pattern.pattern;
-  if (!regexPattern.startsWith('^')) {
-    regexPattern = '^$regexPattern';
-  }
-  if (!regexPattern.endsWith('\$')) {
-    regexPattern = '$regexPattern\$';
-  }
+  _validateRawRegExp(pattern);
 
-  final anchoredPattern = RegExp(
-    regexPattern,
+  // Auto-anchor the pattern so it always matches the full step text.
+  var src = pattern.pattern;
+  if (!src.startsWith('^')) src = '^$src';
+  if (!src.endsWith('\$')) src = '$src\$';
+
+  final anchored = RegExp(
+    src,
     caseSensitive: pattern.isCaseSensitive,
     multiLine: pattern.isMultiLine,
     dotAll: pattern.isDotAll,
     unicode: pattern.isUnicode,
   );
 
-  return StepDefinitionGeneric(anchoredPattern, (rawArgs, world) async {
+  return StepDefinitionGeneric(anchored, (rawArgs, world) async {
+    // If converters were supplied, their count must equal the number of
+    // captured groups; a mismatch means the caller made a configuration error
+    // that would otherwise surface as a confusing type error later.
+    if (converters != null && converters.length != rawArgs.length) {
+      throw ArgumentError(
+        'stepRegExp: converters.length (${converters.length}) must equal '
+        'the number of captured groups (${rawArgs.length}) '
+        'for pattern: ${pattern.pattern}',
+      );
+    }
+
+    final List<dynamic> parsedArgs = (converters != null)
+        ? [for (int i = 0; i < rawArgs.length; i++) converters[i](rawArgs[i])]
+        : rawArgs;
+
     final ctx = StepContext(
       tester: world.tester,
       world: world,
-      args: StepArgs(rawArgs, debugSource: 'RegExp: ${pattern.pattern}'),
-      multilineArg: null /* multiline arg is injected at runner */,
+      args: StepArgs(parsedArgs, debugSource: 'RegExp: ${pattern.pattern}'),
+      multilineArg: null /* injected by the runner */,
     );
     await action(ctx);
   });
