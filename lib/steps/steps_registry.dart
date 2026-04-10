@@ -45,6 +45,16 @@ class StepsRegistry {
   /// after construction.
   final List<StepDefinitionGeneric> _steps;
 
+  /// Memoization cache: maps raw step text to its resolved [StepFunction].
+  ///
+  /// The same step text (e.g. "Given the app is launched") may appear in many
+  /// scenarios. By caching the result of the first lookup the framework avoids
+  /// re-running every regex match on every scenario execution.
+  ///
+  /// `null` values are cached too — they mean "no matching step definition was
+  /// found" — so an unimplemented step is not re-scanned on every scenario.
+  final Map<String, StepFunction?> _cache = {};
+
   /// Creates a registry seeded with [defaultSteps] plus any [extraSteps].
   ///
   /// Steps are matched in declaration order: [defaultSteps] are checked first,
@@ -55,25 +65,46 @@ class StepsRegistry {
 
   /// Looks up a matching step by [stepText], or returns `null` if none found.
   ///
+  /// Results are memoised: the first call for a given [stepText] scans all
+  /// registered definitions and caches the result; subsequent calls return the
+  /// cached value immediately.
+  ///
   /// Throws a [StateError] if more than one registered step definition
   /// matches [stepText] (ambiguous match).
   StepFunction? getStep(String stepText) {
+    if (_cache.containsKey(stepText)) return _cache[stepText];
+    final fn = _resolve(stepText);
+    _cache[stepText] = fn;
+    return fn;
+  }
+
+  /// Scans [_steps] for a definition that matches [stepText].
+  ///
+  /// Uses an early-exit loop so that the scan stops as soon as a second match
+  /// is detected (the ambiguous case). In the common single-match case the
+  /// loop reads only as far as the matching entry — no list is allocated.
+  StepFunction? _resolve(String stepText) {
     final cleanedStepText = cleanStepText(stepText);
 
-    final matches = _steps
-        .where((stepDef) => stepDef.matches(cleanedStepText))
-        .toList();
-
-    if (matches.length > 1) {
-      final patterns = matches.map((s) => s.pattern.pattern).join('\n  ');
-      throw StateError(
-        'Ambiguous match: ${matches.length} step definitions matched "$cleanedStepText":\n  $patterns',
-      );
+    StepDefinitionGeneric? match;
+    for (final stepDef in _steps) {
+      if (stepDef.matches(cleanedStepText)) {
+        if (match != null) {
+          // Second match found — collect all for a descriptive error message.
+          final allMatches =
+              _steps.where((s) => s.matches(cleanedStepText)).toList();
+          final patterns =
+              allMatches.map((s) => s.pattern.pattern).join('\n  ');
+          throw StateError(
+            'Ambiguous match: ${allMatches.length} step definitions matched '
+            '"$cleanedStepText":\n  $patterns',
+          );
+        }
+        match = stepDef;
+      }
     }
 
-    if (matches.isEmpty) return null;
-
-    final stepDef = matches.first;
-    return (world) => stepDef.run(cleanedStepText, world);
+    if (match == null) return null;
+    return (world) => match!.run(cleanedStepText, world);
   }
 }
