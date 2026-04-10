@@ -30,7 +30,7 @@ class JsonReporter extends IntegrationReporter {
   Future<void> onFeatureStarted(FeatureInfo feature) async {
     _currentFeature = JsonFeature(
       uri: feature.uri,
-      id : feature.featureName.toLowerCase().replaceAll(' ', '-'),
+      id: feature.featureName.toLowerCase().replaceAll(' ', '-'),
       name: feature.featureName,
       line: feature.line,
       tags: feature.tags.map((t) => JsonTag(t, feature.line - 1)).toList(),
@@ -57,7 +57,8 @@ class JsonReporter extends IntegrationReporter {
     _currentFeature!.elements.add(_currentScenario!);
   }
 
-  @override Future<void> onAfterScenario(ScenarioResult result) async {
+  @override
+  Future<void> onAfterScenario(ScenarioResult result) async {
     _inBackground = true;
     _background = null;
   }
@@ -107,38 +108,45 @@ class JsonReporter extends IntegrationReporter {
   @override
   Future<void> onAfterAll() async {
     final jsonString = jsonEncode(_features.map((f) => f.toJson()).toList());
-    logLine('[JsonReporter] onAfterAll started. features=${_features.length} path=$path');
+    logLine(
+      '[JsonReporter] onAfterAll started. features=${_features.length} path=$path',
+    );
 
-    final result = await saveReport(ReportBody(
-      content: jsonString,
-      path: path,
-    ));
+    final result = await saveReport(
+      ReportBody(content: jsonString, path: path),
+    );
 
     final rawMessage = result.message ?? '';
-    final message = rawMessage.length > 300
-        ? '${rawMessage.substring(0, 300)}...'
-        : rawMessage;
+    final message =
+        rawMessage.length > 300
+            ? '${rawMessage.substring(0, 300)}...'
+            : rawMessage;
 
     if (result.success) {
-      logLine('[JsonReporter] Report saved successfully. status=${result.statusCode}');
+      logLine(
+        '[JsonReporter] Report saved successfully. status=${result.statusCode}',
+      );
     } else {
-      logLine('[JsonReporter] Failed to save report. status=${result.statusCode} message=$message');
+      logLine(
+        '[JsonReporter] Failed to save report. status=${result.statusCode} message=$message',
+      );
     }
 
     logLine('[JsonReporter] onAfterAll finished.');
   }
 
-  @override Future<void> onBeforeAll() async {}
-  @override Future<void> onBeforeStep(String stepText, WidgetTesterWorld world) async {}
-  @override Future<void> onAfterFeature(FeatureInfo feature) async {}
+  @override
+  Future<void> onBeforeAll() async {}
+  @override
+  Future<void> onBeforeStep(String stepText, WidgetTesterWorld world) async {}
+  @override
+  Future<void> onAfterFeature(FeatureInfo feature) async {}
 
   @override
   int get priority => 0;
 
   @override
   Map<String, dynamic> toJson() {
-    return {
-      'features': _features.map((f) => f.toJson()).toList(),
-    };
+    return {'features': _features.map((f) => f.toJson()).toList()};
   }
 }

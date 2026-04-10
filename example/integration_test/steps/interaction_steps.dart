@@ -9,8 +9,7 @@ StepDefinitionGeneric iEnterText() {
   return stepRegExp(
     RegExp(r'I (?:enter|fill) the (.+?)(?: field with)? "(.+?)"'),
     (ctx) async {
-      final type = ctx.args[0];
-      final value = ctx.args[1];
+      final (type, value) = ctx.args.two<String, String>();
       final key = resolveKey(type);
 
       await ctx.tester.enterText(find.byKey(Key(key)), value);
@@ -20,21 +19,17 @@ StepDefinitionGeneric iEnterText() {
 }
 
 StepDefinitionGeneric iInteractWithButton() {
-  return stepRegExp(
-    RegExp(r'I (tap|scroll to) the (.+?) button'),
-    (ctx) async {
-      final action = ctx.args[0];
-      final type = ctx.args[1];
-      final key = resolveKey(type);
-      final finder = find.byKey(Key(key));
+  return stepRegExp(RegExp(r'I (tap|scroll to) the (.+?) button'), (ctx) async {
+    final (action, type) = ctx.args.two<String, String>();
+    final key = resolveKey(type);
+    final finder = find.byKey(Key(key));
 
-      if (action == 'scroll to') {
-        await ctx.tester.ensureVisible(finder);
-      } else {
-        await ctx.tester.tap(finder);
-      }
+    if (action == 'scroll to') {
+      await ctx.tester.ensureVisible(finder);
+    } else {
+      await ctx.tester.tap(finder);
+    }
 
-      await ctx.tester.pumpAndSettle();
-    },
-  );
+    await ctx.tester.pumpAndSettle();
+  });
 }

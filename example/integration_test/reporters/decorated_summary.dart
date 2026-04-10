@@ -12,7 +12,10 @@ import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
 class DecoratedSummaryReporter extends IntegrationReporter {
   final _ansiEscape = RegExp(r'\x1B\[[0-9;]*m');
   DateTime? _startTime;
-  int _totalScenarios = 0, _passedScenarios = 0, _failedScenarios = 0, _skippedScenarios = 0;
+  int _totalScenarios = 0,
+      _passedScenarios = 0,
+      _failedScenarios = 0,
+      _skippedScenarios = 0;
   ScenarioStatus? _currentStatus;
 
   @override
@@ -31,7 +34,8 @@ class DecoratedSummaryReporter extends IntegrationReporter {
   Future<void> onAfterStep(StepResult result, WidgetTesterWorld _) async {
     if (result is StepFailure) {
       _currentStatus = ScenarioStatus.failed;
-    } else if (result is StepSkipped && _currentStatus == ScenarioStatus.passed) {
+    } else if (result is StepSkipped &&
+        _currentStatus == ScenarioStatus.passed) {
       _currentStatus = ScenarioStatus.skipped;
     }
   }
@@ -40,24 +44,34 @@ class DecoratedSummaryReporter extends IntegrationReporter {
   Future<void> onAfterScenario(ScenarioResult result) async {
     switch (_currentStatus) {
       case ScenarioStatus.passed:
-        _passedScenarios++; break;
+        _passedScenarios++;
+        break;
       case ScenarioStatus.failed:
-        _failedScenarios++; break;
+        _failedScenarios++;
+        break;
       case ScenarioStatus.skipped:
-        _skippedScenarios++; break;
-      default: break;
+        _skippedScenarios++;
+        break;
+      default:
+        break;
     }
   }
 
   int _visibleWidth(String s) => s.wcwidth();
 
-  String _buildLine(String label, String value, int contentWidth, {String? symbol, String? colorCode}) {
+  String _buildLine(
+    String label,
+    String value,
+    int contentWidth, {
+    String? symbol,
+    String? colorCode,
+  }) {
     const reset = '\x1B[0m';
     final rawValue = symbol != null ? '$symbol$value' : value;
-    final colored  = colorCode != null ? '$colorCode$rawValue$reset' : rawValue;
-    final text     = '$label : $rawValue';
-    final padSize  = contentWidth - _visibleWidth(text);
-    final padding  = padSize > 0 ? ' ' * padSize : '';
+    final colored = colorCode != null ? '$colorCode$rawValue$reset' : rawValue;
+    final text = '$label : $rawValue';
+    final padSize = contentWidth - _visibleWidth(text);
+    final padding = padSize > 0 ? ' ' * padSize : '';
     return '║ $label : $colored$padding ║';
   }
 
@@ -69,25 +83,25 @@ class DecoratedSummaryReporter extends IntegrationReporter {
 
     final entries = [
       ['Total scenarios', _totalScenarios.toString(), null, null],
-      ['Passed',          _passedScenarios.toString(), '✓', green],
-      ['Failed',          _failedScenarios.toString(),  '✗', red],
-      ['Skipped',         _skippedScenarios.toString(), '↺', yellow],
-      ['Elapsed Time',    '${mins}m$secs.${millis}s', null, null],
+      ['Passed', _passedScenarios.toString(), '✓', green],
+      ['Failed', _failedScenarios.toString(), '✗', red],
+      ['Skipped', _skippedScenarios.toString(), '↺', yellow],
+      ['Elapsed Time', '${mins}m$secs.${millis}s', null, null],
     ];
 
     // Compute inner content width W
     final contentWidths = entries.map((e) {
       final label = e[0] as String;
-      final val   = e[1] as String;
-      final sym   = e[2];
-      final raw   = sym != null ? '$sym$val' : val;
+      final val = e[1] as String;
+      final sym = e[2];
+      final raw = sym != null ? '$sym$val' : val;
       return _visibleWidth('$label : $raw');
     });
     final W = contentWidths.reduce(max);
 
     // Border length = W + 2 (spaces)
     final border = '═' * (W + 2);
-    const cyan  = '\x1B[96m';
+    const cyan = '\x1B[96m';
     const reset = '\x1B[0m';
 
     // Header centered/padded to W
@@ -98,8 +112,13 @@ class DecoratedSummaryReporter extends IntegrationReporter {
       '║ $header ║',
       '╠$border╣',
       for (var e in entries)
-        _buildLine(e[0] as String, e[1] as String, W,
-            symbol: e[2], colorCode: e[3]),
+        _buildLine(
+          e[0] as String,
+          e[1] as String,
+          W,
+          symbol: e[2],
+          colorCode: e[3],
+        ),
       '╚$border╝',
     ];
 
@@ -114,14 +133,20 @@ class DecoratedSummaryReporter extends IntegrationReporter {
 
     logLine('');
     for (var l in lines) {
-      logLine(l.replaceAllMapped(RegExp(r'^[╔╠╚║]'), (m) => '$cyan${m[0]}$reset'));
+      logLine(
+        l.replaceAllMapped(RegExp(r'^[╔╠╚║]'), (m) => '$cyan${m[0]}$reset'),
+      );
     }
     logLine(reset);
     logLine('');
   }
 
-  @override Future<void> onBeforeStep(String _, WidgetTesterWorld __) async {}
-  @override Future<void> onFeatureStarted(FeatureInfo _) async {}
-  @override Future<void> onAfterFeature(FeatureInfo _) async {}
-  @override Map<String, dynamic> toJson() => {};
+  @override
+  Future<void> onBeforeStep(String _, WidgetTesterWorld __) async {}
+  @override
+  Future<void> onFeatureStarted(FeatureInfo _) async {}
+  @override
+  Future<void> onAfterFeature(FeatureInfo _) async {}
+  @override
+  Map<String, dynamic> toJson() => {};
 }

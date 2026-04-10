@@ -5,8 +5,14 @@ import 'package:flutter_bdd_suite/models/integration_server_result_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
-const String _bridgeHostFromDefine = String.fromEnvironment('FGP_BRIDGE_HOST', defaultValue: '');
-const String _bridgePortFromDefine = String.fromEnvironment('FGP_BRIDGE_PORT', defaultValue: '9876');
+const String _bridgeHostFromDefine = String.fromEnvironment(
+  'FGP_BRIDGE_HOST',
+  defaultValue: '',
+);
+const String _bridgePortFromDefine = String.fromEnvironment(
+  'FGP_BRIDGE_PORT',
+  defaultValue: '9876',
+);
 
 String resolveBridgeHost() {
   if (_bridgeHostFromDefine.isNotEmpty) {
@@ -26,7 +32,9 @@ int resolveBridgePort() {
 
 Uri buildBridgeUri(String path) {
   final normalizedPath = path.startsWith('/') ? path : '/$path';
-  return Uri.parse('http://${resolveBridgeHost()}:${resolveBridgePort()}$normalizedPath');
+  return Uri.parse(
+    'http://${resolveBridgeHost()}:${resolveBridgePort()}$normalizedPath',
+  );
 }
 
 Future<IntegrationServerResult> bridgeGet(

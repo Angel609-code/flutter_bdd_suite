@@ -2,7 +2,7 @@ import 'package:flutter_bdd_suite/lifecycle_listener.dart';
 
 abstract class IntegrationReporter implements LifecycleListener {
   final String path;
-  IntegrationReporter({ this.path = '' });
+  IntegrationReporter({this.path = ''});
 
   Map<String, dynamic> toJson();
 }

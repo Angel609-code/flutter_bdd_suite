@@ -23,7 +23,7 @@ Future<void> bootstrap(IntegrationTestConfig config) async {
 IntegrationTestWidgetsFlutterBinding get binding {
   if (_binding == null) {
     throw StateError(
-        'You must call bootstrap(config) before accessing binding.'
+      'You must call bootstrap(config) before accessing binding.',
     );
   }
 

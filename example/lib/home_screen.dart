@@ -87,9 +87,11 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_searchQuery.isEmpty) return _employees;
     final q = _searchQuery.toLowerCase();
     return _employees
-        .where((e) =>
-            e.name.toLowerCase().contains(q) ||
-            e.role.toLowerCase().contains(q))
+        .where(
+          (e) =>
+              e.name.toLowerCase().contains(q) ||
+              e.role.toLowerCase().contains(q),
+        )
         .toList();
   }
 
@@ -122,34 +124,35 @@ class _HomeScreenState extends State<HomeScreen> {
   void _confirmDelete(Employee employee) {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Delete Employee'),
-        content: Text(
-          'Are you sure you want to remove ${employee.name}?',
-          key: const Key('delete_confirm_message'),
-        ),
-        actions: [
-          TextButton(
-            key: const Key('delete_cancel_button'),
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            key: const Key('delete_confirm_button'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Delete Employee'),
+            content: Text(
+              'Are you sure you want to remove ${employee.name}?',
+              key: const Key('delete_confirm_message'),
             ),
-            onPressed: () {
-              setState(() {
-                _employees.removeWhere((e) => e.id == employee.id);
-              });
-              Navigator.pop(ctx);
-            },
-            child: const Text('Delete'),
+            actions: [
+              TextButton(
+                key: const Key('delete_cancel_button'),
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                key: const Key('delete_confirm_button'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _employees.removeWhere((e) => e.id == employee.id);
+                  });
+                  Navigator.pop(ctx);
+                },
+                child: const Text('Delete'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -232,13 +235,15 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: _StatCard(
                             key: const Key('stat_avg_age'),
                             label: 'Average Age',
-                            value: _employees.isEmpty
-                                ? '—'
-                                : (_employees
-                                            .fold<int>(
-                                                0, (sum, e) => sum + e.age) /
-                                        _employees.length)
-                                    .toStringAsFixed(1),
+                            value:
+                                _employees.isEmpty
+                                    ? '—'
+                                    : (_employees.fold<int>(
+                                              0,
+                                              (sum, e) => sum + e.age,
+                                            ) /
+                                            _employees.length)
+                                        .toStringAsFixed(1),
                             icon: Icons.bar_chart,
                             color: Colors.orange,
                           ),
@@ -262,96 +267,151 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     // ── Employee table ──────────────────────────────────────
                     Card(
-                      child: employees.isEmpty
-                          ? const Padding(
-                              padding: EdgeInsets.all(32),
-                              child: Center(
-                                child: Text(
-                                  'No employees found.',
-                                  key: Key('empty_employee_text'),
-                                  style: TextStyle(color: Colors.grey),
+                      child:
+                          employees.isEmpty
+                              ? const Padding(
+                                padding: EdgeInsets.all(32),
+                                child: Center(
+                                  child: Text(
+                                    'No employees found.',
+                                    key: Key('empty_employee_text'),
+                                    style: TextStyle(color: Colors.grey),
+                                  ),
                                 ),
-                              ),
-                            )
-                          : LayoutBuilder(
-                            builder: (context, constraint) {
-                              return Scrollbar(
-                                controller: _scrollController,
-                                thumbVisibility: true,
-                                child: SingleChildScrollView(
+                              )
+                              : LayoutBuilder(
+                                builder: (context, constraint) {
+                                  return Scrollbar(
                                     controller: _scrollController,
-                                    scrollDirection: Axis.horizontal,
-                                    child: Container(
-                                      constraints: BoxConstraints(minWidth: constraint.maxWidth),
-                                      child: DataTable(
-                                        key: const Key('employee_table'),
-                                        sortAscending: true,
-                                        columns: const [
-                                          DataColumn(label: Text('ID')),
-                                          DataColumn(label: Text('Name')),
-                                          DataColumn(label: Text('Role')),
-                                          DataColumn(label: Text('Age'), numeric: true),
-                                          DataColumn(label: Text('Biography')),
-                                          DataColumn(label: Text('Actions')),
-                                        ],
-                                        rows: List.generate(employees.length, (i) {
-                                          final emp = employees[i];
-                                          return DataRow(
-                                            key: ValueKey('employee_row_${emp.id}'),
-                                            cells: [
-                                              DataCell(Text('${emp.id}',
-                                                  key: Key('emp_id_${emp.id}'))),
-                                              DataCell(Text(emp.name,
-                                                  key: Key('emp_name_${emp.id}'))),
-                                              DataCell(Text(emp.role,
-                                                  key: Key('emp_role_${emp.id}'))),
-                                              DataCell(Text('${emp.age}',
-                                                  key: Key('emp_age_${emp.id}'))),
-                                              DataCell(
-                                                ConstrainedBox(
-                                                  constraints: const BoxConstraints(
-                                                      maxWidth: 200),
-                                                  child: Text(
-                                                    emp.biography,
-                                                    key: Key('emp_bio_${emp.id}'),
-                                                    overflow: TextOverflow.ellipsis,
+                                    thumbVisibility: true,
+                                    child: SingleChildScrollView(
+                                      controller: _scrollController,
+                                      scrollDirection: Axis.horizontal,
+                                      child: Container(
+                                        constraints: BoxConstraints(
+                                          minWidth: constraint.maxWidth,
+                                        ),
+                                        child: DataTable(
+                                          key: const Key('employee_table'),
+                                          sortAscending: true,
+                                          columns: const [
+                                            DataColumn(label: Text('ID')),
+                                            DataColumn(label: Text('Name')),
+                                            DataColumn(label: Text('Role')),
+                                            DataColumn(
+                                              label: Text('Age'),
+                                              numeric: true,
+                                            ),
+                                            DataColumn(
+                                              label: Text('Biography'),
+                                            ),
+                                            DataColumn(label: Text('Actions')),
+                                          ],
+                                          rows: List.generate(employees.length, (
+                                            i,
+                                          ) {
+                                            final emp = employees[i];
+                                            return DataRow(
+                                              key: ValueKey(
+                                                'employee_row_${emp.id}',
+                                              ),
+                                              cells: [
+                                                DataCell(
+                                                  Text(
+                                                    '${emp.id}',
+                                                    key: Key(
+                                                      'emp_id_${emp.id}',
+                                                    ),
                                                   ),
                                                 ),
-                                              ),
-                                              DataCell(
-                                                Row(
-                                                  mainAxisSize: MainAxisSize.min,
-                                                  children: [
-                                                    IconButton(
-                                                      key: Key('edit_employee_$i'),
-                                                      icon: const Icon(Icons.edit,
-                                                          size: 18),
-                                                      tooltip: 'Edit',
-                                                      onPressed: () =>
-                                                          _openEmployeeDialog(
-                                                              existing: emp),
+                                                DataCell(
+                                                  Text(
+                                                    emp.name,
+                                                    key: Key(
+                                                      'emp_name_${emp.id}',
                                                     ),
-                                                    IconButton(
-                                                      key: Key('delete_employee_$i'),
-                                                      icon: const Icon(Icons.delete,
-                                                          size: 18,
-                                                          color: Colors.red),
-                                                      tooltip: 'Delete',
-                                                      onPressed: () =>
-                                                          _confirmDelete(emp),
-                                                    ),
-                                                  ],
+                                                  ),
                                                 ),
-                                              ),
-                                            ],
-                                          );
-                                        }),
+                                                DataCell(
+                                                  Text(
+                                                    emp.role,
+                                                    key: Key(
+                                                      'emp_role_${emp.id}',
+                                                    ),
+                                                  ),
+                                                ),
+                                                DataCell(
+                                                  Text(
+                                                    '${emp.age}',
+                                                    key: Key(
+                                                      'emp_age_${emp.id}',
+                                                    ),
+                                                  ),
+                                                ),
+                                                DataCell(
+                                                  ConstrainedBox(
+                                                    constraints:
+                                                        const BoxConstraints(
+                                                          maxWidth: 200,
+                                                        ),
+                                                    child: Text(
+                                                      emp.biography,
+                                                      key: Key(
+                                                        'emp_bio_${emp.id}',
+                                                      ),
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
+                                                  ),
+                                                ),
+                                                DataCell(
+                                                  Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      IconButton(
+                                                        key: Key(
+                                                          'edit_employee_$i',
+                                                        ),
+                                                        icon: const Icon(
+                                                          Icons.edit,
+                                                          size: 18,
+                                                        ),
+                                                        tooltip: 'Edit',
+                                                        onPressed:
+                                                            () =>
+                                                                _openEmployeeDialog(
+                                                                  existing: emp,
+                                                                ),
+                                                      ),
+                                                      IconButton(
+                                                        key: Key(
+                                                          'delete_employee_$i',
+                                                        ),
+                                                        icon: const Icon(
+                                                          Icons.delete,
+                                                          size: 18,
+                                                          color: Colors.red,
+                                                        ),
+                                                        tooltip: 'Delete',
+                                                        onPressed:
+                                                            () =>
+                                                                _confirmDelete(
+                                                                  emp,
+                                                                ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            );
+                                          }),
+                                        ),
                                       ),
                                     ),
-                                  ),
-                              );
-                            }
-                          ),
+                                  );
+                                },
+                              ),
                     ),
                     const SizedBox(height: 80),
                   ],
@@ -396,7 +456,8 @@ class _EmployeeDialogState extends State<_EmployeeDialog> {
     nameCtrl = TextEditingController(text: widget.existing?.name ?? '');
     roleCtrl = TextEditingController(text: widget.existing?.role ?? '');
     ageCtrl = TextEditingController(
-        text: widget.existing != null ? '${widget.existing!.age}' : '');
+      text: widget.existing != null ? '${widget.existing!.age}' : '',
+    );
     bioCtrl = TextEditingController(text: widget.existing?.biography ?? '');
   }
 
@@ -432,8 +493,11 @@ class _EmployeeDialogState extends State<_EmployeeDialog> {
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.person),
                   ),
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Name is required' : null,
+                  validator:
+                      (v) =>
+                          (v == null || v.trim().isEmpty)
+                              ? 'Name is required'
+                              : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -444,8 +508,11 @@ class _EmployeeDialogState extends State<_EmployeeDialog> {
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.work),
                   ),
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Role is required' : null,
+                  validator:
+                      (v) =>
+                          (v == null || v.trim().isEmpty)
+                              ? 'Role is required'
+                              : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -544,7 +611,10 @@ class _StatCard extends StatelessWidget {
             Text(
               value,
               style: TextStyle(
-                  fontSize: 20, fontWeight: FontWeight.bold, color: color),
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
             ),
             Text(
               label,

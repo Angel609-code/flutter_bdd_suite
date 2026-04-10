@@ -26,9 +26,7 @@ class JsonStep {
       'keyword': keyword,
       'name': name,
       'line': line,
-      'result': <String, dynamic>{
-        'status': status,
-      },
+      'result': <String, dynamic>{'status': status},
       if (table != null) 'rows': table!.toJsonRows(),
     };
 
@@ -100,7 +98,7 @@ class JsonFeature {
     this.description = '',
     required this.line,
     this.tags = const <JsonTag>[],
-  List<JsonScenario>? elements,
+    List<JsonScenario>? elements,
   }) : elements = elements ?? <JsonScenario>[];
 
   Map<String, dynamic> toJson() => <String, dynamic>{
@@ -125,10 +123,6 @@ class JsonTag {
   JsonTag(this.name, this.line);
 
   Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      'line': line,
-    };
+    return {'name': name, 'line': line};
   }
 }
-

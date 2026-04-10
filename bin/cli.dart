@@ -8,7 +8,8 @@ import 'package:flutter_bdd_suite/server/integration_test_server.dart';
 Future<void> main(List<String> args) async {
   final delimiterIndex = args.indexOf('--');
   final myArgs = delimiterIndex >= 0 ? args.sublist(0, delimiterIndex) : args;
-  final passthroughArgs = delimiterIndex >= 0 ? args.sublist(delimiterIndex + 1) : <String>[];
+  final passthroughArgs =
+      delimiterIndex >= 0 ? args.sublist(delimiterIndex + 1) : <String>[];
 
   if (_hasHelpFlag(myArgs)) {
     _printUsage();
@@ -50,8 +51,12 @@ Future<void> main(List<String> args) async {
 
   final bridgeConfig = _resolveBridgeConfig(args: myArgs);
   final forceNoBridge = myArgs.contains('--no-bridge');
-  final bridgeScriptPath = _readArg(myArgs, '--bridge-script') ?? 'integration_test/integration_test_server.dart';
-  final bridgeSetupPath = _readArg(myArgs, '--bridge-setup') ?? 'integration_test/bridge_setup.dart';
+  final bridgeScriptPath =
+      _readArg(myArgs, '--bridge-script') ??
+      'integration_test/integration_test_server.dart';
+  final bridgeSetupPath =
+      _readArg(myArgs, '--bridge-setup') ??
+      'integration_test/bridge_setup.dart';
   final bridgeMode = forceNoBridge ? 'plain' : bridgeConfig.mode;
 
   if (!{'plain', 'auto', 'bridge'}.contains(bridgeMode)) {
@@ -61,18 +66,22 @@ Future<void> main(List<String> args) async {
   }
 
   try {
-    final result = await runGeneratePipeline(GeneratePipelineOptions(
-      cwd: cwd,
-      configPath: configPath,
-      order: order,
-      pattern: pattern,
-      tags: tags,
-    ));
+    final result = await runGeneratePipeline(
+      GeneratePipelineOptions(
+        cwd: cwd,
+        configPath: configPath,
+        order: order,
+        pattern: pattern,
+        tags: tags,
+      ),
+    );
 
     stdout.writeln('\nGenerated ${result.generatedCount} file(s).');
 
     if (result.generatedCount == 0) {
-      stdout.writeln('No scenarios matched your current selection; execution skipped.');
+      stdout.writeln(
+        'No scenarios matched your current selection; execution skipped.',
+      );
       return;
     }
 
@@ -168,22 +177,22 @@ _ExecutionCommand _buildExecutionCommand({
   final normalizedPassthroughArgs = _normalizePassthroughArgs(passthroughArgs);
 
   final bridgeDefines = <String>[
-    if (includeBridgeDefines && bridgeConfig.host != null) '--dart-define=FGP_BRIDGE_HOST=${bridgeConfig.host}',
-    if (includeBridgeDefines) '--dart-define=FGP_BRIDGE_PORT=${bridgeConfig.port}',
+    if (includeBridgeDefines && bridgeConfig.host != null)
+      '--dart-define=FGP_BRIDGE_HOST=${bridgeConfig.host}',
+    if (includeBridgeDefines)
+      '--dart-define=FGP_BRIDGE_PORT=${bridgeConfig.port}',
   ];
 
   if (mode == 'drive') {
     return _ExecutionCommand.process(
       executable: 'flutter',
-      arguments: [
-        'drive',
-        ...bridgeDefines,
-        ...normalizedPassthroughArgs,
-      ],
+      arguments: ['drive', ...bridgeDefines, ...normalizedPassthroughArgs],
     );
   }
 
-  final hasExplicitTestTarget = normalizedPassthroughArgs.any(_looksLikeTestTarget);
+  final hasExplicitTestTarget = normalizedPassthroughArgs.any(
+    _looksLikeTestTarget,
+  );
 
   return _ExecutionCommand.process(
     executable: 'flutter',
@@ -291,7 +300,10 @@ Future<bool> _shouldStartBridge({
 }
 
 bool _containsActiveJsonReporter(String rawContent) {
-  final withoutBlockComments = rawContent.replaceAll(RegExp(r'/\*[\s\S]*?\*/'), '');
+  final withoutBlockComments = rawContent.replaceAll(
+    RegExp(r'/\*[\s\S]*?\*/'),
+    '',
+  );
   final withoutLineComments = withoutBlockComments
       .split('\n')
       .map((line) => line.replaceFirst(RegExp(r'//.*$'), ''))
@@ -408,10 +420,7 @@ Future<List<StreamSubscription<List<int>>>> _attachBridgeProcessSubscriptions({
     }),
   ];
 
-  await _waitForBridgeReadiness(
-    process: process,
-    port: port,
-  );
+  await _waitForBridgeReadiness(process: process, port: port);
 
   return silentSubscriptions;
 }
@@ -421,9 +430,7 @@ Future<void> _assertPortAvailable(int port) async {
     return;
   }
 
-  throw StateError(
-    'port $port is already in use',
-  );
+  throw StateError('port $port is already in use');
 }
 
 Future<void> _waitForBridgeReadiness({
@@ -435,9 +442,7 @@ Future<void> _waitForBridgeReadiness({
   while (DateTime.now().isBefore(deadline)) {
     final exitCode = await _tryReadExitCode(process);
     if (exitCode != null) {
-      throw StateError(
-        'startup process exited early (code: $exitCode)',
-      );
+      throw StateError('startup process exited early (code: $exitCode)');
     }
 
     if (await _isPortReachable(port)) {
@@ -447,9 +452,7 @@ Future<void> _waitForBridgeReadiness({
     await Future<void>.delayed(const Duration(milliseconds: 120));
   }
 
-  throw StateError(
-    'timeout waiting for bridge on port $port',
-  );
+  throw StateError('timeout waiting for bridge on port $port');
 }
 
 Future<int?> _tryReadExitCode(Process process) async {
@@ -492,9 +495,7 @@ Future<bool> _isPortReachable(int port) async {
   }
 }
 
-_ResolvedBridgeConfig _resolveBridgeConfig({
-  required List<String> args,
-}) {
+_ResolvedBridgeConfig _resolveBridgeConfig({required List<String> args}) {
   const defaults = _BridgeConfig(mode: 'auto', port: 9876);
 
   final envMode = Platform.environment['FGP_BRIDGE_MODE'];
@@ -515,6 +516,7 @@ _ResolvedBridgeConfig _resolveBridgeConfig({
     port: resolvedPort,
   );
 }
+
 String? _firstNonEmpty(String? first, String? second) {
   for (final value in [first, second]) {
     if (value != null && value.trim().isNotEmpty) {
@@ -571,7 +573,7 @@ Future<int> _runCommand(_ExecutionCommand command) async {
 
   final stdoutDone = process.stdout.listen(stdout.add).asFuture<void>();
   final stderrDone = process.stderr.listen(stderr.add).asFuture<void>();
-  
+
   final exitCode = await process.exitCode;
   await Future.wait([stdoutDone, stderrDone]);
   return exitCode;
@@ -654,10 +656,7 @@ class _ExecutionCommand {
     required String executable,
     required List<String> arguments,
   }) {
-    return _ExecutionCommand._(
-      executable: executable,
-      arguments: arguments,
-    );
+    return _ExecutionCommand._(executable: executable, arguments: arguments);
   }
 
   factory _ExecutionCommand.shell(String command) {
@@ -679,10 +678,7 @@ class _BridgeConfig {
   final String mode;
   final int port;
 
-  const _BridgeConfig({
-    required this.mode,
-    required this.port,
-  });
+  const _BridgeConfig({required this.mode, required this.port});
 }
 
 class _ResolvedBridgeConfig {
@@ -716,10 +712,7 @@ class _ProcessBridgeRuntime implements _ManagedBridgeRuntime {
   final Process process;
   final List<StreamSubscription<List<int>>> subscriptions;
 
-  _ProcessBridgeRuntime({
-    required this.process,
-    required this.subscriptions,
-  });
+  _ProcessBridgeRuntime({required this.process, required this.subscriptions});
 
   @override
   Future<void> stop() async {

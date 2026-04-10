@@ -8,11 +8,7 @@ class Scenario {
   final List<String> tags;
   final List<Step> steps = [];
 
-  Scenario({
-    required this.name,
-    required this.line,
-    this.tags = const [],
-  });
+  Scenario({required this.name, required this.line, this.tags = const []});
 
   Map<String, dynamic> toJson() {
     return {
@@ -67,10 +63,7 @@ class ScenarioResult {
   /// The overall outcome of the scenario.
   final ScenarioExecutionStatus status;
 
-  const ScenarioResult({
-    required this.scenario,
-    required this.status,
-  });
+  const ScenarioResult({required this.scenario, required this.status});
 
   /// Convenience accessor – mirrors [ScenarioInfo.scenarioName].
   String get scenarioName => scenario.scenarioName;

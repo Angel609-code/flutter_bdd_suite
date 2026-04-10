@@ -26,10 +26,8 @@ class FeatureParser {
 
       // Collect tags
       if (line.startsWith('@')) {
-        final tagsInLine = line
-            .split(RegExp(r'\s+'))
-            .where((t) => t.startsWith('@'))
-            .toList();
+        final tagsInLine =
+            line.split(RegExp(r'\s+')).where((t) => t.startsWith('@')).toList();
         pendingTags.addAll(tagsInLine);
         continue;
       }
@@ -71,10 +69,14 @@ class FeatureParser {
         continue;
       }
 
-      if (line.startsWith(GherkinKeywords.scenarioOutline) || line.startsWith(GherkinKeywords.scenarioTemplate)) {
+      if (line.startsWith(GherkinKeywords.scenarioOutline) ||
+          line.startsWith(GherkinKeywords.scenarioTemplate)) {
         inBackground = false;
         currentScenario = null;
-        final prefix = line.startsWith(GherkinKeywords.scenarioOutline) ? GherkinKeywords.scenarioOutline : GherkinKeywords.scenarioTemplate;
+        final prefix =
+            line.startsWith(GherkinKeywords.scenarioOutline)
+                ? GherkinKeywords.scenarioOutline
+                : GherkinKeywords.scenarioTemplate;
         currentOutline = Scenario(
           name: line.substring(prefix.length).trim(),
           line: i + 1,
@@ -84,10 +86,13 @@ class FeatureParser {
         continue;
       }
 
-      if (line.startsWith(GherkinKeywords.examples) || line.startsWith(GherkinKeywords.scenarios)) {
+      if (line.startsWith(GherkinKeywords.examples) ||
+          line.startsWith(GherkinKeywords.scenarios)) {
         inBackground = false;
         if (currentOutline == null) {
-          throw Exception('Examples block without a preceding Scenario Outline/Template');
+          throw Exception(
+            'Examples block without a preceding Scenario Outline/Template',
+          );
         }
 
         final outlineTags = currentOutline.tags;
@@ -108,10 +113,12 @@ class FeatureParser {
           break; // Stop looking for the table if a non-comment, non-empty, non-tag, non-table line is found.
         }
 
-        if (j < rawLines.length && GherkinKeywords.tableRowRegex.hasMatch(rawLines[j].trim())) {
+        if (j < rawLines.length &&
+            GherkinKeywords.tableRowRegex.hasMatch(rawLines[j].trim())) {
           // Found the data table.
           final rows = <TableRow>[];
-          while (j < rawLines.length && GherkinKeywords.tableRowRegex.hasMatch(rawLines[j].trim())) {
+          while (j < rawLines.length &&
+              GherkinKeywords.tableRowRegex.hasMatch(rawLines[j].trim())) {
             final tableLine = rawLines[j].trim();
             final cells = _splitTableRow(tableLine);
             rows.add(TableRow(cells));
@@ -135,12 +142,14 @@ class FeatureParser {
               // We duplicate the steps so they become part of the scenario itself.
               if (inRule && currentRuleBackground != null) {
                 for (final bgStep in currentRuleBackground.steps) {
-                  substitutedScenario.steps.add(Step(
-                    text: bgStep.text,
-                    line: bgStep.line,
-                    table: bgStep.table,
-                    docString: bgStep.docString,
-                  ));
+                  substitutedScenario.steps.add(
+                    Step(
+                      text: bgStep.text,
+                      line: bgStep.line,
+                      table: bgStep.table,
+                      docString: bgStep.docString,
+                    ),
+                  );
                 }
               }
 
@@ -148,16 +157,22 @@ class FeatureParser {
                 String substitutedText = step.text;
                 for (var colIdx = 0; colIdx < keys.length; colIdx++) {
                   final key = keys[colIdx];
-                  final val = (colIdx < row.columns.length) ? row.columns[colIdx] : '';
-                  substitutedText = substitutedText.replaceAll('<$key>', val ?? '');
+                  final val =
+                      (colIdx < row.columns.length) ? row.columns[colIdx] : '';
+                  substitutedText = substitutedText.replaceAll(
+                    '<$key>',
+                    val ?? '',
+                  );
                 }
-                substitutedScenario.steps.add(Step(
-                  text: substitutedText,
-                  line: step.line,
-                  // Tables and doc-strings on outline steps are preserved as-is.
-                  table: step.table,
-                  docString: step.docString,
-                ));
+                substitutedScenario.steps.add(
+                  Step(
+                    text: substitutedText,
+                    line: step.line,
+                    // Tables and doc-strings on outline steps are preserved as-is.
+                    table: step.table,
+                    docString: step.docString,
+                  ),
+                );
               }
               feature?.scenarios.add(substitutedScenario);
             }
@@ -168,11 +183,15 @@ class FeatureParser {
         continue;
       }
 
-      if (line.startsWith(GherkinKeywords.scenario) || line.startsWith(GherkinKeywords.example)) {
+      if (line.startsWith(GherkinKeywords.scenario) ||
+          line.startsWith(GherkinKeywords.example)) {
         // Stop background collection once a scenario begins
         inBackground = false;
         currentOutline = null;
-        final prefix = line.startsWith(GherkinKeywords.scenario) ? GherkinKeywords.scenario : GherkinKeywords.example;
+        final prefix =
+            line.startsWith(GherkinKeywords.scenario)
+                ? GherkinKeywords.scenario
+                : GherkinKeywords.example;
         currentScenario = Scenario(
           name: line.substring(prefix.length).trim(),
           line: i + 1,
@@ -182,12 +201,14 @@ class FeatureParser {
         // If we are in a rule, prepend the rule background steps to the scenario steps.
         if (inRule && currentRuleBackground != null) {
           for (final bgStep in currentRuleBackground.steps) {
-            currentScenario.steps.add(Step(
-              text: bgStep.text,
-              line: bgStep.line,
-              table: bgStep.table,
-              docString: bgStep.docString,
-            ));
+            currentScenario.steps.add(
+              Step(
+                text: bgStep.text,
+                line: bgStep.line,
+                table: bgStep.table,
+                docString: bgStep.docString,
+              ),
+            );
           }
         }
 
@@ -216,7 +237,9 @@ class FeatureParser {
         // appended to [stepText].
         if (i + 1 < rawLines.length) {
           final nextLineTrimmed = rawLines[i + 1].trim();
-          if (nextLineTrimmed.startsWith(GherkinKeywords.docStringTripleQuote) ||
+          if (nextLineTrimmed.startsWith(
+                GherkinKeywords.docStringTripleQuote,
+              ) ||
               nextLineTrimmed.startsWith(GherkinKeywords.docStringBackticks)) {
             final delimiter = nextLineTrimmed.substring(0, 3);
             i++; // skip the opening delimiter line
@@ -237,11 +260,13 @@ class FeatureParser {
         // A table immediately follows the step line (after any doc-string has
         // been consumed above). Its parsed form is stored in [table]; it is
         // never serialised into [stepText].
-        if (i + 1 < rawLines.length && GherkinKeywords.tableRowRegex.hasMatch(rawLines[i + 1])) {
+        if (i + 1 < rawLines.length &&
+            GherkinKeywords.tableRowRegex.hasMatch(rawLines[i + 1])) {
           final rows = <TableRow>[];
 
           // Consume all consecutive table-row lines.
-          while (i + 1 < rawLines.length && GherkinKeywords.tableRowRegex.hasMatch(rawLines[i + 1])) {
+          while (i + 1 < rawLines.length &&
+              GherkinKeywords.tableRowRegex.hasMatch(rawLines[i + 1])) {
             i++;
             final tableLine = rawLines[i].trim();
             final cells = _splitTableRow(tableLine);

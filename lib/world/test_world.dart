@@ -1,4 +1,3 @@
-
 /// The core World interface representing scenario-level state.
 ///
 /// The framework creates a fresh instance of [World] before each scenario.

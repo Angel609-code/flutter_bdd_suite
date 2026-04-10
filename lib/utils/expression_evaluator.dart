@@ -8,7 +8,8 @@ class TagAtom extends TagExpr {
   TagAtom(this.tag);
 
   @override
-  bool evaluate(Set<String> tags) => tags.contains(tag) || tags.contains('@$tag');
+  bool evaluate(Set<String> tags) =>
+      tags.contains(tag) || tags.contains('@$tag');
 }
 
 class NotExpr extends TagExpr {
@@ -24,7 +25,8 @@ class AndExpr extends TagExpr {
   AndExpr(this.left, this.right);
 
   @override
-  bool evaluate(Set<String> tags) =>  left.evaluate(tags) && right.evaluate(tags);
+  bool evaluate(Set<String> tags) =>
+      left.evaluate(tags) && right.evaluate(tags);
 }
 
 class OrExpr extends TagExpr {
@@ -32,17 +34,19 @@ class OrExpr extends TagExpr {
   OrExpr(this.left, this.right);
 
   @override
-  bool evaluate(Set<String> tags) => left.evaluate(tags) || right.evaluate(tags);
+  bool evaluate(Set<String> tags) =>
+      left.evaluate(tags) || right.evaluate(tags);
 }
 
 /// Parses expressions like `not @a and (@b or @c)`
 TagExpr parseTagExpression(String input) {
-  final tokens = input
-      .replaceAll('(', ' ( ')
-      .replaceAll(')', ' ) ')
-      .split(RegExp(r'\s+'))
-      .where((t) => t.isNotEmpty)
-      .toList();
+  final tokens =
+      input
+          .replaceAll('(', ' ( ')
+          .replaceAll(')', ' ) ')
+          .split(RegExp(r'\s+'))
+          .where((t) => t.isNotEmpty)
+          .toList();
 
   int idx = 0;
 

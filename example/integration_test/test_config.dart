@@ -18,9 +18,7 @@ final config = IntegrationTestConfig(
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
     debugPrint('Implement anything before the tests');
   },
-  hooks: [
-    DebugLifecycleHook(),
-  ],
+  hooks: [DebugLifecycleHook()],
   reporters: [
     SummaryReporter(),
     DecoratedSummaryReporter(),
@@ -34,5 +32,5 @@ final config = IntegrationTestConfig(
     theElementIsVisible(),
     iEnterText(),
     iInteractWithButton(),
-  ]
+  ],
 );

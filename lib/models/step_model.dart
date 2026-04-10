@@ -26,12 +26,7 @@ class Step {
   /// backtick-fence (` ``` `) block directly below the step keyword.
   final String? docString;
 
-  Step({
-    required this.text,
-    required this.line,
-    this.table,
-    this.docString,
-  });
+  Step({required this.text, required this.line, this.table, this.docString});
 
   Map<String, dynamic> toJson() {
     return {

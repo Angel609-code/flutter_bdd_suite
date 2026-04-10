@@ -92,9 +92,8 @@ class GherkinTable {
     }
 
     final rowsList = (decoded['rows'] as List<dynamic>);
-    final dataRows = rowsList
-        .map((r) => TableRow.fromJson((r as List<dynamic>)))
-        .toList();
+    final dataRows =
+        rowsList.map((r) => TableRow.fromJson((r as List<dynamic>))).toList();
 
     return GherkinTable(dataRows, header);
   }
@@ -147,9 +146,8 @@ class GherkinTable {
       header = TableRow.fromJson(headerList);
     }
     final rowsList = decoded['rows'] as List<dynamic>;
-    final dataRows = rowsList
-        .map((r) => TableRow.fromJson(r as List<dynamic>))
-        .toList();
+    final dataRows =
+        rowsList.map((r) => TableRow.fromJson(r as List<dynamic>)).toList();
     return GherkinTable(dataRows, header);
   }
 }

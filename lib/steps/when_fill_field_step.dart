@@ -28,23 +28,19 @@ import 'package:flutter_test/flutter_test.dart';
 ///
 /// Returns a `StepDefinitionGeneric` that the runner can register.
 StepDefinitionGeneric whenFillFieldStep() {
-  return step(
-    'I fill the {string} field with {string}',
-    (ctx) async {
-      final key = ctx.args[0] as String;
-      final value = ctx.args[1] as String;
-      // Find the widget by its ValueKey.
-      final finder = find.byKey(ValueKey(key));
+  return step('I fill the {string} field with {string}', (ctx) async {
+    final (key, value) = ctx.args.two<String, String>();
+    // Find the widget by its ValueKey.
+    final finder = find.byKey(ValueKey(key));
 
-      // Verify that exactly one widget matches.
-      expect(finder, findsOneWidget);
+    // Verify that exactly one widget matches.
+    expect(finder, findsOneWidget);
 
-      // Enter the provided text into the widget.
-      await ctx.tester.enterText(finder, value);
+    // Enter the provided text into the widget.
+    await ctx.tester.enterText(finder, value);
 
-      // Allow the UI to settle after text entry.
-      // Uses the global timeout from IntegrationTestConfig.
-      await ctx.tester.pumpAndSettle();
-    },
-  );
+    // Allow the UI to settle after text entry.
+    // Uses the global timeout from IntegrationTestConfig.
+    await ctx.tester.pumpAndSettle();
+  });
 }

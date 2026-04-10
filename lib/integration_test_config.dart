@@ -6,7 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
 /// A callback that always exposes its single argument as `binding`.
-typedef PreBindingSetup = Future<void> Function(IntegrationTestWidgetsFlutterBinding binding);
+typedef PreBindingSetup =
+    Future<void> Function(IntegrationTestWidgetsFlutterBinding binding);
 
 /// Defines the configuration used by the generated test runner.
 ///

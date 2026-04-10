@@ -1,5 +1,6 @@
 import 'package:flutter_bdd_suite/utils/placeholders.dart';
 import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
+import 'package:flutter_bdd_suite/utils/step_args.dart';
 import 'package:flutter_bdd_suite/models/gherkin_table_model.dart';
 import 'package:flutter_bdd_suite/models/step_multiline_arg.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 class StepContext {
   final WidgetTester tester;
   final WidgetTesterWorld world;
-  final List<dynamic> args;
+  final StepArgs args;
   final StepMultilineArg? _multilineArg;
 
   StepContext({
@@ -23,6 +24,26 @@ class StepContext {
 
   GherkinTable? get table => _multilineArg?.table;
   String? get docString => _multilineArg?.docString;
+
+  /// Returns the attached data table, or throws a [StateError] if none was provided.
+  GherkinTable tableOrThrow() {
+    final t = table;
+    if (t == null)
+      throw StateError(
+        'Expected a DataTable attached to this step, but none was found.',
+      );
+    return t;
+  }
+
+  /// Returns the attached doc-string content, or throws a [StateError] if none was provided.
+  String docStringOrThrow() {
+    final d = docString;
+    if (d == null)
+      throw StateError(
+        'Expected a DocString attached to this step, but none was found.',
+      );
+    return d;
+  }
 }
 
 /// The concrete function type executed by the test runner for each matched step.
@@ -40,7 +61,11 @@ class StepDefinitionGeneric {
 
   bool matches(String input) => pattern.hasMatch(input);
 
-  Future<void> run(String input, WidgetTesterWorld world, [StepMultilineArg? multilineArg]) async {
+  Future<void> run(
+    String input,
+    WidgetTesterWorld world, [
+    StepMultilineArg? multilineArg,
+  ]) async {
     final match = pattern.firstMatch(input);
     if (match == null) throw Exception('No match for: $input');
 
@@ -68,7 +93,7 @@ _ParsedStepRegex _compileExpression(String rawPattern) {
   var escapedPattern = RegExp.escape(rawPattern);
   escapedPattern = escapedPattern.replaceAllMapped(
     RegExp(r'\\\{([A-Za-z]\w*)\\\}'),
-    (m) => '{' + m.group(1)! + '}',
+    (m) => '{w\$m.group(1)!}',
   );
 
   final regexBody = escapedPattern.replaceAllMapped(
@@ -102,7 +127,7 @@ StepDefinitionGeneric step(String pattern, StepAction action) {
     final ctx = StepContext(
       tester: world.tester,
       world: world,
-      args: parsedArgs,
+      args: StepArgs(parsedArgs, debugSource: 'Pattern: $pattern'),
       multilineArg: null /* multiline arg is injected at runner */,
     );
     await action(ctx);
@@ -115,8 +140,12 @@ StepDefinitionGeneric step(String pattern, StepAction action) {
 StepDefinitionGeneric stepRegExp(RegExp pattern, StepAction action) {
   // Ensure the regex is anchored if it isn't already to match full lines correctly.
   var regexPattern = pattern.pattern;
-  if (!regexPattern.startsWith('^')) regexPattern = '^$regexPattern';
-  if (!regexPattern.endsWith('\$')) regexPattern = '$regexPattern\$';
+  if (!regexPattern.startsWith('^')) {
+    regexPattern = '^$regexPattern';
+  }
+  if (!regexPattern.endsWith('\$')) {
+    regexPattern = '$regexPattern\$';
+  }
 
   final anchoredPattern = RegExp(
     regexPattern,
@@ -130,7 +159,7 @@ StepDefinitionGeneric stepRegExp(RegExp pattern, StepAction action) {
     final ctx = StepContext(
       tester: world.tester,
       world: world,
-      args: rawArgs, // Raw strings from regex capture groups
+      args: StepArgs(rawArgs, debugSource: 'RegExp: ${pattern.pattern}'),
       multilineArg: null /* multiline arg is injected at runner */,
     );
     await action(ctx);

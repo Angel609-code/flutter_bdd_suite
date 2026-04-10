@@ -44,23 +44,21 @@ String resolveKey(String type) {
 }
 
 StepDefinitionGeneric theApplicationIsLaunched() {
-  return stepRegExp(
-    RegExp(r'the application is launched'),
-    (ctx) async {
-      themeNotifier.value = ThemeMode.light;
-      await ctx.tester.pumpWidget(const BddExampleApp());
-      await ctx.tester.pumpAndSettle();
-    },
-  );
+  return stepRegExp(RegExp(r'the application is launched'), (ctx) async {
+    themeNotifier.value = ThemeMode.light;
+    await ctx.tester.pumpWidget(const BddExampleApp());
+    await ctx.tester.pumpAndSettle();
+  });
 }
 
 StepDefinitionGeneric iShouldSeeTextOrElement() {
   return stepRegExp(
-    RegExp(r'I should (not )?see (?:multiple )?(?:(.+?) element|"(.+?)")(?: texts)?'),
+    RegExp(
+      r'I should (not )?see (?:multiple )?(?:(.+?) element|"(.+?)")(?: texts)?',
+    ),
     (ctx) async {
-      final notMatch = ctx.args[0];
-      final type = ctx.args[1];
-      final text = ctx.args[2];
+      final (notMatch, type, text) =
+          ctx.args.three<String?, String?, String?>();
       final shouldNot = notMatch != null && notMatch.isNotEmpty;
 
       Finder finder;
@@ -97,8 +95,7 @@ StepDefinitionGeneric theElementIsVisible() {
   return stepRegExp(
     RegExp(r'(.+?) element(?:s)? (?:is|are) (?:visible|present|"(.+?)")'),
     (ctx) async {
-      final type = ctx.args[0];
-      final value = ctx.args[1];
+      final (type, value) = ctx.args.two<String, String?>();
       final key = resolveKey(type);
       if (value == 'visible' || value == 'present') {
         expect(find.byKey(Key(key)), findsOneWidget);
@@ -110,17 +107,16 @@ StepDefinitionGeneric theElementIsVisible() {
 }
 
 StepDefinitionGeneric iShouldReachDashboard() {
-  return stepRegExp(
-    RegExp(r'I should (not )?reach the dashboard'),
-    (ctx) async {
-      final notMatch = ctx.args[0];
-      final shouldReach = notMatch == null || notMatch.isEmpty;
+  return stepRegExp(RegExp(r'I should (not )?reach the dashboard'), (
+    ctx,
+  ) async {
+    final (notMatch,) = ctx.args.one<String?>();
+    final shouldReach = notMatch == null || notMatch.isEmpty;
 
-      if (shouldReach) {
-        expect(find.byKey(const Key('add_employee_fab')), findsOneWidget);
-      } else {
-        expect(find.byKey(const Key('login_button')), findsOneWidget);
-      }
-    },
-  );
+    if (shouldReach) {
+      expect(find.byKey(const Key('add_employee_fab')), findsOneWidget);
+    } else {
+      expect(find.byKey(const Key('login_button')), findsOneWidget);
+    }
+  });
 }

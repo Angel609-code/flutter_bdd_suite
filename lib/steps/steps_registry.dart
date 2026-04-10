@@ -35,9 +35,7 @@ class StepsRegistry {
   ///
   /// A read-only list; never mutated at runtime. Custom steps are merged at
   /// construction time into [_steps].
-  static final List<StepDefinitionGeneric> defaultSteps = [
-    whenFillFieldStep(),
-  ];
+  static final List<StepDefinitionGeneric> defaultSteps = [whenFillFieldStep()];
 
   /// The active step definitions for this registry instance.
   ///
@@ -61,7 +59,7 @@ class StepsRegistry {
   /// then [extraSteps]. An [StateError] is thrown at lookup time if more than
   /// one step matches (ambiguous match).
   StepsRegistry({List<StepDefinitionGeneric> extraSteps = const []})
-      : _steps = [...defaultSteps, ...extraSteps];
+    : _steps = [...defaultSteps, ...extraSteps];
 
   /// Looks up a matching step by [stepText], or returns `null` if none found.
   ///
@@ -93,8 +91,9 @@ class StepsRegistry {
           // Second match found — collect all for a descriptive error message.
           final allMatches =
               _steps.where((s) => s.matches(cleanedStepText)).toList();
-          final patterns =
-              allMatches.map((s) => s.pattern.pattern).join('\n  ');
+          final patterns = allMatches
+              .map((s) => s.pattern.pattern)
+              .join('\n  ');
           throw StateError(
             'Ambiguous match: ${allMatches.length} step definitions matched '
             '"$cleanedStepText":\n  $patterns',
@@ -105,6 +104,7 @@ class StepsRegistry {
     }
 
     if (match == null) return null;
-    return (world) => match!.run(cleanedStepText, world, world.multilineArgToInject);
+    return (world) =>
+        match!.run(cleanedStepText, world, world.multilineArgToInject);
   }
 }
