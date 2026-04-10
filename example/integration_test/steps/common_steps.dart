@@ -52,54 +52,48 @@ StepDefinitionGeneric theApplicationIsLaunched() {
 }
 
 StepDefinitionGeneric iShouldSeeTextOrElement() {
-  return stepRegExp(
-    RegExp(r'I should (not )?see (.+)'),
-    (ctx) async {
-      final (notMatch, raw) =
-          ctx.args.two<String?, String>();
+  return stepRegExp(RegExp(r'I should (not )?see (.+)'), (ctx) async {
+    final (notMatch, raw) = ctx.args.two<String?, String>();
 
-      final shouldNot = notMatch != null && notMatch.isNotEmpty;
+    final shouldNot = notMatch != null && notMatch.isNotEmpty;
 
-      Finder finder;
+    Finder finder;
 
-      final multipleMatch = RegExp(r'^multiple "([^"]*)" texts$').firstMatch(raw);
+    final multipleMatch = RegExp(r'^multiple "([^"]*)" texts$').firstMatch(raw);
 
-      if (multipleMatch != null) {
-        final text = multipleMatch.group(1)!;
-        finder = find.text(text);
+    if (multipleMatch != null) {
+      final text = multipleMatch.group(1)!;
+      finder = find.text(text);
 
-        final count = int.tryParse(text);
-
-        if (shouldNot) {
-          expect(finder, findsNothing);
-        } else if (count != null) {
-          expect(finder, findsNWidgets(count));
-        } else {
-          expect(finder, findsWidgets);
-        }
-        return;
-      }
-
-      if (raw.startsWith('"') && raw.endsWith('"')) {
-        final text = raw.substring(1, raw.length - 1);
-        finder = find.textContaining(text);
-      }
-      
-      else if (raw.endsWith(' element')) {
-        final type = raw.replaceAll(' element', '');
-        final key = resolveKey(type);
-        finder = find.byKey(Key(key));
-      } else {
-        throw Exception('Invalid step format: $raw');
-      }
+      final count = int.tryParse(text);
 
       if (shouldNot) {
         expect(finder, findsNothing);
+      } else if (count != null) {
+        expect(finder, findsNWidgets(count));
       } else {
         expect(finder, findsWidgets);
       }
-    },
-  );
+      return;
+    }
+
+    if (raw.startsWith('"') && raw.endsWith('"')) {
+      final text = raw.substring(1, raw.length - 1);
+      finder = find.textContaining(text);
+    } else if (raw.endsWith(' element')) {
+      final type = raw.replaceAll(' element', '');
+      final key = resolveKey(type);
+      finder = find.byKey(Key(key));
+    } else {
+      throw Exception('Invalid step format: $raw');
+    }
+
+    if (shouldNot) {
+      expect(finder, findsNothing);
+    } else {
+      expect(finder, findsWidgets);
+    }
+  });
 }
 
 StepDefinitionGeneric theLoginUIIsVisible() {
@@ -135,15 +129,12 @@ StepDefinitionGeneric theElementIsVisible() {
     //   visible   → stateRaw = "visible"
     //   "visible" → stateRaw = "visible"
     //
-    RegExp(
-      r'(.+?) element(?:s)? (?:is|are) "?([^"]+)"?',
-    ),
+    RegExp(r'(.+?) element(?:s)? (?:is|are) "?([^"]+)"?'),
     (ctx) async {
       // We always get exactly TWO values:
       // type     → "employee dialog title"
       // stateRaw → "visible" OR "hidden" (quotes already stripped by regex)
-      final (type, stateRaw) =
-          ctx.args.two<String, String>();
+      final (type, stateRaw) = ctx.args.two<String, String>();
 
       // Normalize just in case (defensive programming)
       final state = stateRaw.toLowerCase().trim();

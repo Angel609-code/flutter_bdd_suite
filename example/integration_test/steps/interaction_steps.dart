@@ -7,9 +7,7 @@ import 'common_steps.dart';
 StepDefinitionGeneric iEnterText() {
   // Use non-capturing groups `(?:enter|fill)` to simplify the callback signature.
   return stepRegExp(
-    RegExp(
-      r'I (?:enter|fill) the (.+?)(?: field)?(?: with)? "([^"]*)"'
-    ),
+    RegExp(r'I (?:enter|fill) the (.+?)(?: field)?(?: with)? "([^"]*)"'),
     (ctx) async {
       final (type, value) = ctx.args.two<String, String>();
       final key = resolveKey(type);
