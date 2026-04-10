@@ -85,8 +85,42 @@ class _ParsedStepRegex {
   _ParsedStepRegex(this.regex, this.tokens);
 }
 
+void _validateStrictExpression(String pattern) {
+  final forbidden = [
+    '(?:',
+    '|',
+    '^',
+    '\$',
+    '\\d',
+    '\\w',
+    '[',
+    ']',
+    '(?=',
+    '(?!',
+  ];
+  for (final f in forbidden) {
+    if (pattern.contains(f)) {
+      throw ArgumentError(
+        'Invalid Cucumber expression: "$pattern".\n'
+        'Expression steps should not contain raw regular expression features like "$f".\n'
+        'If you need advanced matching (alternations, lookarounds, etc.), use `stepRegExp()` instead of `step()`.',
+      );
+    }
+  }
+
+  // Check for unescaped parentheses (a simple heuristic)
+  if (RegExp(r'(?<!\\)[()]').hasMatch(pattern)) {
+    throw ArgumentError(
+      'Invalid Cucumber expression: "$pattern".\n'
+      'Expression steps should not contain unescaped parentheses.\n'
+      'If you are trying to capture groups, use `stepRegExp()` instead of `step()`.',
+    );
+  }
+}
+
 /// Compiles a Cucumber-style expression (with `{...}` placeholders) into a RegExp.
 _ParsedStepRegex _compileExpression(String rawPattern) {
+  _validateStrictExpression(rawPattern);
   final tokens = <PlaceholderDef>[];
 
   // Escape the pattern first, but temporarily un-escape our {} blocks so we can process them
@@ -137,7 +171,11 @@ StepDefinitionGeneric step(String pattern, StepAction action) {
 /// Registers a step using standard Dart RegExp semantics.
 ///
 /// Capture groups `(...)` become `ctx.args`. Non-capturing groups `(?:...)` are ignored.
-StepDefinitionGeneric stepRegExp(RegExp pattern, StepAction action) {
+StepDefinitionGeneric stepRegExp(
+  RegExp pattern,
+  StepAction action, {
+  List<dynamic Function(String)>? converters,
+}) {
   // Ensure the regex is anchored if it isn't already to match full lines correctly.
   var regexPattern = pattern.pattern;
   if (!regexPattern.startsWith('^')) {

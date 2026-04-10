@@ -44,7 +44,7 @@ String resolveKey(String type) {
 }
 
 StepDefinitionGeneric theApplicationIsLaunched() {
-  return stepRegExp(RegExp(r'the application is launched'), (ctx) async {
+  return step('the application is launched', (ctx) async {
     themeNotifier.value = ThemeMode.light;
     await ctx.tester.pumpWidget(const BddExampleApp());
     await ctx.tester.pumpAndSettle();
