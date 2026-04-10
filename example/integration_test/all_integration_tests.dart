@@ -2,8 +2,8 @@
 import 'package:flutter_bdd_suite/integration_test_helper.dart';
 import 'test_config.dart';
 
-import 'generated/auth/login.dart' as login;
 import 'generated/dashboard/employee_directory.dart' as employee_directory;
+import 'generated/auth/login.dart' as login;
 
 void main() async {
   final helper = await IntegrationTestHelper.create(config: config);
@@ -12,6 +12,6 @@ void main() async {
   // Individual feature runners do not call registerSuiteHooks themselves.
   helper.registerSuiteHooks();
 
-  login.run(helper);
   employee_directory.run(helper);
+  login.run(helper);
 }

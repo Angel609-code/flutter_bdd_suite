@@ -14,20 +14,15 @@ class StepDefinitionGeneric {
   final int argCount;
 
   /// The internal executor called by [run].
-  final Future<void> Function(
-    List<String> args,
-    WidgetTesterWorld world,
-  ) execute;
+  final Future<void> Function(List<String> args, WidgetTesterWorld world)
+  execute;
 
   StepDefinitionGeneric(this.pattern, this.argCount, this.execute);
 
   bool matches(String input) => pattern.hasMatch(input);
 
   /// Run this step for the given [input] text.
-  Future<void> run(
-    String input,
-    WidgetTesterWorld context,
-  ) async {
+  Future<void> run(String input, WidgetTesterWorld context) async {
     final match = pattern.firstMatch(input);
     if (match == null) throw Exception('No match for: $input');
 
@@ -57,7 +52,9 @@ _ParsedStepRegex _buildStepRegex(String rawPattern, int expectedCaptureCount) {
   );
 
   // Count placeholders "{Name}" (start with letter) in rawPattern.
-  final placeholderMatches = RegExp(r'\{([A-Za-z]\w*)\}').allMatches(rawPattern);
+  final placeholderMatches = RegExp(
+    r'\{([A-Za-z]\w*)\}',
+  ).allMatches(rawPattern);
   final placeholderCount = placeholderMatches.length;
 
   // Count manual "(…)" groups, ignoring ANY "(?…)".
@@ -84,21 +81,20 @@ _ParsedStepRegex _buildStepRegex(String rawPattern, int expectedCaptureCount) {
 
   // Replace "{Token}" with its regex and collect PlaceholderDef.
   final placeholderDefs = <PlaceholderDef>[];
-  var regexBody = rawPattern.replaceAllMapped(
-    RegExp(r'\{([A-Za-z]\w*)\}'),
-    (match) {
-      final name = match.group(1)!;
-      final def = placeholders[name];
-      if (def == null) {
-        throw ArgumentError(
-          'Unsupported placeholder "{$name}". '
-          'Supported tokens: ${placeholders.keys.join(", ")}.',
-        );
-      }
-      placeholderDefs.add(def);
-      return def.regexPart;
-    },
-  );
+  var regexBody = rawPattern.replaceAllMapped(RegExp(r'\{([A-Za-z]\w*)\}'), (
+    match,
+  ) {
+    final name = match.group(1)!;
+    final def = placeholders[name];
+    if (def == null) {
+      throw ArgumentError(
+        'Unsupported placeholder "{$name}". '
+        'Supported tokens: ${placeholders.keys.join(", ")}.',
+      );
+    }
+    placeholderDefs.add(def);
+    return def.regexPart;
+  });
 
   // Extract each manual "(…)" inner pattern from regexBody.
   final manualDefs = <String>[];
@@ -136,7 +132,8 @@ _ParsedStepRegex _buildStepRegex(String rawPattern, int expectedCaptureCount) {
     }
 
     if (rawPattern[idx] == '(') {
-      if (idx + 2 < rawPattern.length && rawPattern.substring(idx, idx + 3) == '(?:') {
+      if (idx + 2 < rawPattern.length &&
+          rawPattern.substring(idx, idx + 3) == '(?:') {
         idx += 3;
         continue;
       }
@@ -176,7 +173,11 @@ _ParsedStepRegex _buildStepRegex(String rawPattern, int expectedCaptureCount) {
 }
 
 /// Helper to parse arguments based on token definitions.
-List<dynamic> _parseArgs(List<String> args, List<CaptureToken> tokens, int count) {
+List<dynamic> _parseArgs(
+  List<String> args,
+  List<CaptureToken> tokens,
+  int count,
+) {
   return List.generate(count, (i) {
     final token = tokens[i];
     return token.kind == CaptureKind.placeholder
@@ -192,20 +193,13 @@ List<dynamic> _parseArgs(List<String> args, List<CaptureToken> tokens, int count
 StepDefinitionGeneric _createGeneric<W>(
   String rawPattern,
   int count,
-  Future<void> Function(
-    List<dynamic> parsedArgs,
-    W world,
-  ) executor,
+  Future<void> Function(List<dynamic> parsedArgs, W world) executor,
 ) {
   final parsed = _buildStepRegex(rawPattern, count);
-  return StepDefinitionGeneric(
-    parsed.regex,
-    count,
-    (args, context) async {
-      final parsedArgs = _parseArgs(args, parsed.tokens, count);
-      await executor(parsedArgs, context as W);
-    },
-  );
+  return StepDefinitionGeneric(parsed.regex, count, (args, context) async {
+    final parsedArgs = _parseArgs(args, parsed.tokens, count);
+    await executor(parsedArgs, context as W);
+  });
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -220,70 +214,119 @@ StepDefinitionGeneric _createGeneric<W>(
 //     ...
 //   });
 
+/// Alias for [WidgetTesterWorld], making step signatures read more naturally as
+/// standard BDD context objects.
+typedef StepContext = WidgetTesterWorld;
+
+@Deprecated('Use step() instead for idiomatic BDD naming.')
 StepDefinitionGeneric generic<W>(
   String rawPattern,
   Future<void> Function(W world) fn,
+) => step<W>(rawPattern, fn);
+
+/// Defines a step with 0 parameters.
+StepDefinitionGeneric step<W>(
+  String rawPattern,
+  Future<void> Function(W ctx) fn,
 ) {
   final finalRegex = RegExp('^${RegExp.escape(rawPattern)}\$');
-  return StepDefinitionGeneric(
-    finalRegex,
-    0,
-    (args, context) async {
-      await fn(context as W);
-    },
-  );
+  return StepDefinitionGeneric(finalRegex, 0, (args, context) async {
+    await fn(context as W);
+  });
 }
 
+@Deprecated('Use step1() instead for idiomatic BDD naming.')
 StepDefinitionGeneric generic1<T, W>(
   String rawPattern,
   Future<void> Function(T value, W world) fn,
-) => _createGeneric<W>(
-      rawPattern,
-      1,
-      (p, w) => fn(p[0] as T, w),
-    );
+) => step1<T, W>(rawPattern, fn);
 
+/// Defines a step with exactly 1 parameter.
+StepDefinitionGeneric step1<T, W>(
+  String rawPattern,
+  Future<void> Function(T value, W ctx) fn,
+) => _createGeneric<W>(rawPattern, 1, (p, w) => fn(p[0] as T, w));
+
+@Deprecated('Use step2() instead for idiomatic BDD naming.')
 StepDefinitionGeneric generic2<T1, T2, W>(
   String rawPattern,
   Future<void> Function(T1, T2, W world) fn,
-) => _createGeneric<W>(
-      rawPattern,
-      2,
-      (p, w) => fn(p[0] as T1, p[1] as T2, w),
-    );
+) => step2<T1, T2, W>(rawPattern, fn);
 
+/// Defines a step with exactly 2 parameters.
+StepDefinitionGeneric step2<T1, T2, W>(
+  String rawPattern,
+  Future<void> Function(T1, T2, W ctx) fn,
+) => _createGeneric<W>(rawPattern, 2, (p, w) => fn(p[0] as T1, p[1] as T2, w));
+
+@Deprecated('Use step3() instead for idiomatic BDD naming.')
 StepDefinitionGeneric generic3<T1, T2, T3, W>(
   String rawPattern,
   Future<void> Function(T1, T2, T3, W world) fn,
-) => _createGeneric<W>(
-      rawPattern,
-      3,
-      (p, w) => fn(p[0] as T1, p[1] as T2, p[2] as T3, w),
-    );
+) => step3<T1, T2, T3, W>(rawPattern, fn);
 
+/// Defines a step with exactly 3 parameters.
+StepDefinitionGeneric step3<T1, T2, T3, W>(
+  String rawPattern,
+  Future<void> Function(T1, T2, T3, W ctx) fn,
+) => _createGeneric<W>(
+  rawPattern,
+  3,
+  (p, w) => fn(p[0] as T1, p[1] as T2, p[2] as T3, w),
+);
+
+@Deprecated('Use step4() instead for idiomatic BDD naming.')
 StepDefinitionGeneric generic4<T1, T2, T3, T4, W>(
   String rawPattern,
   Future<void> Function(T1, T2, T3, T4, W world) fn,
-) => _createGeneric<W>(
-      rawPattern,
-      4,
-      (p, w) => fn(p[0] as T1, p[1] as T2, p[2] as T3, p[3] as T4, w),
-    );
+) => step4<T1, T2, T3, T4, W>(rawPattern, fn);
 
+/// Defines a step with exactly 4 parameters.
+StepDefinitionGeneric step4<T1, T2, T3, T4, W>(
+  String rawPattern,
+  Future<void> Function(T1, T2, T3, T4, W ctx) fn,
+) => _createGeneric<W>(
+  rawPattern,
+  4,
+  (p, w) => fn(p[0] as T1, p[1] as T2, p[2] as T3, p[3] as T4, w),
+);
+
+@Deprecated('Use step5() instead for idiomatic BDD naming.')
 StepDefinitionGeneric generic5<T1, T2, T3, T4, T5, W>(
   String rawPattern,
   Future<void> Function(T1, T2, T3, T4, T5, W world) fn,
-) => _createGeneric<W>(
-      rawPattern,
-      5,
-      (p, w) => fn(p[0] as T1, p[1] as T2, p[2] as T3, p[3] as T4, p[4] as T5, w),
-    );
+) => step5<T1, T2, T3, T4, T5, W>(rawPattern, fn);
 
+/// Defines a step with exactly 5 parameters.
+StepDefinitionGeneric step5<T1, T2, T3, T4, T5, W>(
+  String rawPattern,
+  Future<void> Function(T1, T2, T3, T4, T5, W ctx) fn,
+) => _createGeneric<W>(
+  rawPattern,
+  5,
+  (p, w) => fn(p[0] as T1, p[1] as T2, p[2] as T3, p[3] as T4, p[4] as T5, w),
+);
+
+@Deprecated('Use step6() instead for idiomatic BDD naming.')
 StepDefinitionGeneric generic6<T1, T2, T3, T4, T5, T6, W>(
   String rawPattern,
   Future<void> Function(T1, T2, T3, T4, T5, T6, W world) fn,
+) => step6<T1, T2, T3, T4, T5, T6, W>(rawPattern, fn);
+
+/// Defines a step with exactly 6 parameters.
+StepDefinitionGeneric step6<T1, T2, T3, T4, T5, T6, W>(
+  String rawPattern,
+  Future<void> Function(T1, T2, T3, T4, T5, T6, W ctx) fn,
 ) => _createGeneric<W>(
-      rawPattern,
-      6,
-      (p, w) => fn(p[0] as T1, p[1] as T2, p[2] as T3, p[3] as T4, p[4] as T5, p[5] as T6, w),
-    );
+  rawPattern,
+  6,
+  (p, w) => fn(
+    p[0] as T1,
+    p[1] as T2,
+    p[2] as T3,
+    p[3] as T4,
+    p[4] as T5,
+    p[5] as T6,
+    w,
+  ),
+);

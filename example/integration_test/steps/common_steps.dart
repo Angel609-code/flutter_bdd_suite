@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:example/main.dart';
 import 'package:example/app_theme.dart';
 import 'package:flutter_bdd_suite/utils/step_definition_generic.dart';
-import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 String resolveKey(String type) {
@@ -45,20 +44,20 @@ String resolveKey(String type) {
 }
 
 StepDefinitionGeneric theApplicationIsLaunched() {
-  return generic<WidgetTesterWorld>(
+  return step<StepContext>(
     r'the application is launched',
-    (world) async {
+    (ctx) async {
       themeNotifier.value = ThemeMode.light;
-      await world.tester.pumpWidget(const BddExampleApp());
-      await world.tester.pumpAndSettle();
+      await ctx.tester.pumpWidget(const BddExampleApp());
+      await ctx.tester.pumpAndSettle();
     },
   );
 }
 
 StepDefinitionGeneric iShouldSeeTextOrElement() {
-  return generic4<String?, String?, String?, String?, WidgetTesterWorld>(
+  return step4<String?, String?, String?, String?, StepContext>(
     r'I should (not )?see (?:multiple )?(?:(.+?) element|{string})(?: texts)?',
-    (notMatch, type, text, _, world) async {
+    (notMatch, type, text, _, ctx) async {
       final shouldNot = notMatch != null && notMatch.isNotEmpty;
 
       Finder finder;
@@ -80,9 +79,11 @@ StepDefinitionGeneric iShouldSeeTextOrElement() {
 }
 
 StepDefinitionGeneric theLoginUIIsVisible() {
-  return generic3<String, String, String, WidgetTesterWorld>(
-    r'the login (screen|form fields) (is|are) (visible|present)',
-    (_, __, ___, world) async {
+  // We use non-capturing groups `(?:screen|form fields)` and `(?:is|are)`
+  // to avoid passing useless words as step arguments.
+  return step<StepContext>(
+    r'the login (?:screen|form fields) (?:is|are) (?:visible|present)',
+    (ctx) async {
       expect(find.byKey(const Key('username_field')), findsOneWidget);
       expect(find.byKey(const Key('password_field')), findsOneWidget);
     },
@@ -90,9 +91,9 @@ StepDefinitionGeneric theLoginUIIsVisible() {
 }
 
 StepDefinitionGeneric theElementIsVisible() {
-  return generic4<String, String?, String, String, WidgetTesterWorld>(
-    r'(.+?) element(s)? (is|are) (?:visible|present|{string})',
-    (type, _, __, value, world) async {
+  return step3<String, String?, String, StepContext>(
+    r'(.+?) element(?:s)? (?:is|are) (?:visible|present|{string})',
+    (type, _, value, ctx) async {
       final key = resolveKey(type);
       if (value == 'visible' || value == 'present') {
         expect(find.byKey(Key(key)), findsOneWidget);
@@ -104,9 +105,9 @@ StepDefinitionGeneric theElementIsVisible() {
 }
 
 StepDefinitionGeneric iShouldReachDashboard() {
-  return generic1<String?, WidgetTesterWorld>(
+  return step1<String?, StepContext>(
     r'I should (not )?reach the dashboard',
-    (notMatch, world) async {
+    (notMatch, ctx) async {
       final shouldReach = notMatch == null || notMatch.isEmpty;
 
       if (shouldReach) {

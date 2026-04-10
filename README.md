@@ -199,7 +199,7 @@ Scenario: Add multiple employees
     | Bob     | Designer  | 80000  |
 ```
 
-In your step definition, access the table via the `world.table` property (see [Working with Tables in Steps](#working-with-tables-in-steps)).
+In your step definition, access the table via the `ctx.table` property (see [Working with Tables in Steps](#working-with-tables-in-steps)).
 
 ### Doc Strings
 
@@ -319,8 +319,8 @@ StepDefinitionGeneric theAppIsLaunched() {
   return generic<WidgetTesterWorld>(
     r'the application is launched',
     (world) async {
-      await world.tester.pumpWidget(const BddExampleApp());
-      await world.tester.pumpAndSettle();
+      await ctx.tester.pumpWidget(const BddExampleApp());
+      await ctx.tester.pumpAndSettle();
     },
   );
 }
@@ -525,35 +525,35 @@ Define custom steps using the typed `generic` builder functions. Each function c
 import 'package:flutter_bdd_suite/flutter_bdd_suite.dart';
 
 // 0 captures — matches the literal string exactly
-StepDefinitionGeneric tapLoginButton() => generic(
+StepDefinitionGeneric tapLoginButton() => step<StepContext>(
   'I tap the login button',
-  (WidgetTesterWorld world) async {
-    await world.tester.tap(find.byKey(const ValueKey('login_button')));
-    await world.tester.pumpAndSettle();
+  (StepContext ctx) async {
+    await ctx.tester.tap(find.byKey(const ValueKey('login_button')));
+    await ctx.tester.pumpAndSettle();
   },
 );
 
 // 1 capture — {string} extracts a quoted value
-StepDefinitionGeneric iSeeText() => generic1(
+StepDefinitionGeneric iSeeText() => step1(
   'I should see {string}',
-  (String text, WidgetTesterWorld world) async {
+  (String text, StepContext ctx) async {
     expect(find.text(text), findsOneWidget);
   },
 );
 
 // 2 captures — two {string} placeholders
-StepDefinitionGeneric fillField() => generic2(
+StepDefinitionGeneric fillField() => step2(
   'I fill the {string} field with {string}',
-  (String key, String value, WidgetTesterWorld world) async {
-    await world.tester.enterText(find.byKey(ValueKey(key)), value);
-    await world.tester.pumpAndSettle();
+  (String key, String value, StepContext ctx) async {
+    await ctx.tester.enterText(find.byKey(ValueKey(key)), value);
+    await ctx.tester.pumpAndSettle();
   },
 );
 
 // Manual regex capture — use a regex group directly in the pattern
-StepDefinitionGeneric waitSeconds() => generic1(
+StepDefinitionGeneric waitSeconds() => step1(
   r'I wait (\d+) seconds?',
-  (String seconds, WidgetTesterWorld world) async {
+  (String seconds, StepContext ctx) async {
     await Future.delayed(Duration(seconds: int.parse(seconds)));
   },
 );
@@ -602,9 +602,9 @@ You can access them inside any `generic` (and `genericN`) builder via the `table
 // Step with no string captures, but accesses the attached table
 StepDefinitionGeneric givenEmployeesExist() => generic<WidgetTesterWorld>(
   'the following employees exist',
-  (WidgetTesterWorld world) async {
+  (StepContext ctx) async {
     // Access the table directly from the world context
-    final table = world.table;
+    final table = ctx.table;
     
     // Iterate rows as Map<String, String?>
     // (the Gherkin spec ensures table! will not be null if the step has a table)
@@ -617,10 +617,10 @@ StepDefinitionGeneric givenEmployeesExist() => generic<WidgetTesterWorld>(
 // Step with captures AND multiline content
 StepDefinitionGeneric givenDataForEntity() => generic1<String, WidgetTesterWorld>(
   'the following data exists for {string}',
-  (String entity, WidgetTesterWorld world) async {
+  (String entity, StepContext ctx) async {
     // Access via world.multilineArg (the raw union type) if needed,
     // or use the shortcuts:
-    if (world.table != null) {
+    if (ctx.table != null) {
       print('Handling table for $entity');
     } else if (world.docString != null) {
       print('Handling docstring: ${world.docString}');
@@ -629,7 +629,7 @@ StepDefinitionGeneric givenDataForEntity() => generic1<String, WidgetTesterWorld
 );
 ```
 
-The `world.table` and `world.docString` properties are `null` when the step in the feature file has no attached data. Since they are properties of the context object, you don't need to change your function signature to use them.
+The `ctx.table` and `world.docString` properties are `null` when the step in the feature file has no attached data. Since they are properties of the context object, you don't need to change your function signature to use them.
 
 `GherkinTable` API:
 
@@ -646,7 +646,7 @@ The `world.table` and `world.docString` properties are `null` when the step in t
 
 The **World** is a context object that lives for the duration of a single scenario. It is passed to every step function and gives you access to:
 
-- `world.tester` — the Flutter `WidgetTester` for interacting with the widget tree.
+- `ctx.tester` — the Flutter `WidgetTester` for interacting with the widget tree.
 - `world.binding` — the `IntegrationTestWidgetsFlutterBinding`.
 - `world.setAttachment<T>(key, value)` / `world.getAttachment<T>(key)` — share state between steps within the same scenario.
 
@@ -654,17 +654,17 @@ The **World** is a context object that lives for the duration of a single scenar
 
 ```dart
 // Step 1: store a value
-StepDefinitionGeneric iRememberTheText() => generic1(
+StepDefinitionGeneric iRememberTheText() => step1(
   'I remember the text {string}',
-  (String text, WidgetTesterWorld world) async {
+  (String text, StepContext ctx) async {
     world.setAttachment('remembered_text', text);
   },
 );
 
 // Step 2: retrieve the stored value
-StepDefinitionGeneric iVerifyTheText() => generic(
+StepDefinitionGeneric iVerifyTheText() => step<StepContext>(
   'I verify the remembered text',
-  (WidgetTesterWorld world) async {
+  (StepContext ctx) async {
     final text = world.getAttachment<String>('remembered_text');
     expect(find.text(text!), findsOneWidget);
   },
@@ -713,12 +713,12 @@ class MyHook extends IntegrationHook {
   }
 
   @override
-  Future<void> onBeforeStep(String stepText, WidgetTesterWorld world) async {
+  Future<void> onBeforeStep(String stepText, StepContext ctx) async {
     // Prepare for a step (e.g., clear a text field)
   }
 
   @override
-  Future<void> onAfterStep(StepResult result, WidgetTesterWorld world) async {
+  Future<void> onAfterStep(StepResult result, StepContext ctx) async {
     // React to a step result (e.g., take a screenshot on failure)
     if (result is StepFailure) {
       // capture screenshot, log error, etc.
@@ -813,7 +813,7 @@ class MyReporter extends IntegrationReporter {
   }
 
   @override
-  Future<void> onAfterStep(StepResult result, WidgetTesterWorld world) async {
+  Future<void> onAfterStep(StepResult result, StepContext ctx) async {
     final icon = result is StepSuccess ? '✓' : result is StepFailure ? '✗' : '○';
     print('  $icon ${result.stepText}');
   }
@@ -956,9 +956,9 @@ class SetupHook extends IntegrationHook {
 Or in a step definition:
 
 ```dart
-StepDefinitionGeneric theDbIsReset() => generic(
+StepDefinitionGeneric theDbIsReset() => step<StepContext>(
   'the database has been reset',
-  (WidgetTesterWorld world) async {
+  (StepContext ctx) async {
     final result = await resetDatabase();
     expect(result.success, isTrue);
   },

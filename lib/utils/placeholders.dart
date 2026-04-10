@@ -22,10 +22,7 @@ class PlaceholderDef {
   /// implementation.
   final dynamic Function(String) parser;
 
-  const PlaceholderDef({
-    required this.regexPart,
-    required this.parser,
-  });
+  const PlaceholderDef({required this.regexPart, required this.parser});
 }
 
 /// Defines which placeholder tokens are supported and how to handle them.
@@ -71,3 +68,23 @@ final Map<String, PlaceholderDef> placeholders = {
     parser: (raw) => raw,
   ),
 };
+
+/// A public registry to expose custom parameter type registration to users.
+///
+/// Using this registry, users can define custom tokens, e.g. `{employee}`,
+/// and provide a parser so that steps can be strongly typed for their own models.
+class ParameterTypes {
+  /// Registers a new custom parameter type.
+  ///
+  /// For example:
+  /// ```dart
+  /// ParameterTypes.register('color', r'(red|blue|green)', (val) => Color.parse(val));
+  /// ```
+  static void register<T>(
+    String name,
+    String regexPart,
+    T Function(String) parser,
+  ) {
+    placeholders[name] = PlaceholderDef(regexPart: regexPart, parser: parser);
+  }
+}
