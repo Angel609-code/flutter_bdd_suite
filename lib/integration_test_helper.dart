@@ -113,7 +113,7 @@ class IntegrationTestHelper {
     _reporterManager = LifecycleManager(config.reporters);
 
     _world = WidgetTesterWorld();
-    _world.setBinding(binding);
+    _world.binding = binding;
 
     // Build a per-execution registry from the built-in defaults plus any
     // custom steps declared in the config. No static mutation occurs.
@@ -158,7 +158,7 @@ class IntegrationTestHelper {
     _skipRemaining = false;
     _errorOnBackground = false;
 
-    await _world.setTester(tester);
+    _world.testerOrNull = tester;
 
     // If an explicit setUp is provided, call it.
     if (config.setUp != null) {
@@ -254,6 +254,7 @@ class IntegrationTestHelper {
     // step's first-class fields and forwarded as a single typed value.
     final stepFunction = _stepsRegistry.getStep(step.text);
     final multilineArg = _buildMultilineArg(step);
+        _world.multilineArgToInject = multilineArg;
 
     if (_skipRemaining) {
       final duration = DateTime.now().microsecondsSinceEpoch - start;
@@ -286,14 +287,14 @@ class IntegrationTestHelper {
         );
 
         // Inject the multiline argument into the world context before execution.
-        _world.setMultilineArg(multilineArg);
+
 
         try {
           // Forward execution to the step implementation.
           await stepFunction(_world);
         } finally {
           // Clear current step data to prevent leakage.
-          _world.setMultilineArg(null);
+
         }
 
         final duration = DateTime.now().microsecondsSinceEpoch - start;

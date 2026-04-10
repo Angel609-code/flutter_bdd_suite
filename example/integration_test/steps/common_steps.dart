@@ -44,8 +44,8 @@ String resolveKey(String type) {
 }
 
 StepDefinitionGeneric theApplicationIsLaunched() {
-  return step<StepContext>(
-    r'the application is launched',
+  return stepRegExp(
+    RegExp(r'the application is launched'),
     (ctx) async {
       themeNotifier.value = ThemeMode.light;
       await ctx.tester.pumpWidget(const BddExampleApp());
@@ -55,9 +55,12 @@ StepDefinitionGeneric theApplicationIsLaunched() {
 }
 
 StepDefinitionGeneric iShouldSeeTextOrElement() {
-  return step4<String?, String?, String?, String?, StepContext>(
-    r'I should (not )?see (?:multiple )?(?:(.+?) element|{string})(?: texts)?',
-    (notMatch, type, text, _, ctx) async {
+  return stepRegExp(
+    RegExp(r'I should (not )?see (?:multiple )?(?:(.+?) element|"(.+?)")(?: texts)?'),
+    (ctx) async {
+      final notMatch = ctx.args[0];
+      final type = ctx.args[1];
+      final text = ctx.args[2];
       final shouldNot = notMatch != null && notMatch.isNotEmpty;
 
       Finder finder;
@@ -81,8 +84,8 @@ StepDefinitionGeneric iShouldSeeTextOrElement() {
 StepDefinitionGeneric theLoginUIIsVisible() {
   // We use non-capturing groups `(?:screen|form fields)` and `(?:is|are)`
   // to avoid passing useless words as step arguments.
-  return step<StepContext>(
-    r'the login (?:screen|form fields) (?:is|are) (?:visible|present)',
+  return stepRegExp(
+    RegExp(r'the login (?:screen|form fields) (?:is|are) (?:visible|present)'),
     (ctx) async {
       expect(find.byKey(const Key('username_field')), findsOneWidget);
       expect(find.byKey(const Key('password_field')), findsOneWidget);
@@ -91,9 +94,11 @@ StepDefinitionGeneric theLoginUIIsVisible() {
 }
 
 StepDefinitionGeneric theElementIsVisible() {
-  return step3<String, String?, String, StepContext>(
-    r'(.+?) element(?:s)? (?:is|are) (?:visible|present|{string})',
-    (type, _, value, ctx) async {
+  return stepRegExp(
+    RegExp(r'(.+?) element(?:s)? (?:is|are) (?:visible|present|"(.+?)")'),
+    (ctx) async {
+      final type = ctx.args[0];
+      final value = ctx.args[1];
       final key = resolveKey(type);
       if (value == 'visible' || value == 'present') {
         expect(find.byKey(Key(key)), findsOneWidget);
@@ -105,9 +110,10 @@ StepDefinitionGeneric theElementIsVisible() {
 }
 
 StepDefinitionGeneric iShouldReachDashboard() {
-  return step1<String?, StepContext>(
-    r'I should (not )?reach the dashboard',
-    (notMatch, ctx) async {
+  return stepRegExp(
+    RegExp(r'I should (not )?reach the dashboard'),
+    (ctx) async {
+      final notMatch = ctx.args[0];
       final shouldReach = notMatch == null || notMatch.isEmpty;
 
       if (shouldReach) {

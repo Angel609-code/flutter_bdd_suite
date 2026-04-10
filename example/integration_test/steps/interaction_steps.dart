@@ -6,9 +6,11 @@ import 'common_steps.dart';
 
 StepDefinitionGeneric iEnterText() {
   // Use non-capturing groups `(?:enter|fill)` to simplify the callback signature.
-  return step2<String, String, StepContext>(
-    r'I (?:enter|fill) the (.+?)(?: field with)? {string}',
-    (type, value, ctx) async {
+  return stepRegExp(
+    RegExp(r'I (?:enter|fill) the (.+?)(?: field with)? "(.+?)"'),
+    (ctx) async {
+      final type = ctx.args[0];
+      final value = ctx.args[1];
       final key = resolveKey(type);
 
       await ctx.tester.enterText(find.byKey(Key(key)), value);
@@ -18,9 +20,11 @@ StepDefinitionGeneric iEnterText() {
 }
 
 StepDefinitionGeneric iInteractWithButton() {
-  return step2<String, String, StepContext>(
-    r'I (tap|scroll to) the (.+?) button',
-    (action, type, ctx) async {
+  return stepRegExp(
+    RegExp(r'I (tap|scroll to) the (.+?) button'),
+    (ctx) async {
+      final action = ctx.args[0];
+      final type = ctx.args[1];
       final key = resolveKey(type);
       final finder = find.byKey(Key(key));
 

@@ -525,7 +525,7 @@ Define custom steps using the typed `generic` builder functions. Each function c
 import 'package:flutter_bdd_suite/flutter_bdd_suite.dart';
 
 // 0 captures — matches the literal string exactly
-StepDefinitionGeneric tapLoginButton() => step<StepContext>(
+StepDefinitionGeneric tapLoginButton() => step(
   'I tap the login button',
   (StepContext ctx) async {
     await ctx.tester.tap(find.byKey(const ValueKey('login_button')));
@@ -662,7 +662,7 @@ StepDefinitionGeneric iRememberTheText() => step1(
 );
 
 // Step 2: retrieve the stored value
-StepDefinitionGeneric iVerifyTheText() => step<StepContext>(
+StepDefinitionGeneric iVerifyTheText() => step(
   'I verify the remembered text',
   (StepContext ctx) async {
     final text = world.getAttachment<String>('remembered_text');
@@ -956,7 +956,7 @@ class SetupHook extends IntegrationHook {
 Or in a step definition:
 
 ```dart
-StepDefinitionGeneric theDbIsReset() => step<StepContext>(
+StepDefinitionGeneric theDbIsReset() => step(
   'the database has been reset',
   (StepContext ctx) async {
     final result = await resetDatabase();

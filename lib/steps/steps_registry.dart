@@ -105,6 +105,6 @@ class StepsRegistry {
     }
 
     if (match == null) return null;
-    return (world) => match!.run(cleanedStepText, world);
+    return (world) => match!.run(cleanedStepText, world, world.multilineArgToInject);
   }
 }
