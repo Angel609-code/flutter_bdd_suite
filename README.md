@@ -575,6 +575,103 @@ final config = IntegrationTestConfig(
 
 Builders `generic` through `generic6` are available, supporting 0 to 6 captures respectively.
 
+### Expression vs RegExp Steps
+
+This framework enforces a strict separation between simple Cucumber Expressions and powerful Regular Expressions. This ensures predictability and prevents bugs caused by mixing the two.
+
+#### `step()` (Cucumber Expressions)
+Use `step()` for the vast majority of your definitions. It accepts plain text and `{}` placeholders.
+**Important:** Do not use raw regex features (like `(?:...)`, `|`, `^`, `$`) inside `step()`. The framework will throw a helpful runtime error if it detects them.
+
+```dart
+// GOOD: Plain text
+step('the application is launched', (ctx) async { ... });
+
+// GOOD: Placeholders
+step('I fill the {string} field with {string}', (ctx) async {
+  final (field, value) = ctx.args.two<String, String>();
+  // ...
+});
+```
+
+#### `stepRegExp()` (Regular Expressions)
+Use `stepRegExp()` *only* when you need advanced regex logic like alternations, optional words, or specific lookarounds.
+
+```dart
+// GOOD: Using non-capturing groups (?:) to accept multiple phrasings
+// without polluting the arguments list.
+stepRegExp(
+  RegExp(r'I (?:enter|fill) the (.+?)(?: field with)? "(.+?)"'),
+  (ctx) async {
+    final (field, value) = ctx.args.two<String, String>();
+    // ...
+  }
+);
+```
+
+### Regex steps: capturing vs non-capturing groups
+
+When using `stepRegExp()`, it is critical to understand how Regex groupings translate into `StepArgs`:
+
+1. **Only capturing groups `(...)` produce an argument.**
+2. **Non-capturing groups `(?:...)` are ignored** by the argument list. This is extremely useful for alternations (e.g. `(?:enter|fill)`).
+3. **Optional captures yield `null`.** If a capturing group is bypassed, its corresponding argument will be `null` (meaning you must type it as `String?`).
+
+#### Multi-state steps (Best Practice)
+If a single step handles multiple states (e.g., "is visible" vs "is not present"), **capture the entire state block** instead of hiding the words in a non-capturing group.
+
+```dart
+stepRegExp(
+  RegExp(r'(.+?) element(?:s)? (?:is|are) (visible|present|"(.+?)")'),
+  (ctx) async {
+    // The regex has exactly THREE capturing groups: `(.+?)`, the entire state, and the optional quoted string.
+    final (type, stateRaw, quoted) = ctx.args.three<String, String, String?>();
+
+    final key = resolveKey(type);
+
+    // If the user used quotes (e.g., "hidden"), `quoted` will contain "hidden".
+    // Otherwise, `stateRaw` will contain the exact word they typed (e.g., "visible" or "present").
+    final state = quoted ?? stateRaw;
+
+    switch (state) {
+      case 'visible':
+      case 'present':
+        expect(find.byKey(Key(key)), findsOneWidget);
+        break;
+      case 'not visible':
+      case 'hidden':
+        expect(find.byKey(Key(key)), findsNothing);
+        break;
+    }
+  },
+);
+```
+
+If you request `ctx.args.four()` for this step, the framework will throw a helpful runtime error explaining the mismatch between your capture groups and your request.
+
+### Custom Parameter Types
+
+You can register custom parameter models to be automatically parsed from your step text:
+
+```dart
+import 'package:flutter_bdd_suite/utils/placeholders.dart';
+
+// In your setup file:
+ParameterTypes.register<Color>(
+  'color',
+  r'(red|blue|green)',
+  (val) => Color.parse(val),
+);
+```
+
+Then use it in a step:
+
+```dart
+step('the background should be {color}', (ctx) async {
+    final (color,) = ctx.args.one<Color>();
+});
+```
+
 ### Pattern Syntax
 
 Patterns are strings that get compiled to `RegExp` for matching. The following constructs are supported:

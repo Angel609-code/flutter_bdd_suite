@@ -34,11 +34,13 @@ David Kim,Analyst,35,david@teamsync.io''';
     final parsed = parseCsv(_sampleCsvContent);
 
     setState(() {
-      _files.add(_ImportedFile(
-        name: 'employees_${DateTime.now().millisecondsSinceEpoch}.csv',
-        content: _sampleCsvContent,
-        rowCount: parsed.length - 1,
-      ));
+      _files.add(
+        _ImportedFile(
+          name: 'employees_${DateTime.now().millisecondsSinceEpoch}.csv',
+          content: _sampleCsvContent,
+          rowCount: parsed.length - 1,
+        ),
+      );
 
       _parsed = parsed;
       _status = 'CSV file imported successfully.';
@@ -114,9 +116,7 @@ class _ActionCard extends StatelessWidget {
               Text(
                 key: const Key('file_status_message'),
                 status,
-                style: TextStyle(
-                  color: isSuccess ? Colors.green : Colors.grey,
-                ),
+                style: TextStyle(color: isSuccess ? Colors.green : Colors.grey),
               ),
               const SizedBox(height: 12),
               Wrap(
@@ -143,6 +143,7 @@ class _ActionCard extends StatelessWidget {
     );
   }
 }
+
 class _CsvPreview extends StatelessWidget {
   final List<List<String>> parsed;
   final bool showRaw;
@@ -207,9 +208,10 @@ class _CsvPreview extends StatelessWidget {
                       ),
                       child: DataTable(
                         key: const Key('csv_content_table'),
-                        columns: headers
-                            .map((h) => DataColumn(label: Text(h)))
-                            .toList(),
+                        columns:
+                            headers
+                                .map((h) => DataColumn(label: Text(h)))
+                                .toList(),
                         rows: List.generate(rows.length, (rowIdx) {
                           final row = rows[rowIdx];
                           return DataRow(
@@ -265,7 +267,7 @@ class _FilesList extends StatelessWidget {
                   ),
                 );
               }),
-            )
+            ),
         ],
       ),
     );

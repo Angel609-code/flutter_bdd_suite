@@ -6,9 +6,7 @@ class Background {
   final List<Step> steps = [];
 
   Map<String, dynamic> toJson() {
-    return {
-      'steps': steps.map((step) => step.toJson()).toList(),
-    };
+    return {'steps': steps.map((step) => step.toJson()).toList()};
   }
 
   @override

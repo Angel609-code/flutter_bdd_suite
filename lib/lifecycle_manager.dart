@@ -8,7 +8,9 @@ import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
 class LifecycleManager {
   final List<LifecycleListener> _listeners;
 
-  LifecycleManager(List<LifecycleListener> listeners) : _listeners = [...listeners]..sort((a, b) => b.priority.compareTo(a.priority));
+  LifecycleManager(List<LifecycleListener> listeners)
+    : _listeners = [...listeners]
+        ..sort((a, b) => b.priority.compareTo(a.priority));
 
   Future<void> onBeforeAll() async {
     for (final listener in _listeners) {
@@ -55,7 +57,9 @@ class LifecycleManager {
       try {
         await listener.onBeforeScenario(scenario);
       } catch (e, st) {
-        logLine('Error in onBeforeScenario("${scenario.scenarioName}"): $e\n$st');
+        logLine(
+          'Error in onBeforeScenario("${scenario.scenarioName}"): $e\n$st',
+        );
       }
     }
   }

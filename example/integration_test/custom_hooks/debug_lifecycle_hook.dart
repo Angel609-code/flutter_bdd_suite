@@ -39,7 +39,9 @@ class DebugLifecycleHook extends IntegrationHook {
 
   @override
   Future<void> onAfterScenario(ScenarioResult result) async {
-    logLine('[DEBUG HOOK] onAfterScenario: ${result.scenarioName} (${result.status.name})');
+    logLine(
+      '[DEBUG HOOK] onAfterScenario: ${result.scenarioName} (${result.status.name})',
+    );
   }
 
   @override

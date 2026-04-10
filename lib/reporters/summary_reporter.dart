@@ -10,9 +10,9 @@ import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
 class SummaryReporter extends IntegrationReporter {
   DateTime? _startTime;
 
-  int _totalScenarios   = 0;
-  int _passedScenarios  = 0;
-  int _failedScenarios  = 0;
+  int _totalScenarios = 0;
+  int _passedScenarios = 0;
+  int _failedScenarios = 0;
   int _skippedScenarios = 0;
 
   ScenarioStatus? _currentStatus;
@@ -61,23 +61,27 @@ class SummaryReporter extends IntegrationReporter {
   @override
   Future<void> onAfterAll() async {
     final elapsed = DateTime.now().difference(_startTime!);
-    final mins   = elapsed.inMinutes;
-    final secs   = elapsed.inSeconds % 60;
+    final mins = elapsed.inMinutes;
+    final secs = elapsed.inSeconds % 60;
     final millis = (elapsed.inMilliseconds % 1000).toString().padLeft(3, '0');
 
     logLine('');
     logLine(
-        '$_totalScenarios scenarios ' 
-        '($green$_passedScenarios passed$reset, ' 
-        '$red$_failedScenarios failed$reset, ' 
-        '$yellow$_skippedScenarios skipped$reset)'
+      '$_totalScenarios scenarios '
+      '($green$_passedScenarios passed$reset, '
+      '$red$_failedScenarios failed$reset, '
+      '$yellow$_skippedScenarios skipped$reset)',
     );
     logLine('${mins}m$secs.${millis}s');
     logLine('');
   }
 
-  @override Map<String, dynamic> toJson() => {};
-  @override Future<void> onBeforeStep(String _, WidgetTesterWorld __) async {}
-  @override Future<void> onFeatureStarted(FeatureInfo _) async {}
-  @override Future<void> onAfterFeature(FeatureInfo _) async {}
+  @override
+  Map<String, dynamic> toJson() => {};
+  @override
+  Future<void> onBeforeStep(String _, WidgetTesterWorld __) async {}
+  @override
+  Future<void> onFeatureStarted(FeatureInfo _) async {}
+  @override
+  Future<void> onAfterFeature(FeatureInfo _) async {}
 }

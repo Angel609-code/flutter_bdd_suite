@@ -28,10 +28,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         return AlertDialog(
           title: const Text('Terms & Conditions'),
           content: SingleChildScrollView(
-            child: Text(
-              _termsText,
-              key: const Key('terms_text'),
-            ),
+            child: Text(_termsText, key: const Key('terms_text')),
           ),
           actions: [
             TextButton(
@@ -86,7 +83,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 4),
+                        horizontal: 16,
+                        vertical: 4,
+                      ),
                       child: Text(
                         _darkModeEnabled
                             ? 'Dark Mode: Enabled'
@@ -105,7 +104,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Volume', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      const Text(
+                        'Volume',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       Slider(
                         key: const Key('volume_slider'),
                         min: 0,
@@ -117,7 +122,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           });
                         },
                       ),
-                      Text('Current Volume: ${_volume.round()}', key: const Key('volume_label')),
+                      Text(
+                        'Current Volume: ${_volume.round()}',
+                        key: const Key('volume_label'),
+                      ),
                     ],
                   ),
                 ),

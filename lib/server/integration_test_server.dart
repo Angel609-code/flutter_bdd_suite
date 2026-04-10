@@ -24,7 +24,10 @@ class IntegrationTestServer {
   };
 
   IntegrationTestServer({int? port})
-      : port = port ?? int.tryParse(Platform.environment['FGP_BRIDGE_PORT'] ?? '') ?? 9876;
+    : port =
+          port ??
+          int.tryParse(Platform.environment['FGP_BRIDGE_PORT'] ?? '') ??
+          9876;
 
   /// Registers a custom HTTP endpoint handler.
   ///
@@ -37,7 +40,9 @@ class IntegrationTestServer {
       throw ArgumentError('Unsupported method $m');
     }
     if (_custom[m]!.containsKey(registration.path)) {
-      throw ArgumentError('Handler for $m ${registration.path} already registered');
+      throw ArgumentError(
+        'Handler for $m ${registration.path} already registered',
+      );
     }
     _custom[m]![registration.path] = registration.handler;
   }
@@ -54,7 +59,10 @@ class IntegrationTestServer {
     }
     _server!.listen((req) async {
       req.response.headers.set('Access-Control-Allow-Origin', '*');
-      req.response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+      req.response.headers.set(
+        'Access-Control-Allow-Methods',
+        'GET, POST, OPTIONS',
+      );
       req.response.headers.set('Access-Control-Allow-Headers', '*');
       req.response.headers.set('Access-Control-Allow-Private-Network', 'true');
       if (req.method == 'OPTIONS') {
@@ -64,15 +72,11 @@ class IntegrationTestServer {
       }
       try {
         final method = req.method.toUpperCase();
-        final handlers = {
-          'POST': {
-            '/save-report': _handleReport,
-            ...?_custom['POST'],
-          },
-          'GET': {
-            ...?_custom['GET'],
-          },
-        }[method];
+        final handlers =
+            {
+              'POST': {'/save-report': _handleReport, ...?_custom['POST']},
+              'GET': {...?_custom['GET']},
+            }[method];
         final handler = handlers?[req.uri.path];
         if (handler != null) {
           await handler(req);
@@ -102,9 +106,10 @@ class IntegrationTestServer {
 
       // 2. Build the Absolute Path
       // If the path is already absolute, use it. Otherwise, join it with project root.
-      final absolutePath = pathFromClient.startsWith('/') 
-          ? pathFromClient 
-          : '$projectRoot/$pathFromClient';
+      final absolutePath =
+          pathFromClient.startsWith('/')
+              ? pathFromClient
+              : '$projectRoot/$pathFromClient';
 
       final file = File(absolutePath);
 

@@ -36,9 +36,13 @@ class GeneratePipelineResult {
 Future<GeneratePipelineResult> runGeneratePipeline(
   GeneratePipelineOptions options,
 ) async {
-  final configFile = File(p.join(options.cwd, 'integration_test', options.configPath));
+  final configFile = File(
+    p.join(options.cwd, 'integration_test', options.configPath),
+  );
   if (!configFile.existsSync()) {
-    throw StateError('Cannot find config at integration_test/${options.configPath}');
+    throw StateError(
+      'Cannot find config at integration_test/${options.configPath}',
+    );
   }
 
   TagExpr? tagFilter;
@@ -48,34 +52,44 @@ Future<GeneratePipelineResult> runGeneratePipeline(
 
   final selectedTagFilter = tagFilter;
 
-  final featuresDir = Directory(p.join(options.cwd, 'integration_test', 'features'));
+  final featuresDir = Directory(
+    p.join(options.cwd, 'integration_test', 'features'),
+  );
   if (!featuresDir.existsSync()) {
-    throw StateError('No integration_test/features folder found under ${options.cwd}');
+    throw StateError(
+      'No integration_test/features folder found under ${options.cwd}',
+    );
   }
 
   final parser = FeatureParser();
-  List<File> featureFiles = featuresDir
-      .listSync(recursive: true)
-      .whereType<File>()
-      .where((f) => f.path.endsWith('.feature'))
-      .toList();
+  List<File> featureFiles =
+      featuresDir
+          .listSync(recursive: true)
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.feature'))
+          .toList();
 
   if (options.pattern != null && options.pattern!.isNotEmpty) {
     final regex = RegExp(options.pattern!);
-    featureFiles = featureFiles.where((f) {
-      final relPath = p.relative(f.path, from: featuresDir.path);
-      return regex.hasMatch(relPath);
-    }).toList();
+    featureFiles =
+        featureFiles.where((f) {
+          final relPath = p.relative(f.path, from: featuresDir.path);
+          return regex.hasMatch(relPath);
+        }).toList();
   }
 
-  final generatedRoot = Directory(p.join(options.cwd, 'integration_test', 'generated'));
+  final generatedRoot = Directory(
+    p.join(options.cwd, 'integration_test', 'generated'),
+  );
   if (generatedRoot.existsSync()) {
     generatedRoot.deleteSync(recursive: true);
   }
   generatedRoot.createSync(recursive: true);
 
   final templateUri = await Isolate.resolvePackageUri(
-    Uri.parse('package:flutter_bdd_suite/templates/test_runner_template.mustache'),
+    Uri.parse(
+      'package:flutter_bdd_suite/templates/test_runner_template.mustache',
+    ),
   );
   if (templateUri == null) {
     throw StateError('Cannot resolve template URI');
@@ -86,7 +100,10 @@ Future<GeneratePipelineResult> runGeneratePipeline(
     throw StateError('Cannot find template at ${templateFile.path}');
   }
 
-  final template = Template(templateFile.readAsStringSync(), htmlEscapeValues: false);
+  final template = Template(
+    templateFile.readAsStringSync(),
+    htmlEscapeValues: false,
+  );
   int generatedCount = 0;
 
   for (final featureFile in featureFiles) {
@@ -95,13 +112,16 @@ Future<GeneratePipelineResult> runGeneratePipeline(
     final feature = parser.parse(raw, relPath);
 
     if (selectedTagFilter != null) {
-      final kept = feature.scenarios.where((sc) {
-        final tags = {...feature.tags, ...sc.tags}.toSet();
-        return selectedTagFilter.evaluate(tags);
-      }).toList();
+      final kept =
+          feature.scenarios.where((sc) {
+            final tags = {...feature.tags, ...sc.tags}.toSet();
+            return selectedTagFilter.evaluate(tags);
+          }).toList();
 
       if (kept.isEmpty) {
-        stdout.writeln('Skipping ${feature.name}, no scenarios match ${options.tags}');
+        stdout.writeln(
+          'Skipping ${feature.name}, no scenarios match ${options.tags}',
+        );
         continue;
       }
 
@@ -110,7 +130,8 @@ Future<GeneratePipelineResult> runGeneratePipeline(
         ..addAll(kept);
     }
 
-    final featureCount = RegExp(r'^\s*Feature:', multiLine: true).allMatches(raw).length;
+    final featureCount =
+        RegExp(r'^\s*Feature:', multiLine: true).allMatches(raw).length;
     if (featureCount != 1) {
       throw StateError('Expected one Feature in ${featureFile.path}');
     }
@@ -141,7 +162,11 @@ Future<GeneratePipelineResult> runGeneratePipeline(
       'hasTags': featureTagsUnique.isNotEmpty,
       'tagsString': '[${featureTagsUnique.map((e) => "'$e'").join(', ')}]',
       'scenarios': scenarioMaps,
-      'backgroundSteps': feature.background?.steps.map((s) => {'jsonStep': s.toString()}).toList() ?? [],
+      'backgroundSteps':
+          feature.background?.steps
+              .map((s) => {'jsonStep': s.toString()})
+              .toList() ??
+          [],
       'hasBackgroundSteps': feature.background?.steps.isNotEmpty ?? false,
     };
 
@@ -158,7 +183,10 @@ Future<GeneratePipelineResult> runGeneratePipeline(
       'configImport': "import '$configImportPath';",
     });
 
-    final outFilePath = p.join(generatedRoot.path, '${p.withoutExtension(relPath)}.dart');
+    final outFilePath = p.join(
+      generatedRoot.path,
+      '${p.withoutExtension(relPath)}.dart',
+    );
 
     File(outFilePath)
       ..createSync(recursive: true)
@@ -168,12 +196,15 @@ Future<GeneratePipelineResult> runGeneratePipeline(
     stdout.writeln('Generated $outFilePath');
   }
 
-  final genDir = Directory(p.join(options.cwd, 'integration_test', 'generated'));
-  List<File> allFiles = genDir
-      .listSync(recursive: true)
-      .whereType<File>()
-      .where((f) => f.path.endsWith('.dart'))
-      .toList();
+  final genDir = Directory(
+    p.join(options.cwd, 'integration_test', 'generated'),
+  );
+  List<File> allFiles =
+      genDir
+          .listSync(recursive: true)
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.dart'))
+          .toList();
 
   switch (options.order) {
     case 'alphabetically':
@@ -188,9 +219,10 @@ Future<GeneratePipelineResult> runGeneratePipeline(
       break;
     case var s when s.startsWith('random'):
       final parts = options.order.split(':');
-      final rng = (parts.length == 2 && int.tryParse(parts[1]) != null)
-          ? Random(int.parse(parts[1]))
-          : Random();
+      final rng =
+          (parts.length == 2 && int.tryParse(parts[1]) != null)
+              ? Random(int.parse(parts[1]))
+              : Random();
       allFiles.shuffle(rng);
       break;
     case 'reverse':
@@ -201,20 +233,29 @@ Future<GeneratePipelineResult> runGeneratePipeline(
   }
 
   if (allFiles.isEmpty) {
-    final emptyMaster = File(p.join(options.cwd, 'integration_test', 'all_integration_tests.dart'));
+    final emptyMaster = File(
+      p.join(options.cwd, 'integration_test', 'all_integration_tests.dart'),
+    );
     emptyMaster
       ..createSync(recursive: true)
-      ..writeAsStringSync('// DO NOT EDIT MANUALLY. Generated by flutter_bdd_suite.\nvoid main() {}\n');
+      ..writeAsStringSync(
+        '// DO NOT EDIT MANUALLY. Generated by flutter_bdd_suite.\nvoid main() {}\n',
+      );
 
     return GeneratePipelineResult(
       generatedCount: 0,
-      masterRunnerPath: p.join('integration_test', 'all_integration_tests.dart'),
+      masterRunnerPath: p.join(
+        'integration_test',
+        'all_integration_tests.dart',
+      ),
     );
   }
 
   final basenameCount = <String, int>{};
   for (final file in allFiles) {
-    final base = p.basenameWithoutExtension(p.relative(file.path, from: 'integration_test'));
+    final base = p.basenameWithoutExtension(
+      p.relative(file.path, from: 'integration_test'),
+    );
     basenameCount[base] = (basenameCount[base] ?? 0) + 1;
   }
 
@@ -233,16 +274,17 @@ Future<GeneratePipelineResult> runGeneratePipeline(
     callLines.add('  $alias.run(helper);');
   }
 
-  final masterConfigImport = "import '${p.relative(
-    p.join(options.cwd, 'integration_test', options.configPath),
-    from: p.join(options.cwd, 'integration_test'),
-  )}';";
+  final masterConfigImport =
+      "import '${p.relative(p.join(options.cwd, 'integration_test', options.configPath), from: p.join(options.cwd, 'integration_test'))}';";
 
-  final buffer = StringBuffer()
-    ..writeln('// DO NOT EDIT MANUALLY. Generated by flutter_bdd_suite.')
-    ..writeln("import 'package:flutter_bdd_suite/integration_test_helper.dart';")
-    ..writeln(masterConfigImport)
-    ..writeln();
+  final buffer =
+      StringBuffer()
+        ..writeln('// DO NOT EDIT MANUALLY. Generated by flutter_bdd_suite.')
+        ..writeln(
+          "import 'package:flutter_bdd_suite/integration_test_helper.dart';",
+        )
+        ..writeln(masterConfigImport)
+        ..writeln();
 
   for (final line in importLines) {
     buffer.writeln(line);
@@ -251,10 +293,16 @@ Future<GeneratePipelineResult> runGeneratePipeline(
   buffer
     ..writeln()
     ..writeln('void main() async {')
-    ..writeln('  final helper = await IntegrationTestHelper.create(config: config);')
+    ..writeln(
+      '  final helper = await IntegrationTestHelper.create(config: config);',
+    )
     ..writeln()
-    ..writeln('  // Register suite-level setUpAll/tearDownAll exactly once for all features.')
-    ..writeln('  // Individual feature runners do not call registerSuiteHooks themselves.')
+    ..writeln(
+      '  // Register suite-level setUpAll/tearDownAll exactly once for all features.',
+    )
+    ..writeln(
+      '  // Individual feature runners do not call registerSuiteHooks themselves.',
+    )
     ..writeln('  helper.registerSuiteHooks();')
     ..writeln();
 
@@ -264,12 +312,16 @@ Future<GeneratePipelineResult> runGeneratePipeline(
 
   buffer.writeln('}');
 
-  final masterFile = File(p.join(options.cwd, 'integration_test', 'all_integration_tests.dart'));
+  final masterFile = File(
+    p.join(options.cwd, 'integration_test', 'all_integration_tests.dart'),
+  );
   masterFile
     ..createSync(recursive: true)
     ..writeAsStringSync(buffer.toString());
 
-  stdout.writeln('Generated integration_test/all_integration_tests.dart with ${allFiles.length} runners.');
+  stdout.writeln(
+    'Generated integration_test/all_integration_tests.dart with ${allFiles.length} runners.',
+  );
 
   return GeneratePipelineResult(
     generatedCount: generatedCount,

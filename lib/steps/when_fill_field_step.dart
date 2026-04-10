@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bdd_suite/utils/step_definition_generic.dart';
-import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Creates a step definition that enters [value] into the widget whose key is [key].
@@ -29,21 +28,19 @@ import 'package:flutter_test/flutter_test.dart';
 ///
 /// Returns a `StepDefinitionGeneric` that the runner can register.
 StepDefinitionGeneric whenFillFieldStep() {
-  return generic2<String, String, WidgetTesterWorld>(
-    'I fill the {string} field with {string}',
-    (key, value, context) async {
-      // Find the widget by its ValueKey.
-      final finder = find.byKey(ValueKey(key));
+  return step('I fill the {string} field with {string}', (ctx) async {
+    final (key, value) = ctx.args.two<String, String>();
+    // Find the widget by its ValueKey.
+    final finder = find.byKey(ValueKey(key));
 
-      // Verify that exactly one widget matches.
-      expect(finder, findsOneWidget);
+    // Verify that exactly one widget matches.
+    expect(finder, findsOneWidget);
 
-      // Enter the provided text into the widget.
-      await context.tester.enterText(finder, value);
+    // Enter the provided text into the widget.
+    await ctx.tester.enterText(finder, value);
 
-      // Allow the UI to settle after text entry.
-      // Uses the global timeout from IntegrationTestConfig.
-      await context.tester.pumpAndSettle();
-    },
-  );
+    // Allow the UI to settle after text entry.
+    // Uses the global timeout from IntegrationTestConfig.
+    await ctx.tester.pumpAndSettle();
+  });
 }

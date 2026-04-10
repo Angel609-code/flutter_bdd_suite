@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:example/main.dart';
 import 'package:example/app_theme.dart';
 import 'package:flutter_bdd_suite/utils/step_definition_generic.dart';
-import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 String resolveKey(String type) {
@@ -45,29 +44,53 @@ String resolveKey(String type) {
 }
 
 StepDefinitionGeneric theApplicationIsLaunched() {
-  return generic<WidgetTesterWorld>(
-    r'the application is launched',
-    (world) async {
-      themeNotifier.value = ThemeMode.light;
-      await world.tester.pumpWidget(const BddExampleApp());
-      await world.tester.pumpAndSettle();
-    },
-  );
+  return step('the application is launched', (ctx) async {
+    themeNotifier.value = ThemeMode.light;
+    await ctx.tester.pumpWidget(const BddExampleApp());
+    await ctx.tester.pumpAndSettle();
+  });
 }
 
 StepDefinitionGeneric iShouldSeeTextOrElement() {
-  return generic4<String?, String?, String?, String?, WidgetTesterWorld>(
-    r'I should (not )?see (?:multiple )?(?:(.+?) element|{string})(?: texts)?',
-    (notMatch, type, text, _, world) async {
+  return stepRegExp(
+    RegExp(r'I should (not )?see (.+)'),
+    (ctx) async {
+      final (notMatch, raw) =
+          ctx.args.two<String?, String>();
+
       final shouldNot = notMatch != null && notMatch.isNotEmpty;
 
       Finder finder;
 
-      if (text != null && text.isNotEmpty) {
+      final multipleMatch = RegExp(r'^multiple "([^"]*)" texts$').firstMatch(raw);
+
+      if (multipleMatch != null) {
+        final text = multipleMatch.group(1)!;
+        finder = find.text(text);
+
+        final count = int.tryParse(text);
+
+        if (shouldNot) {
+          expect(finder, findsNothing);
+        } else if (count != null) {
+          expect(finder, findsNWidgets(count));
+        } else {
+          expect(finder, findsWidgets);
+        }
+        return;
+      }
+
+      if (raw.startsWith('"') && raw.endsWith('"')) {
+        final text = raw.substring(1, raw.length - 1);
         finder = find.textContaining(text);
-      } else {
-        final key = resolveKey(type!);
+      }
+      
+      else if (raw.endsWith(' element')) {
+        final type = raw.replaceAll(' element', '');
+        final key = resolveKey(type);
         finder = find.byKey(Key(key));
+      } else {
+        throw Exception('Invalid step format: $raw');
       }
 
       if (shouldNot) {
@@ -80,9 +103,11 @@ StepDefinitionGeneric iShouldSeeTextOrElement() {
 }
 
 StepDefinitionGeneric theLoginUIIsVisible() {
-  return generic3<String, String, String, WidgetTesterWorld>(
-    r'the login (screen|form fields) (is|are) (visible|present)',
-    (_, __, ___, world) async {
+  // We use non-capturing groups `(?:screen|form fields)` and `(?:is|are)`
+  // to avoid passing useless words as step arguments.
+  return stepRegExp(
+    RegExp(r'the login (?:screen|form fields) (?:is|are) (?:visible|present)'),
+    (ctx) async {
       expect(find.byKey(const Key('username_field')), findsOneWidget);
       expect(find.byKey(const Key('password_field')), findsOneWidget);
     },
@@ -90,30 +115,73 @@ StepDefinitionGeneric theLoginUIIsVisible() {
 }
 
 StepDefinitionGeneric theElementIsVisible() {
-  return generic4<String, String?, String, String, WidgetTesterWorld>(
-    r'(.+?) element(s)? (is|are) (?:visible|present|{string})',
-    (type, _, __, value, world) async {
+  return stepRegExp(
+    // This regex supports BOTH:
+    //   is visible
+    //   is "visible"
+    //
+    // Breakdown:
+    // (.+?)                  → Captures the element type (e.g. "employee dialog title")
+    // element(?:s)?          → Matches "element" or "elements"
+    // (?:is|are)             → Matches "is" or "are"
+    // "?([^"]+)"?            → Captures the state, with OPTIONAL quotes
+    //
+    // Key idea:
+    // "?        → optional opening quote
+    // ([^"]+)   → capture ANY text that is NOT a quote
+    // "?        → optional closing quote
+    //
+    // This means BOTH of these produce the SAME captured value:
+    //   visible   → stateRaw = "visible"
+    //   "visible" → stateRaw = "visible"
+    //
+    RegExp(
+      r'(.+?) element(?:s)? (?:is|are) "?([^"]+)"?',
+    ),
+    (ctx) async {
+      // We always get exactly TWO values:
+      // type     → "employee dialog title"
+      // stateRaw → "visible" OR "hidden" (quotes already stripped by regex)
+      final (type, stateRaw) =
+          ctx.args.two<String, String>();
+
+      // Normalize just in case (defensive programming)
+      final state = stateRaw.toLowerCase().trim();
+
       final key = resolveKey(type);
-      if (value == 'visible' || value == 'present') {
-        expect(find.byKey(Key(key)), findsOneWidget);
-      } else {
-        expect(find.byKey(Key(key)), findsNothing);
+      final finder = find.byKey(Key(key));
+
+      // Interpret the meaning of the state
+      switch (state) {
+        case 'visible':
+        case 'present':
+          // Widget must exist in the widget tree
+          expect(finder, findsOneWidget);
+          break;
+
+        case 'hidden':
+          // Widget must NOT exist in the widget tree
+          expect(finder, findsNothing);
+          break;
+
+        default:
+          throw Exception('Invalid state: $state');
       }
     },
   );
 }
 
 StepDefinitionGeneric iShouldReachDashboard() {
-  return generic1<String?, WidgetTesterWorld>(
-    r'I should (not )?reach the dashboard',
-    (notMatch, world) async {
-      final shouldReach = notMatch == null || notMatch.isEmpty;
+  return stepRegExp(RegExp(r'I should (not )?reach the dashboard'), (
+    ctx,
+  ) async {
+    final (notMatch,) = ctx.args.one<String?>();
+    final shouldReach = notMatch == null || notMatch.isEmpty;
 
-      if (shouldReach) {
-        expect(find.byKey(const Key('add_employee_fab')), findsOneWidget);
-      } else {
-        expect(find.byKey(const Key('login_button')), findsOneWidget);
-      }
-    },
-  );
+    if (shouldReach) {
+      expect(find.byKey(const Key('add_employee_fab')), findsOneWidget);
+    } else {
+      expect(find.byKey(const Key('login_button')), findsOneWidget);
+    }
+  });
 }

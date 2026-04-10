@@ -1,90 +1,140 @@
-import 'package:flutter_bdd_suite/utils/capture_token.dart';
 import 'package:flutter_bdd_suite/utils/placeholders.dart';
 import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
+import 'package:flutter_bdd_suite/utils/step_args.dart';
+import 'package:flutter_bdd_suite/models/gherkin_table_model.dart';
+import 'package:flutter_bdd_suite/models/step_multiline_arg.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+/// The execution context for a single step.
+///
+/// Contains the typed [args] parsed from the step text, the Flutter [tester],
+/// the active [world] state, and any attached [table] or [docString].
+class StepContext {
+  final WidgetTester tester;
+  final WidgetTesterWorld world;
+  final StepArgs args;
+  final StepMultilineArg? _multilineArg;
+
+  StepContext({
+    required this.tester,
+    required this.world,
+    required this.args,
+    StepMultilineArg? multilineArg,
+  }) : _multilineArg = multilineArg;
+
+  GherkinTable? get table => _multilineArg?.table;
+  String? get docString => _multilineArg?.docString;
+
+  /// Returns the attached data table, or throws a [StateError] if none was provided.
+  GherkinTable tableOrThrow() {
+    final t = table;
+    if (t == null) {
+      throw StateError(
+        'Expected a DataTable attached to this step, but none was found.',
+      );
+    }
+    
+    return t;
+  }
+
+  /// Returns the attached doc-string content, or throws a [StateError] if none was provided.
+  String docStringOrThrow() {
+    final d = docString;
+    if (d == null) {
+      throw StateError(
+        'Expected a DocString attached to this step, but none was found.',
+      );
+    }
+
+    return d;
+  }
+}
 
 /// The concrete function type executed by the test runner for each matched step.
-///
-/// Receive the active [world]. Any attached data (table or doc-string) can be
-/// accessed via [world.multilineArg] or the convenience shortcuts [world.table]
-/// and [world.docString].
 typedef StepFunction = Future<void> Function(WidgetTesterWorld world);
+
+/// The callback signature for user-defined steps.
+typedef StepAction = Future<void> Function(StepContext ctx);
 
 class StepDefinitionGeneric {
   final RegExp pattern;
-  final int argCount;
+  final Future<void> Function(List<String> args, WidgetTesterWorld world)
+  execute;
 
-  /// The internal executor called by [run].
-  final Future<void> Function(
-    List<String> args,
-    WidgetTesterWorld world,
-  ) execute;
-
-  StepDefinitionGeneric(this.pattern, this.argCount, this.execute);
+  StepDefinitionGeneric(this.pattern, this.execute);
 
   bool matches(String input) => pattern.hasMatch(input);
 
-  /// Run this step for the given [input] text.
   Future<void> run(
     String input,
-    WidgetTesterWorld context,
-  ) async {
+    WidgetTesterWorld world, [
+    StepMultilineArg? multilineArg,
+  ]) async {
     final match = pattern.firstMatch(input);
     if (match == null) throw Exception('No match for: $input');
 
     final args = <String>[];
-    for (int i = 1; i <= argCount; i++) {
+    for (int i = 1; i <= match.groupCount; i++) {
       args.add(match.group(i) ?? '');
     }
 
-    await execute(args, context);
+    await execute(args, world);
   }
 }
 
 class _ParsedStepRegex {
   final RegExp regex;
-  final List<CaptureToken> tokens;
+  final List<PlaceholderDef> tokens;
 
   _ParsedStepRegex(this.regex, this.tokens);
 }
 
-/// Defines a step with EXACTLY `expectedCaptureCount` captures
-/// (placeholder `{…}` or manual `( … )`).
-_ParsedStepRegex _buildStepRegex(String rawPattern, int expectedCaptureCount) {
-  // Rewrite only those "(?: …)?" whose interior has NO "(" or ")".
-  rawPattern = rawPattern.replaceAllMapped(
-    RegExp(r'\(\?:(\s[^()]+?)\)\?'),
-    (m) => '(${m.group(1)})?',
-  );
-
-  // Count placeholders "{Name}" (start with letter) in rawPattern.
-  final placeholderMatches = RegExp(r'\{([A-Za-z]\w*)\}').allMatches(rawPattern);
-  final placeholderCount = placeholderMatches.length;
-
-  // Count manual "(…)" groups, ignoring ANY "(?…)".
-  final manualPositions = <int>[];
-  final openParRegex = RegExp(r'(?<!\?)\((?!\?)');
-  var scanForManual = 0;
-  while (true) {
-    final m = openParRegex.firstMatch(rawPattern.substring(scanForManual));
-    if (m == null) break;
-    final pos = scanForManual + m.start;
-    manualPositions.add(pos);
-    scanForManual = pos + 1;
+void _validateStrictExpression(String pattern) {
+  final forbidden = [
+    '(?:',
+    '|',
+    '^',
+    '\$',
+    '\\d',
+    '\\w',
+    '[',
+    ']',
+    '(?=',
+    '(?!',
+  ];
+  for (final f in forbidden) {
+    if (pattern.contains(f)) {
+      throw ArgumentError(
+        'Invalid Cucumber expression: "$pattern".\n'
+        'Expression steps should not contain raw regular expression features like "$f".\n'
+        'If you need advanced matching (alternations, lookarounds, etc.), use `stepRegExp()` instead of `step()`.',
+      );
+    }
   }
-  final manualCount = manualPositions.length;
 
-  if (placeholderCount + manualCount != expectedCaptureCount) {
+  // Check for unescaped parentheses (a simple heuristic)
+  if (RegExp(r'(?<!\\)[()]').hasMatch(pattern)) {
     throw ArgumentError(
-      'generic$expectedCaptureCount requires exactly $expectedCaptureCount captures '
-      '(sum of placeholders and manual groups). '
-      'Found $placeholderCount placeholder(s) and $manualCount manual group(s) in:\n'
-      '  $rawPattern',
+      'Invalid Cucumber expression: "$pattern".\n'
+      'Expression steps should not contain unescaped parentheses.\n'
+      'If you are trying to capture groups, use `stepRegExp()` instead of `step()`.',
     );
   }
+}
 
-  // Replace "{Token}" with its regex and collect PlaceholderDef.
-  final placeholderDefs = <PlaceholderDef>[];
-  var regexBody = rawPattern.replaceAllMapped(
+/// Compiles a Cucumber-style expression (with `{...}` placeholders) into a RegExp.
+_ParsedStepRegex _compileExpression(String rawPattern) {
+  _validateStrictExpression(rawPattern);
+  final tokens = <PlaceholderDef>[];
+
+  // Escape the pattern first, but temporarily un-escape our {} blocks so we can process them
+  var escapedPattern = RegExp.escape(rawPattern);
+  escapedPattern = escapedPattern.replaceAllMapped(
+    RegExp(r'\\\{([A-Za-z]\w*)\\\}'),
+    (m) => '{w\$m.group(1)!}',
+  );
+
+  final regexBody = escapedPattern.replaceAllMapped(
     RegExp(r'\{([A-Za-z]\w*)\}'),
     (match) {
       final name = match.group(1)!;
@@ -95,195 +145,65 @@ _ParsedStepRegex _buildStepRegex(String rawPattern, int expectedCaptureCount) {
           'Supported tokens: ${placeholders.keys.join(", ")}.',
         );
       }
-      placeholderDefs.add(def);
+      tokens.add(def);
       return def.regexPart;
     },
   );
 
-  // Extract each manual "(…)" inner pattern from regexBody.
-  final manualDefs = <String>[];
-  final manualGroupRegex = RegExp(r'(?<!\?)\((?!\?)');
-  var scanIndex = 0;
-  while (true) {
-    final m = manualGroupRegex.firstMatch(regexBody.substring(scanIndex));
-    if (m == null) break;
-    final start = scanIndex + m.start;
-    var depth = 1;
-    var i = start + 1;
-    while (i < regexBody.length && depth > 0) {
-      if (regexBody[i] == '(') {
-        depth++;
-      } else if (regexBody[i] == ')') {
-        depth--;
-      }
-      i++;
-    }
-    final inner = regexBody.substring(start + 1, i - 1);
-    manualDefs.add(inner);
-    scanIndex = i;
-  }
-
-  // Build an ordered list of CaptureTokens (placeholder vs. manual).
-  final ordered = <CaptureToken>[];
-  var pIndex = 0, mIndex = 0;
-  var idx = 0;
-  while (idx < rawPattern.length) {
-    final ph = RegExp(r'\{([A-Za-z]\w*)\}').matchAsPrefix(rawPattern, idx);
-    if (ph != null) {
-      ordered.add(CaptureToken.fromPlaceholder(placeholderDefs[pIndex++]));
-      idx += ph.group(0)!.length;
-      continue;
-    }
-
-    if (rawPattern[idx] == '(') {
-      if (idx + 2 < rawPattern.length && rawPattern.substring(idx, idx + 3) == '(?:') {
-        idx += 3;
-        continue;
-      }
-      if (idx + 1 < rawPattern.length && rawPattern[idx + 1] == '?') {
-        var depth = 1;
-        var i = idx + 2;
-        while (i < rawPattern.length && depth > 0) {
-          if (rawPattern[i] == '(') {
-            depth++;
-          } else if (rawPattern[i] == ')') {
-            depth--;
-          }
-          i++;
-        }
-        idx = i;
-        continue;
-      }
-      ordered.add(CaptureToken.fromManual(manualDefs[mIndex++]));
-      idx += 1;
-      continue;
-    }
-
-    idx++;
-  }
-
-  if (ordered.length != expectedCaptureCount) {
-    throw ArgumentError(
-      'generic$expectedCaptureCount expects exactly $expectedCaptureCount capturing '
-      'groups after replacement. Found ${ordered.length} token(s) in pattern:\n'
-      '  $rawPattern\n'
-      'Expanded regex: $regexBody',
-    );
-  }
-
   final finalRegex = RegExp('^$regexBody\$');
-  return _ParsedStepRegex(finalRegex, ordered);
+  return _ParsedStepRegex(finalRegex, tokens);
 }
 
-/// Helper to parse arguments based on token definitions.
-List<dynamic> _parseArgs(List<String> args, List<CaptureToken> tokens, int count) {
-  return List.generate(count, (i) {
-    final token = tokens[i];
-    return token.kind == CaptureKind.placeholder
-        ? token.placeholderDef!.parser(args[i])
-        : args[i];
+/// Registers a step using Cucumber Expression semantics (`{string}`, `{int}`, etc.).
+StepDefinitionGeneric step(String pattern, StepAction action) {
+  final compiled = _compileExpression(pattern);
+  return StepDefinitionGeneric(compiled.regex, (rawArgs, world) async {
+    final parsedArgs = <dynamic>[];
+    for (int i = 0; i < compiled.tokens.length; i++) {
+      parsedArgs.add(compiled.tokens[i].parser(rawArgs[i]));
+    }
+    final ctx = StepContext(
+      tester: world.tester,
+      world: world,
+      args: StepArgs(parsedArgs, debugSource: 'Pattern: $pattern'),
+      multilineArg: null /* multiline arg is injected at runner */,
+    );
+    await action(ctx);
   });
 }
 
-// ──────────────────────────────────────────────────────────────────────────────
-// Internal builder
-// ──────────────────────────────────────────────────────────────────────────────
+/// Registers a step using standard Dart RegExp semantics.
+///
+/// Capture groups `(...)` become `ctx.args`. Non-capturing groups `(?:...)` are ignored.
+StepDefinitionGeneric stepRegExp(
+  RegExp pattern,
+  StepAction action, {
+  List<dynamic Function(String)>? converters,
+}) {
+  // Ensure the regex is anchored if it isn't already to match full lines correctly.
+  var regexPattern = pattern.pattern;
+  if (!regexPattern.startsWith('^')) {
+    regexPattern = '^$regexPattern';
+  }
+  if (!regexPattern.endsWith('\$')) {
+    regexPattern = '$regexPattern\$';
+  }
 
-StepDefinitionGeneric _createGeneric<W>(
-  String rawPattern,
-  int count,
-  Future<void> Function(
-    List<dynamic> parsedArgs,
-    W world,
-  ) executor,
-) {
-  final parsed = _buildStepRegex(rawPattern, count);
-  return StepDefinitionGeneric(
-    parsed.regex,
-    count,
-    (args, context) async {
-      final parsedArgs = _parseArgs(args, parsed.tokens, count);
-      await executor(parsedArgs, context as W);
-    },
+  final anchoredPattern = RegExp(
+    regexPattern,
+    caseSensitive: pattern.isCaseSensitive,
+    multiLine: pattern.isMultiLine,
+    dotAll: pattern.isDotAll,
+    unicode: pattern.isUnicode,
   );
+
+  return StepDefinitionGeneric(anchoredPattern, (rawArgs, world) async {
+    final ctx = StepContext(
+      tester: world.tester,
+      world: world,
+      args: StepArgs(rawArgs, debugSource: 'RegExp: ${pattern.pattern}'),
+      multilineArg: null /* multiline arg is injected at runner */,
+    );
+    await action(ctx);
+  });
 }
-
-// ──────────────────────────────────────────────────────────────────────────────
-// PUBLIC GENERIC DEFINITIONS
-// ──────────────────────────────────────────────────────────────────────────────
-//
-// These builders provide the simplest possible signature for step definitions.
-// Any attached data (table or doc-string) is available via the world context:
-//
-//   generic('the following exist', (world) async {
-//     final table = world.table;
-//     ...
-//   });
-
-StepDefinitionGeneric generic<W>(
-  String rawPattern,
-  Future<void> Function(W world) fn,
-) {
-  final finalRegex = RegExp('^${RegExp.escape(rawPattern)}\$');
-  return StepDefinitionGeneric(
-    finalRegex,
-    0,
-    (args, context) async {
-      await fn(context as W);
-    },
-  );
-}
-
-StepDefinitionGeneric generic1<T, W>(
-  String rawPattern,
-  Future<void> Function(T value, W world) fn,
-) => _createGeneric<W>(
-      rawPattern,
-      1,
-      (p, w) => fn(p[0] as T, w),
-    );
-
-StepDefinitionGeneric generic2<T1, T2, W>(
-  String rawPattern,
-  Future<void> Function(T1, T2, W world) fn,
-) => _createGeneric<W>(
-      rawPattern,
-      2,
-      (p, w) => fn(p[0] as T1, p[1] as T2, w),
-    );
-
-StepDefinitionGeneric generic3<T1, T2, T3, W>(
-  String rawPattern,
-  Future<void> Function(T1, T2, T3, W world) fn,
-) => _createGeneric<W>(
-      rawPattern,
-      3,
-      (p, w) => fn(p[0] as T1, p[1] as T2, p[2] as T3, w),
-    );
-
-StepDefinitionGeneric generic4<T1, T2, T3, T4, W>(
-  String rawPattern,
-  Future<void> Function(T1, T2, T3, T4, W world) fn,
-) => _createGeneric<W>(
-      rawPattern,
-      4,
-      (p, w) => fn(p[0] as T1, p[1] as T2, p[2] as T3, p[3] as T4, w),
-    );
-
-StepDefinitionGeneric generic5<T1, T2, T3, T4, T5, W>(
-  String rawPattern,
-  Future<void> Function(T1, T2, T3, T4, T5, W world) fn,
-) => _createGeneric<W>(
-      rawPattern,
-      5,
-      (p, w) => fn(p[0] as T1, p[1] as T2, p[2] as T3, p[3] as T4, p[4] as T5, w),
-    );
-
-StepDefinitionGeneric generic6<T1, T2, T3, T4, T5, T6, W>(
-  String rawPattern,
-  Future<void> Function(T1, T2, T3, T4, T5, T6, W world) fn,
-) => _createGeneric<W>(
-      rawPattern,
-      6,
-      (p, w) => fn(p[0] as T1, p[1] as T2, p[2] as T3, p[3] as T4, p[4] as T5, p[5] as T6, w),
-    );
