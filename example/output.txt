@@ -1,0 +1,697 @@
+Generated /Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/integration_test/generated/auth/login.dart
+Generated /Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/integration_test/generated/dashboard/employee_directory.dart
+Generated integration_test/all_integration_tests.dart with 2 runners.
+
+Generated 2 file(s).
+Execution command: flutter test --dart-define=FGP_BRIDGE_PORT=9876 -d macos --coverage integration_test/all_integration_tests.dart
+[bridge] [IntegrationTestServer] Listening on port 9876
+00:00 +0: loading /Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/integration_test/all_integration_tests.dart                                                                   00:01 +0: loading /Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/integration_test/all_integration_tests.dart                                                                   Building macOS application...                                   00:02 +0: loading /Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/integration_test/all_integration_tests.dart                                                                   00:03 +0: loading /Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/integration_test/all_integration_tests.dart                                                                   00:04 +0: loading /Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/integration_test/all_integration_tests.dart                                                                   00:05 +0: loading /Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/integration_test/all_integration_tests.dart                                                                   00:06 +0: loading /Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/integration_test/all_integration_tests.dart                                                                   00:07 +0: loading /Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/integration_test/all_integration_tests.dart                                                                   
+✓ Built build/macos/Build/Products/Debug/example.app
+00:08 +0: loading /Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/integration_test/all_integration_tests.dart                                                                   Failed to foreground app; open returned 1
+00:08 +0: loading /Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/integration_test/all_integration_tests.dart                                                                   
+Implement anything before the tests
+00:08 +0: (setUpAll)                                                                                                                                                                                   00:08 +0: (setUpAll)                                                                                                                                                                                   
+Server says: Hello 👋 
+ {"cwd":"/Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example","files":["/Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/test_driver","/Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/integration_test","/Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/macos","/Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/.DS_Store","/Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/.metadata","/Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/web","/Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/pubspec.lock","/Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/README.md","/Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/pubspec.yaml","/Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/.gitignore","/Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/example.iml","/Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/linux","/Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/android","/Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/.flutter-plugins-dependencies","/Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/lib","/Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/.flutter-plugins","/Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/report","/Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/analysis_options.yaml","/Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/build","/Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/.dart_tool","/Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/assets","/Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/coverage","/Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/output.txt","/Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/.idea"]}
+[DEBUG HOOK] onBeforeAll
+00:08 +0: Feature: User Authentication (setUpAll)                                                                                                                                                      00:08 +0: Feature: User Authentication (setUpAll)                                                                                                                                                      
+[DEBUG HOOK] onBeforeFeature
+00:08 +0: Feature: User Authentication Scenario: Login with different credential combinations (Example 1)                                                                                              00:08 +0: Feature: User Authentication Scenario: Login with different credential combinations (Example 1)                                                                                              
+[DEBUG HOOK] onBeforeScenario: Login with different credential combinations (Example 1)
+[DEBUG HOOK] onBeforeStep: Given the application is launched
+[92m➔ [/features/auth/login.feature:8] [38;5;208mExecuting background step: Given the application is launched[0m
+[DEBUG HOOK] onAfterStep: Given the application is launched
+[DEBUG HOOK] onBeforeStep: And the login form fields should be visible
+[92m➔ [/features/auth/login.feature:9] [38;5;208mExecuting background step: And the login form fields should be visible[0m
+[DEBUG HOOK] onAfterStep: And the login form fields should be visible
+[DEBUG HOOK] onBeforeStep: When I fill the username field with "wrong"
+[92m➔ [/features/auth/login.feature:12] [93mExecuting step: When I fill the username field with "wrong"[0m
+[DEBUG HOOK] onAfterStep: When I fill the username field with "wrong"
+[DEBUG HOOK] onBeforeStep: And I fill the password field with "pass"
+[92m➔ [/features/auth/login.feature:13] [93mExecuting step: And I fill the password field with "pass"[0m
+[DEBUG HOOK] onAfterStep: And I fill the password field with "pass"
+[DEBUG HOOK] onBeforeStep: And I tap the login button
+[92m➔ [/features/auth/login.feature:14] [93mExecuting step: And I tap the login button[0m
+[DEBUG HOOK] onAfterStep: And I tap the login button
+[DEBUG HOOK] onBeforeStep: Then I should see "Invalid credentials."
+[92m➔ [/features/auth/login.feature:15] [93mExecuting step: Then I should see "Invalid credentials."[0m
+[DEBUG HOOK] onAfterStep: Then I should see "Invalid credentials."
+[DEBUG HOOK] onBeforeStep: And I should not reach the dashboard
+[92m➔ [/features/auth/login.feature:16] [93mExecuting step: And I should not reach the dashboard[0m
+[DEBUG HOOK] onAfterStep: And I should not reach the dashboard
+[DEBUG HOOK] onAfterScenario: Login with different credential combinations (Example 1) (passed)
+00:09 +1: Feature: User Authentication Scenario: Login with different credential combinations (Example 1)                                                                                              00:09 +1: Feature: User Authentication Scenario: Login with different credential combinations (Example 2)                                                                                              00:09 +1: Feature: User Authentication Scenario: Login with different credential combinations (Example 2)                                                                                              
+[DEBUG HOOK] onBeforeScenario: Login with different credential combinations (Example 2)
+[DEBUG HOOK] onBeforeStep: Given the application is launched
+[92m➔ [/features/auth/login.feature:8] [38;5;208mExecuting background step: Given the application is launched[0m
+[DEBUG HOOK] onAfterStep: Given the application is launched
+[DEBUG HOOK] onBeforeStep: And the login form fields should be visible
+[92m➔ [/features/auth/login.feature:9] [38;5;208mExecuting background step: And the login form fields should be visible[0m
+[DEBUG HOOK] onAfterStep: And the login form fields should be visible
+[DEBUG HOOK] onBeforeStep: When I fill the username field with ""
+[92m➔ [/features/auth/login.feature:12] [93mExecuting step: When I fill the username field with ""[0m
+[DEBUG HOOK] onAfterStep: When I fill the username field with ""
+[DEBUG HOOK] onBeforeStep: And I fill the password field with ""
+[92m➔ [/features/auth/login.feature:13] [93mExecuting step: And I fill the password field with ""[0m
+[DEBUG HOOK] onAfterStep: And I fill the password field with ""
+[DEBUG HOOK] onBeforeStep: And I tap the login button
+[92m➔ [/features/auth/login.feature:14] [93mExecuting step: And I tap the login button[0m
+[DEBUG HOOK] onAfterStep: And I tap the login button
+[DEBUG HOOK] onBeforeStep: Then I should see "Username and password are required."
+[92m➔ [/features/auth/login.feature:15] [93mExecuting step: Then I should see "Username and password are required."[0m
+[DEBUG HOOK] onAfterStep: Then I should see "Username and password are required."
+[DEBUG HOOK] onBeforeStep: And I should not reach the dashboard
+[92m➔ [/features/auth/login.feature:16] [93mExecuting step: And I should not reach the dashboard[0m
+[DEBUG HOOK] onAfterStep: And I should not reach the dashboard
+[DEBUG HOOK] onAfterScenario: Login with different credential combinations (Example 2) (passed)
+00:10 +2: Feature: User Authentication Scenario: Login with different credential combinations (Example 2)                                                                                              00:10 +2: Feature: User Authentication Scenario: Login with different credential combinations (Example 3)                                                                                              00:10 +2: Feature: User Authentication Scenario: Login with different credential combinations (Example 3)                                                                                              
+[DEBUG HOOK] onBeforeScenario: Login with different credential combinations (Example 3)
+[DEBUG HOOK] onBeforeStep: Given the application is launched
+[92m➔ [/features/auth/login.feature:8] [38;5;208mExecuting background step: Given the application is launched[0m
+[DEBUG HOOK] onAfterStep: Given the application is launched
+[DEBUG HOOK] onBeforeStep: And the login form fields should be visible
+[92m➔ [/features/auth/login.feature:9] [38;5;208mExecuting background step: And the login form fields should be visible[0m
+[DEBUG HOOK] onAfterStep: And the login form fields should be visible
+[DEBUG HOOK] onBeforeStep: When I fill the username field with "admin"
+[92m➔ [/features/auth/login.feature:12] [93mExecuting step: When I fill the username field with "admin"[0m
+[DEBUG HOOK] onAfterStep: When I fill the username field with "admin"
+[DEBUG HOOK] onBeforeStep: And I fill the password field with "password123"
+[92m➔ [/features/auth/login.feature:13] [93mExecuting step: And I fill the password field with "password123"[0m
+[DEBUG HOOK] onAfterStep: And I fill the password field with "password123"
+[DEBUG HOOK] onBeforeStep: And I tap the login button
+[92m➔ [/features/auth/login.feature:14] [93mExecuting step: And I tap the login button[0m
+[DEBUG HOOK] onAfterStep: And I tap the login button
+[DEBUG HOOK] onBeforeStep: Then I should see "Welcome to the Dashboard!"
+[92m➔ [/features/auth/login.feature:15] [93mExecuting step: Then I should see "Welcome to the Dashboard!"[0m
+[DEBUG HOOK] onAfterStep: Then I should see "Welcome to the Dashboard!"
+[DEBUG HOOK] onBeforeStep: And I should reach the dashboard
+[92m➔ [/features/auth/login.feature:16] [93mExecuting step: And I should reach the dashboard[0m
+[DEBUG HOOK] onAfterStep: And I should reach the dashboard
+[DEBUG HOOK] onAfterScenario: Login with different credential combinations (Example 3) (passed)
+00:12 +3: Feature: User Authentication Scenario: Login with different credential combinations (Example 3)                                                                                              00:12 +3: Feature: User Authentication Scenario: Login screen displays the TeamSync branding                                                                                                           00:12 +3: Feature: User Authentication Scenario: Login screen displays the TeamSync branding                                                                                                           
+[DEBUG HOOK] onBeforeScenario: Login screen displays the TeamSync branding
+[DEBUG HOOK] onBeforeStep: Given the application is launched
+[92m➔ [/features/auth/login.feature:8] [38;5;208mExecuting background step: Given the application is launched[0m
+[DEBUG HOOK] onAfterStep: Given the application is launched
+[DEBUG HOOK] onBeforeStep: And the login form fields should be visible
+[92m➔ [/features/auth/login.feature:9] [38;5;208mExecuting background step: And the login form fields should be visible[0m
+[DEBUG HOOK] onAfterStep: And the login form fields should be visible
+[DEBUG HOOK] onBeforeStep: Then I should see "TeamSync"
+[92m➔ [/features/auth/login.feature:25] [93mExecuting step: Then I should see "TeamSync"[0m
+[DEBUG HOOK] onAfterStep: Then I should see "TeamSync"
+[DEBUG HOOK] onBeforeStep: And I should see "Employee Directory"
+[92m➔ [/features/auth/login.feature:26] [93mExecuting step: And I should see "Employee Directory"[0m
+[DEBUG HOOK] onAfterStep: And I should see "Employee Directory"
+[DEBUG HOOK] onBeforeStep: And the login form fields should be visible
+[92m➔ [/features/auth/login.feature:27] [93mExecuting step: And the login form fields should be visible[0m
+[DEBUG HOOK] onAfterStep: And the login form fields should be visible
+[DEBUG HOOK] onAfterScenario: Login screen displays the TeamSync branding (passed)
+00:12 +4: Feature: User Authentication Scenario: Login screen displays the TeamSync branding                                                                                                           00:12 +4: Feature: User Authentication (tearDownAll)                                                                                                                                                   00:12 +4: Feature: Employee Directory Dashboard (setUpAll)                                                                                                                                             00:12 +4: Feature: Employee Directory Dashboard (setUpAll)                                                                                                                                             
+[DEBUG HOOK] onBeforeFeature
+00:12 +4: Feature: Employee Directory Dashboard Scenario: Dashboard shows welcome message and employee table                                                                                           00:12 +4: Feature: Employee Directory Dashboard Scenario: Dashboard shows welcome message and employee table                                                                                           
+[DEBUG HOOK] onBeforeScenario: Dashboard shows welcome message and employee table
+[DEBUG HOOK] onBeforeStep: Given the application is launched
+[92m➔ [/features/dashboard/employee_directory.feature:8] [38;5;208mExecuting background step: Given the application is launched[0m
+[DEBUG HOOK] onAfterStep: Given the application is launched
+[DEBUG HOOK] onBeforeStep: And I fill the username field with "admin"
+[92m➔ [/features/dashboard/employee_directory.feature:9] [38;5;208mExecuting background step: And I fill the username field with "admin"[0m
+[DEBUG HOOK] onAfterStep: And I fill the username field with "admin"
+[DEBUG HOOK] onBeforeStep: And I fill the password field with "password123"
+[92m➔ [/features/dashboard/employee_directory.feature:10] [38;5;208mExecuting background step: And I fill the password field with "password123"[0m
+[DEBUG HOOK] onAfterStep: And I fill the password field with "password123"
+[DEBUG HOOK] onBeforeStep: And I tap the login button
+[92m➔ [/features/dashboard/employee_directory.feature:11] [38;5;208mExecuting background step: And I tap the login button[0m
+[DEBUG HOOK] onAfterStep: And I tap the login button
+[DEBUG HOOK] onBeforeStep: Then I should see "Welcome to the Dashboard!"
+[92m➔ [/features/dashboard/employee_directory.feature:12] [38;5;208mExecuting background step: Then I should see "Welcome to the Dashboard!"[0m
+[DEBUG HOOK] onAfterStep: Then I should see "Welcome to the Dashboard!"
+[DEBUG HOOK] onBeforeStep: Then I should see "Welcome to the Dashboard!"
+[92m➔ [/features/dashboard/employee_directory.feature:15] [93mExecuting step: Then I should see "Welcome to the Dashboard!"[0m
+[DEBUG HOOK] onAfterStep: Then I should see "Welcome to the Dashboard!"
+[DEBUG HOOK] onBeforeStep: And the employee table should be visible
+[92m➔ [/features/dashboard/employee_directory.feature:16] [93mExecuting step: And the employee table should be visible[0m
+[DEBUG HOOK] onAfterStep: And the employee table should be visible
+[DEBUG HOOK] onBeforeStep: And I should see "Alice Johnson"
+[92m➔ [/features/dashboard/employee_directory.feature:17] [93mExecuting step: And I should see "Alice Johnson"[0m
+[DEBUG HOOK] onAfterStep: And I should see "Alice Johnson"
+[DEBUG HOOK] onBeforeStep: And I should see "Bob Martinez"
+[92m➔ [/features/dashboard/employee_directory.feature:18] [93mExecuting step: And I should see "Bob Martinez"[0m
+[DEBUG HOOK] onAfterStep: And I should see "Bob Martinez"
+[DEBUG HOOK] onBeforeStep: And I should see "Carol White"
+[92m➔ [/features/dashboard/employee_directory.feature:19] [93mExecuting step: And I should see "Carol White"[0m
+[DEBUG HOOK] onAfterStep: And I should see "Carol White"
+[DEBUG HOOK] onAfterScenario: Dashboard shows welcome message and employee table (passed)
+00:13 +5: Feature: Employee Directory Dashboard Scenario: Dashboard shows welcome message and employee table                                                                                           00:13 +5: Feature: Employee Directory Dashboard Scenario: Dashboard stat cards reflect employee data                                                                                                   00:13 +5: Feature: Employee Directory Dashboard Scenario: Dashboard stat cards reflect employee data                                                                                                   
+[DEBUG HOOK] onBeforeScenario: Dashboard stat cards reflect employee data
+[DEBUG HOOK] onBeforeStep: Given the application is launched
+[92m➔ [/features/dashboard/employee_directory.feature:8] [38;5;208mExecuting background step: Given the application is launched[0m
+[DEBUG HOOK] onAfterStep: Given the application is launched
+[DEBUG HOOK] onBeforeStep: And I fill the username field with "admin"
+[92m➔ [/features/dashboard/employee_directory.feature:9] [38;5;208mExecuting background step: And I fill the username field with "admin"[0m
+[DEBUG HOOK] onAfterStep: And I fill the username field with "admin"
+[DEBUG HOOK] onBeforeStep: And I fill the password field with "password123"
+[92m➔ [/features/dashboard/employee_directory.feature:10] [38;5;208mExecuting background step: And I fill the password field with "password123"[0m
+[DEBUG HOOK] onAfterStep: And I fill the password field with "password123"
+[DEBUG HOOK] onBeforeStep: And I tap the login button
+[92m➔ [/features/dashboard/employee_directory.feature:11] [38;5;208mExecuting background step: And I tap the login button[0m
+[DEBUG HOOK] onAfterStep: And I tap the login button
+[DEBUG HOOK] onBeforeStep: Then I should see "Welcome to the Dashboard!"
+[92m➔ [/features/dashboard/employee_directory.feature:12] [38;5;208mExecuting background step: Then I should see "Welcome to the Dashboard!"[0m
+[DEBUG HOOK] onAfterStep: Then I should see "Welcome to the Dashboard!"
+[DEBUG HOOK] onBeforeStep: Then I should see multiple "3" texts
+[92m➔ [/features/dashboard/employee_directory.feature:22] [93mExecuting step: Then I should see multiple "3" texts[0m
+[DEBUG HOOK] onAfterStep: Then I should see multiple "3" texts
+[DEBUG HOOK] onBeforeStep: And I should see "Total Employees"
+[92m➔ [/features/dashboard/employee_directory.feature:23] [93mExecuting step: And I should see "Total Employees"[0m
+[DEBUG HOOK] onAfterStep: And I should see "Total Employees"
+[DEBUG HOOK] onBeforeStep: And I should see "Average Age"
+[92m➔ [/features/dashboard/employee_directory.feature:24] [93mExecuting step: And I should see "Average Age"[0m
+[DEBUG HOOK] onAfterStep: And I should see "Average Age"
+[DEBUG HOOK] onAfterScenario: Dashboard stat cards reflect employee data (passed)
+00:14 +6: Feature: Employee Directory Dashboard Scenario: Dashboard stat cards reflect employee data                                                                                                   00:14 +6: Feature: Employee Directory Dashboard Scenario: Adding employee with valid data adds a table row                                                                                             00:14 +6: Feature: Employee Directory Dashboard Scenario: Adding employee with valid data adds a table row                                                                                             
+[DEBUG HOOK] onBeforeScenario: Adding employee with valid data adds a table row
+[DEBUG HOOK] onBeforeStep: Given the application is launched
+[92m➔ [/features/dashboard/employee_directory.feature:8] [38;5;208mExecuting background step: Given the application is launched[0m
+[DEBUG HOOK] onAfterStep: Given the application is launched
+[DEBUG HOOK] onBeforeStep: And I fill the username field with "admin"
+[92m➔ [/features/dashboard/employee_directory.feature:9] [38;5;208mExecuting background step: And I fill the username field with "admin"[0m
+[DEBUG HOOK] onAfterStep: And I fill the username field with "admin"
+[DEBUG HOOK] onBeforeStep: And I fill the password field with "password123"
+[92m➔ [/features/dashboard/employee_directory.feature:10] [38;5;208mExecuting background step: And I fill the password field with "password123"[0m
+[DEBUG HOOK] onAfterStep: And I fill the password field with "password123"
+[DEBUG HOOK] onBeforeStep: And I tap the login button
+[92m➔ [/features/dashboard/employee_directory.feature:11] [38;5;208mExecuting background step: And I tap the login button[0m
+[DEBUG HOOK] onAfterStep: And I tap the login button
+[DEBUG HOOK] onBeforeStep: Then I should see "Welcome to the Dashboard!"
+[92m➔ [/features/dashboard/employee_directory.feature:12] [38;5;208mExecuting background step: Then I should see "Welcome to the Dashboard!"[0m
+[DEBUG HOOK] onAfterStep: Then I should see "Welcome to the Dashboard!"
+[DEBUG HOOK] onBeforeStep: When I tap the add employee button
+[92m➔ [/features/dashboard/employee_directory.feature:28] [93mExecuting step: When I tap the add employee button[0m
+[DEBUG HOOK] onAfterStep: When I tap the add employee button
+[DEBUG HOOK] onBeforeStep: Then the employee dialog title should be visible
+[92m➔ [/features/dashboard/employee_directory.feature:29] [93mExecuting step: Then the employee dialog title should be visible[0m
+[DEBUG HOOK] onAfterStep: Then the employee dialog title should be visible
+[DEBUG HOOK] onBeforeStep: And I should see "Add Employee"
+[92m➔ [/features/dashboard/employee_directory.feature:30] [93mExecuting step: And I should see "Add Employee"[0m
+[DEBUG HOOK] onAfterStep: And I should see "Add Employee"
+[DEBUG HOOK] onBeforeStep: When I fill the employee name field with "David Kim"
+[92m➔ [/features/dashboard/employee_directory.feature:31] [93mExecuting step: When I fill the employee name field with "David Kim"[0m
+[DEBUG HOOK] onAfterStep: When I fill the employee name field with "David Kim"
+[DEBUG HOOK] onBeforeStep: And I fill the employee role field with "Analyst"
+[92m➔ [/features/dashboard/employee_directory.feature:32] [93mExecuting step: And I fill the employee role field with "Analyst"[0m
+[DEBUG HOOK] onAfterStep: And I fill the employee role field with "Analyst"
+[DEBUG HOOK] onBeforeStep: And I fill the employee age field with "35"
+[92m➔ [/features/dashboard/employee_directory.feature:33] [93mExecuting step: And I fill the employee age field with "35"[0m
+[DEBUG HOOK] onAfterStep: And I fill the employee age field with "35"
+[DEBUG HOOK] onBeforeStep: And I fill the employee bio field with "Business analyst with expertise in data.\nSix years experience."
+[92m➔ [/features/dashboard/employee_directory.feature:34] [93mExecuting step: And I fill the employee bio field with "Business analyst with expertise in data.\nSix years experience."[0m
+[DEBUG HOOK] onAfterStep: And I fill the employee bio field with "Business analyst with expertise in data.\nSix years experience."
+[DEBUG HOOK] onBeforeStep: And I tap the save employee button
+[92m➔ [/features/dashboard/employee_directory.feature:35] [93mExecuting step: And I tap the save employee button[0m
+[DEBUG HOOK] onAfterStep: And I tap the save employee button
+[DEBUG HOOK] onBeforeStep: Then the employee dialog title should not be visible
+[92m➔ [/features/dashboard/employee_directory.feature:36] [93mExecuting step: Then the employee dialog title should not be visible[0m
+[DEBUG HOOK] onAfterStep: Then the employee dialog title should not be visible
+[DEBUG HOOK] onBeforeStep: And I should see "David Kim"
+[92m➔ [/features/dashboard/employee_directory.feature:37] [93mExecuting step: And I should see "David Kim"[0m
+[DEBUG HOOK] onAfterStep: And I should see "David Kim"
+[DEBUG HOOK] onBeforeStep: And I should see "Analyst"
+[92m➔ [/features/dashboard/employee_directory.feature:38] [93mExecuting step: And I should see "Analyst"[0m
+[DEBUG HOOK] onAfterStep: And I should see "Analyst"
+[DEBUG HOOK] onAfterScenario: Adding employee with valid data adds a table row (passed)
+00:17 +7: Feature: Employee Directory Dashboard Scenario: Adding employee with valid data adds a table row                                                                                             00:17 +7: Feature: Employee Directory Dashboard Scenario: Adding employees with boundary ages (Example 1)                                                                                              00:17 +7: Feature: Employee Directory Dashboard Scenario: Adding employees with boundary ages (Example 1)                                                                                              
+[DEBUG HOOK] onBeforeScenario: Adding employees with boundary ages (Example 1)
+[DEBUG HOOK] onBeforeStep: Given the application is launched
+[92m➔ [/features/dashboard/employee_directory.feature:8] [38;5;208mExecuting background step: Given the application is launched[0m
+[DEBUG HOOK] onAfterStep: Given the application is launched
+[DEBUG HOOK] onBeforeStep: And I fill the username field with "admin"
+[92m➔ [/features/dashboard/employee_directory.feature:9] [38;5;208mExecuting background step: And I fill the username field with "admin"[0m
+[DEBUG HOOK] onAfterStep: And I fill the username field with "admin"
+[DEBUG HOOK] onBeforeStep: And I fill the password field with "password123"
+[92m➔ [/features/dashboard/employee_directory.feature:10] [38;5;208mExecuting background step: And I fill the password field with "password123"[0m
+[DEBUG HOOK] onAfterStep: And I fill the password field with "password123"
+[DEBUG HOOK] onBeforeStep: And I tap the login button
+[92m➔ [/features/dashboard/employee_directory.feature:11] [38;5;208mExecuting background step: And I tap the login button[0m
+[DEBUG HOOK] onAfterStep: And I tap the login button
+[DEBUG HOOK] onBeforeStep: Then I should see "Welcome to the Dashboard!"
+[92m➔ [/features/dashboard/employee_directory.feature:12] [38;5;208mExecuting background step: Then I should see "Welcome to the Dashboard!"[0m
+[DEBUG HOOK] onAfterStep: Then I should see "Welcome to the Dashboard!"
+[DEBUG HOOK] onBeforeStep: When I tap the add employee button
+[92m➔ [/features/dashboard/employee_directory.feature:41] [93mExecuting step: When I tap the add employee button[0m
+[DEBUG HOOK] onAfterStep: When I tap the add employee button
+[DEBUG HOOK] onBeforeStep: And I fill the employee name field with "Under18Test"
+[92m➔ [/features/dashboard/employee_directory.feature:42] [93mExecuting step: And I fill the employee name field with "Under18Test"[0m
+[DEBUG HOOK] onAfterStep: And I fill the employee name field with "Under18Test"
+[DEBUG HOOK] onBeforeStep: And I fill the employee role field with "Tester"
+[92m➔ [/features/dashboard/employee_directory.feature:43] [93mExecuting step: And I fill the employee role field with "Tester"[0m
+[DEBUG HOOK] onAfterStep: And I fill the employee role field with "Tester"
+[DEBUG HOOK] onBeforeStep: And I fill the employee age field with "17"
+[92m➔ [/features/dashboard/employee_directory.feature:44] [93mExecuting step: And I fill the employee age field with "17"[0m
+[DEBUG HOOK] onAfterStep: And I fill the employee age field with "17"
+[DEBUG HOOK] onBeforeStep: And I tap the save employee button
+[92m➔ [/features/dashboard/employee_directory.feature:45] [93mExecuting step: And I tap the save employee button[0m
+[DEBUG HOOK] onAfterStep: And I tap the save employee button
+[DEBUG HOOK] onBeforeStep: Then the employee dialog title should be visible
+[92m➔ [/features/dashboard/employee_directory.feature:46] [93mExecuting step: Then the employee dialog title should be visible[0m
+[DEBUG HOOK] onAfterStep: Then the employee dialog title should be visible
+[DEBUG HOOK] onBeforeStep: And I should see "Employee must be at least 18 years old"
+[92m➔ [/features/dashboard/employee_directory.feature:47] [93mExecuting step: And I should see "Employee must be at least 18 years old"[0m
+[DEBUG HOOK] onAfterStep: And I should see "Employee must be at least 18 years old"
+[DEBUG HOOK] onAfterScenario: Adding employees with boundary ages (Example 1) (passed)
+00:19 +8: Feature: Employee Directory Dashboard Scenario: Adding employees with boundary ages (Example 1)                                                                                              00:19 +8: Feature: Employee Directory Dashboard Scenario: Adding employees with boundary ages (Example 2)                                                                                              00:19 +8: Feature: Employee Directory Dashboard Scenario: Adding employees with boundary ages (Example 2)                                                                                              
+[DEBUG HOOK] onBeforeScenario: Adding employees with boundary ages (Example 2)
+[DEBUG HOOK] onBeforeStep: Given the application is launched
+[92m➔ [/features/dashboard/employee_directory.feature:8] [38;5;208mExecuting background step: Given the application is launched[0m
+[DEBUG HOOK] onAfterStep: Given the application is launched
+[DEBUG HOOK] onBeforeStep: And I fill the username field with "admin"
+[92m➔ [/features/dashboard/employee_directory.feature:9] [38;5;208mExecuting background step: And I fill the username field with "admin"[0m
+[DEBUG HOOK] onAfterStep: And I fill the username field with "admin"
+[DEBUG HOOK] onBeforeStep: And I fill the password field with "password123"
+[92m➔ [/features/dashboard/employee_directory.feature:10] [38;5;208mExecuting background step: And I fill the password field with "password123"[0m
+[DEBUG HOOK] onAfterStep: And I fill the password field with "password123"
+[DEBUG HOOK] onBeforeStep: And I tap the login button
+[92m➔ [/features/dashboard/employee_directory.feature:11] [38;5;208mExecuting background step: And I tap the login button[0m
+[DEBUG HOOK] onAfterStep: And I tap the login button
+[DEBUG HOOK] onBeforeStep: Then I should see "Welcome to the Dashboard!"
+[92m➔ [/features/dashboard/employee_directory.feature:12] [38;5;208mExecuting background step: Then I should see "Welcome to the Dashboard!"[0m
+[DEBUG HOOK] onAfterStep: Then I should see "Welcome to the Dashboard!"
+[DEBUG HOOK] onBeforeStep: When I tap the add employee button
+[92m➔ [/features/dashboard/employee_directory.feature:41] [93mExecuting step: When I tap the add employee button[0m
+[DEBUG HOOK] onAfterStep: When I tap the add employee button
+[DEBUG HOOK] onBeforeStep: And I fill the employee name field with "Adult18Test"
+[92m➔ [/features/dashboard/employee_directory.feature:42] [93mExecuting step: And I fill the employee name field with "Adult18Test"[0m
+[DEBUG HOOK] onAfterStep: And I fill the employee name field with "Adult18Test"
+[DEBUG HOOK] onBeforeStep: And I fill the employee role field with "Tester"
+[92m➔ [/features/dashboard/employee_directory.feature:43] [93mExecuting step: And I fill the employee role field with "Tester"[0m
+[DEBUG HOOK] onAfterStep: And I fill the employee role field with "Tester"
+[DEBUG HOOK] onBeforeStep: And I fill the employee age field with "18"
+[92m➔ [/features/dashboard/employee_directory.feature:44] [93mExecuting step: And I fill the employee age field with "18"[0m
+[DEBUG HOOK] onAfterStep: And I fill the employee age field with "18"
+[DEBUG HOOK] onBeforeStep: And I tap the save employee button
+[92m➔ [/features/dashboard/employee_directory.feature:45] [93mExecuting step: And I tap the save employee button[0m
+[DEBUG HOOK] onAfterStep: And I tap the save employee button
+[DEBUG HOOK] onBeforeStep: Then the employee dialog title should not be visible
+[92m➔ [/features/dashboard/employee_directory.feature:46] [93mExecuting step: Then the employee dialog title should not be visible[0m
+[DEBUG HOOK] onAfterStep: Then the employee dialog title should not be visible
+[DEBUG HOOK] onBeforeStep: And I should see "Adult18Test"
+[92m➔ [/features/dashboard/employee_directory.feature:47] [93mExecuting step: And I should see "Adult18Test"[0m
+[DEBUG HOOK] onAfterStep: And I should see "Adult18Test"
+[DEBUG HOOK] onAfterScenario: Adding employees with boundary ages (Example 2) (passed)
+00:22 +9: Feature: Employee Directory Dashboard Scenario: Adding employees with boundary ages (Example 2)                                                                                              00:22 +9: Feature: Employee Directory Dashboard Scenario: Adding employees with boundary ages (Example 3)                                                                                              00:22 +9: Feature: Employee Directory Dashboard Scenario: Adding employees with boundary ages (Example 3)                                                                                              
+[DEBUG HOOK] onBeforeScenario: Adding employees with boundary ages (Example 3)
+[DEBUG HOOK] onBeforeStep: Given the application is launched
+[92m➔ [/features/dashboard/employee_directory.feature:8] [38;5;208mExecuting background step: Given the application is launched[0m
+[DEBUG HOOK] onAfterStep: Given the application is launched
+[DEBUG HOOK] onBeforeStep: And I fill the username field with "admin"
+[92m➔ [/features/dashboard/employee_directory.feature:9] [38;5;208mExecuting background step: And I fill the username field with "admin"[0m
+[DEBUG HOOK] onAfterStep: And I fill the username field with "admin"
+[DEBUG HOOK] onBeforeStep: And I fill the password field with "password123"
+[92m➔ [/features/dashboard/employee_directory.feature:10] [38;5;208mExecuting background step: And I fill the password field with "password123"[0m
+[DEBUG HOOK] onAfterStep: And I fill the password field with "password123"
+[DEBUG HOOK] onBeforeStep: And I tap the login button
+[92m➔ [/features/dashboard/employee_directory.feature:11] [38;5;208mExecuting background step: And I tap the login button[0m
+[DEBUG HOOK] onAfterStep: And I tap the login button
+[DEBUG HOOK] onBeforeStep: Then I should see "Welcome to the Dashboard!"
+[92m➔ [/features/dashboard/employee_directory.feature:12] [38;5;208mExecuting background step: Then I should see "Welcome to the Dashboard!"[0m
+[DEBUG HOOK] onAfterStep: Then I should see "Welcome to the Dashboard!"
+[DEBUG HOOK] onBeforeStep: When I tap the add employee button
+[92m➔ [/features/dashboard/employee_directory.feature:41] [93mExecuting step: When I tap the add employee button[0m
+[DEBUG HOOK] onAfterStep: When I tap the add employee button
+[DEBUG HOOK] onBeforeStep: And I fill the employee name field with "Adult100Test"
+[92m➔ [/features/dashboard/employee_directory.feature:42] [93mExecuting step: And I fill the employee name field with "Adult100Test"[0m
+[DEBUG HOOK] onAfterStep: And I fill the employee name field with "Adult100Test"
+[DEBUG HOOK] onBeforeStep: And I fill the employee role field with "Tester"
+[92m➔ [/features/dashboard/employee_directory.feature:43] [93mExecuting step: And I fill the employee role field with "Tester"[0m
+[DEBUG HOOK] onAfterStep: And I fill the employee role field with "Tester"
+[DEBUG HOOK] onBeforeStep: And I fill the employee age field with "100"
+[92m➔ [/features/dashboard/employee_directory.feature:44] [93mExecuting step: And I fill the employee age field with "100"[0m
+[DEBUG HOOK] onAfterStep: And I fill the employee age field with "100"
+[DEBUG HOOK] onBeforeStep: And I tap the save employee button
+[92m➔ [/features/dashboard/employee_directory.feature:45] [93mExecuting step: And I tap the save employee button[0m
+[DEBUG HOOK] onAfterStep: And I tap the save employee button
+[DEBUG HOOK] onBeforeStep: Then the employee dialog title should not be visible
+[92m➔ [/features/dashboard/employee_directory.feature:46] [93mExecuting step: Then the employee dialog title should not be visible[0m
+[DEBUG HOOK] onAfterStep: Then the employee dialog title should not be visible
+[DEBUG HOOK] onBeforeStep: And I should see "Adult100Test"
+[92m➔ [/features/dashboard/employee_directory.feature:47] [93mExecuting step: And I should see "Adult100Test"[0m
+[DEBUG HOOK] onAfterStep: And I should see "Adult100Test"
+[DEBUG HOOK] onAfterScenario: Adding employees with boundary ages (Example 3) (passed)
+00:24 +10: Feature: Employee Directory Dashboard Scenario: Adding employees with boundary ages (Example 3)                                                                                             00:24 +10: Feature: Employee Directory Dashboard Scenario: Empty name shows validation error                                                                                                           00:24 +10: Feature: Employee Directory Dashboard Scenario: Empty name shows validation error                                                                                                           
+[DEBUG HOOK] onBeforeScenario: Empty name shows validation error
+[DEBUG HOOK] onBeforeStep: Given the application is launched
+[92m➔ [/features/dashboard/employee_directory.feature:8] [38;5;208mExecuting background step: Given the application is launched[0m
+[DEBUG HOOK] onAfterStep: Given the application is launched
+[DEBUG HOOK] onBeforeStep: And I fill the username field with "admin"
+[92m➔ [/features/dashboard/employee_directory.feature:9] [38;5;208mExecuting background step: And I fill the username field with "admin"[0m
+[DEBUG HOOK] onAfterStep: And I fill the username field with "admin"
+[DEBUG HOOK] onBeforeStep: And I fill the password field with "password123"
+[92m➔ [/features/dashboard/employee_directory.feature:10] [38;5;208mExecuting background step: And I fill the password field with "password123"[0m
+[DEBUG HOOK] onAfterStep: And I fill the password field with "password123"
+[DEBUG HOOK] onBeforeStep: And I tap the login button
+[92m➔ [/features/dashboard/employee_directory.feature:11] [38;5;208mExecuting background step: And I tap the login button[0m
+[DEBUG HOOK] onAfterStep: And I tap the login button
+[DEBUG HOOK] onBeforeStep: Then I should see "Welcome to the Dashboard!"
+[92m➔ [/features/dashboard/employee_directory.feature:12] [38;5;208mExecuting background step: Then I should see "Welcome to the Dashboard!"[0m
+[DEBUG HOOK] onAfterStep: Then I should see "Welcome to the Dashboard!"
+[DEBUG HOOK] onBeforeStep: When I tap the add employee button
+[92m➔ [/features/dashboard/employee_directory.feature:56] [93mExecuting step: When I tap the add employee button[0m
+[DEBUG HOOK] onAfterStep: When I tap the add employee button
+[DEBUG HOOK] onBeforeStep: And I fill the employee role field with "Developer"
+[92m➔ [/features/dashboard/employee_directory.feature:57] [93mExecuting step: And I fill the employee role field with "Developer"[0m
+[DEBUG HOOK] onAfterStep: And I fill the employee role field with "Developer"
+[DEBUG HOOK] onBeforeStep: And I fill the employee age field with "25"
+[92m➔ [/features/dashboard/employee_directory.feature:58] [93mExecuting step: And I fill the employee age field with "25"[0m
+[DEBUG HOOK] onAfterStep: And I fill the employee age field with "25"
+[DEBUG HOOK] onBeforeStep: And I tap the save employee button
+[92m➔ [/features/dashboard/employee_directory.feature:59] [93mExecuting step: And I tap the save employee button[0m
+[DEBUG HOOK] onAfterStep: And I tap the save employee button
+[DEBUG HOOK] onBeforeStep: Then I should see "Name is required"
+[92m➔ [/features/dashboard/employee_directory.feature:60] [93mExecuting step: Then I should see "Name is required"[0m
+[DEBUG HOOK] onAfterStep: Then I should see "Name is required"
+[DEBUG HOOK] onBeforeStep: And the employee dialog title should be visible
+[92m➔ [/features/dashboard/employee_directory.feature:61] [93mExecuting step: And the employee dialog title should be visible[0m
+[DEBUG HOOK] onAfterStep: And the employee dialog title should be visible
+[DEBUG HOOK] onAfterScenario: Empty name shows validation error (passed)
+00:27 +11: Feature: Employee Directory Dashboard Scenario: Empty name shows validation error                                                                                                           00:27 +11: Feature: Employee Directory Dashboard Scenario: Non-numeric age shows validation error                                                                                                      00:27 +11: Feature: Employee Directory Dashboard Scenario: Non-numeric age shows validation error                                                                                                      
+[DEBUG HOOK] onBeforeScenario: Non-numeric age shows validation error
+[DEBUG HOOK] onBeforeStep: Given the application is launched
+[92m➔ [/features/dashboard/employee_directory.feature:8] [38;5;208mExecuting background step: Given the application is launched[0m
+[DEBUG HOOK] onAfterStep: Given the application is launched
+[DEBUG HOOK] onBeforeStep: And I fill the username field with "admin"
+[92m➔ [/features/dashboard/employee_directory.feature:9] [38;5;208mExecuting background step: And I fill the username field with "admin"[0m
+[DEBUG HOOK] onAfterStep: And I fill the username field with "admin"
+[DEBUG HOOK] onBeforeStep: And I fill the password field with "password123"
+[92m➔ [/features/dashboard/employee_directory.feature:10] [38;5;208mExecuting background step: And I fill the password field with "password123"[0m
+[DEBUG HOOK] onAfterStep: And I fill the password field with "password123"
+[DEBUG HOOK] onBeforeStep: And I tap the login button
+[92m➔ [/features/dashboard/employee_directory.feature:11] [38;5;208mExecuting background step: And I tap the login button[0m
+[DEBUG HOOK] onAfterStep: And I tap the login button
+[DEBUG HOOK] onBeforeStep: Then I should see "Welcome to the Dashboard!"
+[92m➔ [/features/dashboard/employee_directory.feature:12] [38;5;208mExecuting background step: Then I should see "Welcome to the Dashboard!"[0m
+[DEBUG HOOK] onAfterStep: Then I should see "Welcome to the Dashboard!"
+[DEBUG HOOK] onBeforeStep: When I tap the add employee button
+[92m➔ [/features/dashboard/employee_directory.feature:64] [93mExecuting step: When I tap the add employee button[0m
+[DEBUG HOOK] onAfterStep: When I tap the add employee button
+[DEBUG HOOK] onBeforeStep: And I fill the employee name field with "Test User"
+[92m➔ [/features/dashboard/employee_directory.feature:65] [93mExecuting step: And I fill the employee name field with "Test User"[0m
+[DEBUG HOOK] onAfterStep: And I fill the employee name field with "Test User"
+[DEBUG HOOK] onBeforeStep: And I fill the employee role field with "QA"
+[92m➔ [/features/dashboard/employee_directory.feature:66] [93mExecuting step: And I fill the employee role field with "QA"[0m
+[DEBUG HOOK] onAfterStep: And I fill the employee role field with "QA"
+[DEBUG HOOK] onBeforeStep: And I fill the employee age field with "abc"
+[92m➔ [/features/dashboard/employee_directory.feature:67] [93mExecuting step: And I fill the employee age field with "abc"[0m
+[DEBUG HOOK] onAfterStep: And I fill the employee age field with "abc"
+[DEBUG HOOK] onBeforeStep: And I tap the save employee button
+[92m➔ [/features/dashboard/employee_directory.feature:68] [93mExecuting step: And I tap the save employee button[0m
+[DEBUG HOOK] onAfterStep: And I tap the save employee button
+[DEBUG HOOK] onBeforeStep: Then I should see "Age must be a number"
+[92m➔ [/features/dashboard/employee_directory.feature:69] [93mExecuting step: Then I should see "Age must be a number"[0m
+[DEBUG HOOK] onAfterStep: Then I should see "Age must be a number"
+[DEBUG HOOK] onAfterScenario: Non-numeric age shows validation error (passed)
+00:29 +12: Feature: Employee Directory Dashboard Scenario: Non-numeric age shows validation error                                                                                                      00:29 +12: Feature: Employee Directory Dashboard Scenario: Deleting an employee removes them from the table                                                                                            00:29 +12: Feature: Employee Directory Dashboard Scenario: Deleting an employee removes them from the table                                                                                            
+[DEBUG HOOK] onBeforeScenario: Deleting an employee removes them from the table
+[DEBUG HOOK] onBeforeStep: Given the application is launched
+[92m➔ [/features/dashboard/employee_directory.feature:8] [38;5;208mExecuting background step: Given the application is launched[0m
+[DEBUG HOOK] onAfterStep: Given the application is launched
+[DEBUG HOOK] onBeforeStep: And I fill the username field with "admin"
+[92m➔ [/features/dashboard/employee_directory.feature:9] [38;5;208mExecuting background step: And I fill the username field with "admin"[0m
+[DEBUG HOOK] onAfterStep: And I fill the username field with "admin"
+[DEBUG HOOK] onBeforeStep: And I fill the password field with "password123"
+[92m➔ [/features/dashboard/employee_directory.feature:10] [38;5;208mExecuting background step: And I fill the password field with "password123"[0m
+[DEBUG HOOK] onAfterStep: And I fill the password field with "password123"
+[DEBUG HOOK] onBeforeStep: And I tap the login button
+[92m➔ [/features/dashboard/employee_directory.feature:11] [38;5;208mExecuting background step: And I tap the login button[0m
+[DEBUG HOOK] onAfterStep: And I tap the login button
+[DEBUG HOOK] onBeforeStep: Then I should see "Welcome to the Dashboard!"
+[92m➔ [/features/dashboard/employee_directory.feature:12] [38;5;208mExecuting background step: Then I should see "Welcome to the Dashboard!"[0m
+[DEBUG HOOK] onAfterStep: Then I should see "Welcome to the Dashboard!"
+[DEBUG HOOK] onBeforeStep: Given I should see "Alice Johnson"
+[92m➔ [/features/dashboard/employee_directory.feature:73] [93mExecuting step: Given I should see "Alice Johnson"[0m
+[DEBUG HOOK] onAfterStep: Given I should see "Alice Johnson"
+[DEBUG HOOK] onBeforeStep: When I tap the delete button for "Alice Johnson"
+[92m➔ [/features/dashboard/employee_directory.feature:74] [93mExecuting step: When I tap the delete button for "Alice Johnson"[0m
+[DEBUG HOOK] onAfterStep: When I tap the delete button for "Alice Johnson"
+[DEBUG HOOK] onBeforeStep: Then the delete confirm message should be visible
+[92m➔ [/features/dashboard/employee_directory.feature:75] [93mExecuting step: Then the delete confirm message should be visible[0m
+[DEBUG HOOK] onAfterStep: Then the delete confirm message should be visible
+[DEBUG HOOK] onBeforeStep: And I should see "Delete Employee"
+[92m➔ [/features/dashboard/employee_directory.feature:76] [93mExecuting step: And I should see "Delete Employee"[0m
+[DEBUG HOOK] onAfterStep: And I should see "Delete Employee"
+[DEBUG HOOK] onBeforeStep: When I tap the delete confirm button
+[92m➔ [/features/dashboard/employee_directory.feature:77] [93mExecuting step: When I tap the delete confirm button[0m
+[DEBUG HOOK] onAfterStep: When I tap the delete confirm button
+[DEBUG HOOK] onBeforeStep: Then I should not see "Alice Johnson"
+[92m➔ [/features/dashboard/employee_directory.feature:78] [93mExecuting step: Then I should not see "Alice Johnson"[0m
+[DEBUG HOOK] onAfterStep: Then I should not see "Alice Johnson"
+[DEBUG HOOK] onAfterScenario: Deleting an employee removes them from the table (passed)
+00:31 +13: Feature: Employee Directory Dashboard Scenario: Deleting an employee removes them from the table                                                                                            00:31 +13: Feature: Employee Directory Dashboard Scenario: Cancelling delete keeps the employee in the table                                                                                           00:31 +13: Feature: Employee Directory Dashboard Scenario: Cancelling delete keeps the employee in the table                                                                                           
+[DEBUG HOOK] onBeforeScenario: Cancelling delete keeps the employee in the table
+[DEBUG HOOK] onBeforeStep: Given the application is launched
+[92m➔ [/features/dashboard/employee_directory.feature:8] [38;5;208mExecuting background step: Given the application is launched[0m
+[DEBUG HOOK] onAfterStep: Given the application is launched
+[DEBUG HOOK] onBeforeStep: And I fill the username field with "admin"
+[92m➔ [/features/dashboard/employee_directory.feature:9] [38;5;208mExecuting background step: And I fill the username field with "admin"[0m
+[DEBUG HOOK] onAfterStep: And I fill the username field with "admin"
+[DEBUG HOOK] onBeforeStep: And I fill the password field with "password123"
+[92m➔ [/features/dashboard/employee_directory.feature:10] [38;5;208mExecuting background step: And I fill the password field with "password123"[0m
+[DEBUG HOOK] onAfterStep: And I fill the password field with "password123"
+[DEBUG HOOK] onBeforeStep: And I tap the login button
+[92m➔ [/features/dashboard/employee_directory.feature:11] [38;5;208mExecuting background step: And I tap the login button[0m
+[DEBUG HOOK] onAfterStep: And I tap the login button
+[DEBUG HOOK] onBeforeStep: Then I should see "Welcome to the Dashboard!"
+[92m➔ [/features/dashboard/employee_directory.feature:12] [38;5;208mExecuting background step: Then I should see "Welcome to the Dashboard!"[0m
+[DEBUG HOOK] onAfterStep: Then I should see "Welcome to the Dashboard!"
+[DEBUG HOOK] onBeforeStep: Given I should see "Alice Johnson"
+[92m➔ [/features/dashboard/employee_directory.feature:81] [93mExecuting step: Given I should see "Alice Johnson"[0m
+[DEBUG HOOK] onAfterStep: Given I should see "Alice Johnson"
+[DEBUG HOOK] onBeforeStep: When I tap the delete button for "Alice Johnson"
+[92m➔ [/features/dashboard/employee_directory.feature:82] [93mExecuting step: When I tap the delete button for "Alice Johnson"[0m
+[DEBUG HOOK] onAfterStep: When I tap the delete button for "Alice Johnson"
+[DEBUG HOOK] onBeforeStep: Then the delete confirm message should be visible
+[92m➔ [/features/dashboard/employee_directory.feature:83] [93mExecuting step: Then the delete confirm message should be visible[0m
+[DEBUG HOOK] onAfterStep: Then the delete confirm message should be visible
+[DEBUG HOOK] onBeforeStep: When I tap the delete cancel button
+[92m➔ [/features/dashboard/employee_directory.feature:84] [93mExecuting step: When I tap the delete cancel button[0m
+[DEBUG HOOK] onAfterStep: When I tap the delete cancel button
+[DEBUG HOOK] onBeforeStep: Then the delete confirm message should not be visible
+[92m➔ [/features/dashboard/employee_directory.feature:85] [93mExecuting step: Then the delete confirm message should not be visible[0m
+[DEBUG HOOK] onAfterStep: Then the delete confirm message should not be visible
+[DEBUG HOOK] onBeforeStep: And I should see "Alice Johnson"
+[92m➔ [/features/dashboard/employee_directory.feature:86] [93mExecuting step: And I should see "Alice Johnson"[0m
+[DEBUG HOOK] onAfterStep: And I should see "Alice Johnson"
+[DEBUG HOOK] onAfterScenario: Cancelling delete keeps the employee in the table (passed)
+00:33 +14: Feature: Employee Directory Dashboard Scenario: Cancelling delete keeps the employee in the table                                                                                           00:33 +14: Feature: Employee Directory Dashboard Scenario: Editing an employee updates the table row                                                                                                   00:33 +14: Feature: Employee Directory Dashboard Scenario: Editing an employee updates the table row                                                                                                   
+[DEBUG HOOK] onBeforeScenario: Editing an employee updates the table row
+[DEBUG HOOK] onBeforeStep: Given the application is launched
+[92m➔ [/features/dashboard/employee_directory.feature:8] [38;5;208mExecuting background step: Given the application is launched[0m
+[DEBUG HOOK] onAfterStep: Given the application is launched
+[DEBUG HOOK] onBeforeStep: And I fill the username field with "admin"
+[92m➔ [/features/dashboard/employee_directory.feature:9] [38;5;208mExecuting background step: And I fill the username field with "admin"[0m
+[DEBUG HOOK] onAfterStep: And I fill the username field with "admin"
+[DEBUG HOOK] onBeforeStep: And I fill the password field with "password123"
+[92m➔ [/features/dashboard/employee_directory.feature:10] [38;5;208mExecuting background step: And I fill the password field with "password123"[0m
+[DEBUG HOOK] onAfterStep: And I fill the password field with "password123"
+[DEBUG HOOK] onBeforeStep: And I tap the login button
+[92m➔ [/features/dashboard/employee_directory.feature:11] [38;5;208mExecuting background step: And I tap the login button[0m
+[DEBUG HOOK] onAfterStep: And I tap the login button
+[DEBUG HOOK] onBeforeStep: Then I should see "Welcome to the Dashboard!"
+[92m➔ [/features/dashboard/employee_directory.feature:12] [38;5;208mExecuting background step: Then I should see "Welcome to the Dashboard!"[0m
+[DEBUG HOOK] onAfterStep: Then I should see "Welcome to the Dashboard!"
+[DEBUG HOOK] onBeforeStep: Given I should see "Bob Martinez"
+[92m➔ [/features/dashboard/employee_directory.feature:90] [93mExecuting step: Given I should see "Bob Martinez"[0m
+[DEBUG HOOK] onAfterStep: Given I should see "Bob Martinez"
+[DEBUG HOOK] onBeforeStep: When I tap the edit button for "Bob Martinez"
+[92m➔ [/features/dashboard/employee_directory.feature:91] [93mExecuting step: When I tap the edit button for "Bob Martinez"[0m
+[DEBUG HOOK] onAfterStep: When I tap the edit button for "Bob Martinez"
+[DEBUG HOOK] onBeforeStep: Then I should see "Edit Employee"
+[92m➔ [/features/dashboard/employee_directory.feature:92] [93mExecuting step: Then I should see "Edit Employee"[0m
+[DEBUG HOOK] onAfterStep: Then I should see "Edit Employee"
+[DEBUG HOOK] onBeforeStep: When I fill the employee name field with "Robert Martinez"
+[92m➔ [/features/dashboard/employee_directory.feature:93] [93mExecuting step: When I fill the employee name field with "Robert Martinez"[0m
+[DEBUG HOOK] onAfterStep: When I fill the employee name field with "Robert Martinez"
+[DEBUG HOOK] onBeforeStep: And I tap the save employee button
+[92m➔ [/features/dashboard/employee_directory.feature:94] [93mExecuting step: And I tap the save employee button[0m
+[DEBUG HOOK] onAfterStep: And I tap the save employee button
+[DEBUG HOOK] onBeforeStep: Then I should see "Robert Martinez"
+[92m➔ [/features/dashboard/employee_directory.feature:95] [93mExecuting step: Then I should see "Robert Martinez"[0m
+[DEBUG HOOK] onAfterStep: Then I should see "Robert Martinez"
+[DEBUG HOOK] onBeforeStep: And I should not see "Bob Martinez"
+[92m➔ [/features/dashboard/employee_directory.feature:96] [93mExecuting step: And I should not see "Bob Martinez"[0m
+[DEBUG HOOK] onAfterStep: And I should not see "Bob Martinez"
+[DEBUG HOOK] onAfterScenario: Editing an employee updates the table row (passed)
+00:35 +15: Feature: Employee Directory Dashboard Scenario: Editing an employee updates the table row                                                                                                   00:35 +15: Feature: Employee Directory Dashboard Scenario: Searching by name narrows the displayed employees (Example 1)                                                                               00:35 +15: Feature: Employee Directory Dashboard Scenario: Searching by name narrows the displayed employees (Example 1)                                                                               
+[DEBUG HOOK] onBeforeScenario: Searching by name narrows the displayed employees (Example 1)
+[DEBUG HOOK] onBeforeStep: Given the application is launched
+[92m➔ [/features/dashboard/employee_directory.feature:8] [38;5;208mExecuting background step: Given the application is launched[0m
+[DEBUG HOOK] onAfterStep: Given the application is launched
+[DEBUG HOOK] onBeforeStep: And I fill the username field with "admin"
+[92m➔ [/features/dashboard/employee_directory.feature:9] [38;5;208mExecuting background step: And I fill the username field with "admin"[0m
+[DEBUG HOOK] onAfterStep: And I fill the username field with "admin"
+[DEBUG HOOK] onBeforeStep: And I fill the password field with "password123"
+[92m➔ [/features/dashboard/employee_directory.feature:10] [38;5;208mExecuting background step: And I fill the password field with "password123"[0m
+[DEBUG HOOK] onAfterStep: And I fill the password field with "password123"
+[DEBUG HOOK] onBeforeStep: And I tap the login button
+[92m➔ [/features/dashboard/employee_directory.feature:11] [38;5;208mExecuting background step: And I tap the login button[0m
+[DEBUG HOOK] onAfterStep: And I tap the login button
+[DEBUG HOOK] onBeforeStep: Then I should see "Welcome to the Dashboard!"
+[92m➔ [/features/dashboard/employee_directory.feature:12] [38;5;208mExecuting background step: Then I should see "Welcome to the Dashboard!"[0m
+[DEBUG HOOK] onAfterStep: Then I should see "Welcome to the Dashboard!"
+[DEBUG HOOK] onBeforeStep: When I fill the search field with "Alice"
+[92m➔ [/features/dashboard/employee_directory.feature:100] [93mExecuting step: When I fill the search field with "Alice"[0m
+[DEBUG HOOK] onAfterStep: When I fill the search field with "Alice"
+[DEBUG HOOK] onBeforeStep: Then I should see "Alice Johnson"
+[92m➔ [/features/dashboard/employee_directory.feature:101] [93mExecuting step: Then I should see "Alice Johnson"[0m
+[DEBUG HOOK] onAfterStep: Then I should see "Alice Johnson"
+[DEBUG HOOK] onBeforeStep: And I should not see "Bob Martinez"
+[92m➔ [/features/dashboard/employee_directory.feature:102] [93mExecuting step: And I should not see "Bob Martinez"[0m
+[DEBUG HOOK] onAfterStep: And I should not see "Bob Martinez"
+[DEBUG HOOK] onAfterScenario: Searching by name narrows the displayed employees (Example 1) (passed)
+00:36 +16: Feature: Employee Directory Dashboard Scenario: Searching by name narrows the displayed employees (Example 1)                                                                               00:36 +16: Feature: Employee Directory Dashboard Scenario: Searching by name narrows the displayed employees (Example 2)                                                                               00:36 +16: Feature: Employee Directory Dashboard Scenario: Searching by name narrows the displayed employees (Example 2)                                                                               
+[DEBUG HOOK] onBeforeScenario: Searching by name narrows the displayed employees (Example 2)
+[DEBUG HOOK] onBeforeStep: Given the application is launched
+[92m➔ [/features/dashboard/employee_directory.feature:8] [38;5;208mExecuting background step: Given the application is launched[0m
+[DEBUG HOOK] onAfterStep: Given the application is launched
+[DEBUG HOOK] onBeforeStep: And I fill the username field with "admin"
+[92m➔ [/features/dashboard/employee_directory.feature:9] [38;5;208mExecuting background step: And I fill the username field with "admin"[0m
+[DEBUG HOOK] onAfterStep: And I fill the username field with "admin"
+[DEBUG HOOK] onBeforeStep: And I fill the password field with "password123"
+[92m➔ [/features/dashboard/employee_directory.feature:10] [38;5;208mExecuting background step: And I fill the password field with "password123"[0m
+[DEBUG HOOK] onAfterStep: And I fill the password field with "password123"
+[DEBUG HOOK] onBeforeStep: And I tap the login button
+[92m➔ [/features/dashboard/employee_directory.feature:11] [38;5;208mExecuting background step: And I tap the login button[0m
+[DEBUG HOOK] onAfterStep: And I tap the login button
+[DEBUG HOOK] onBeforeStep: Then I should see "Welcome to the Dashboard!"
+[92m➔ [/features/dashboard/employee_directory.feature:12] [38;5;208mExecuting background step: Then I should see "Welcome to the Dashboard!"[0m
+[DEBUG HOOK] onAfterStep: Then I should see "Welcome to the Dashboard!"
+[DEBUG HOOK] onBeforeStep: When I fill the search field with "Manager"
+[92m➔ [/features/dashboard/employee_directory.feature:100] [93mExecuting step: When I fill the search field with "Manager"[0m
+[DEBUG HOOK] onAfterStep: When I fill the search field with "Manager"
+[DEBUG HOOK] onBeforeStep: Then I should see "Carol White"
+[92m➔ [/features/dashboard/employee_directory.feature:101] [93mExecuting step: Then I should see "Carol White"[0m
+[DEBUG HOOK] onAfterStep: Then I should see "Carol White"
+[DEBUG HOOK] onBeforeStep: And I should not see "Alice Johnson"
+[92m➔ [/features/dashboard/employee_directory.feature:102] [93mExecuting step: And I should not see "Alice Johnson"[0m
+[DEBUG HOOK] onAfterStep: And I should not see "Alice Johnson"
+[DEBUG HOOK] onAfterScenario: Searching by name narrows the displayed employees (Example 2) (passed)
+00:37 +17: Feature: Employee Directory Dashboard Scenario: Searching by name narrows the displayed employees (Example 2)                                                                               00:37 +17: Feature: Employee Directory Dashboard Scenario: Searching by name narrows the displayed employees empty state                                                                               00:37 +17: Feature: Employee Directory Dashboard Scenario: Searching by name narrows the displayed employees empty state                                                                               
+[DEBUG HOOK] onBeforeScenario: Searching by name narrows the displayed employees empty state
+[DEBUG HOOK] onBeforeStep: Given the application is launched
+[92m➔ [/features/dashboard/employee_directory.feature:8] [38;5;208mExecuting background step: Given the application is launched[0m
+[DEBUG HOOK] onAfterStep: Given the application is launched
+[DEBUG HOOK] onBeforeStep: And I fill the username field with "admin"
+[92m➔ [/features/dashboard/employee_directory.feature:9] [38;5;208mExecuting background step: And I fill the username field with "admin"[0m
+[DEBUG HOOK] onAfterStep: And I fill the username field with "admin"
+[DEBUG HOOK] onBeforeStep: And I fill the password field with "password123"
+[92m➔ [/features/dashboard/employee_directory.feature:10] [38;5;208mExecuting background step: And I fill the password field with "password123"[0m
+[DEBUG HOOK] onAfterStep: And I fill the password field with "password123"
+[DEBUG HOOK] onBeforeStep: And I tap the login button
+[92m➔ [/features/dashboard/employee_directory.feature:11] [38;5;208mExecuting background step: And I tap the login button[0m
+[DEBUG HOOK] onAfterStep: And I tap the login button
+[DEBUG HOOK] onBeforeStep: Then I should see "Welcome to the Dashboard!"
+[92m➔ [/features/dashboard/employee_directory.feature:12] [38;5;208mExecuting background step: Then I should see "Welcome to the Dashboard!"[0m
+[DEBUG HOOK] onAfterStep: Then I should see "Welcome to the Dashboard!"
+[DEBUG HOOK] onBeforeStep: When I fill the search field with "xyznotfound"
+[92m➔ [/features/dashboard/employee_directory.feature:110] [93mExecuting step: When I fill the search field with "xyznotfound"[0m
+[DEBUG HOOK] onAfterStep: When I fill the search field with "xyznotfound"
+[DEBUG HOOK] onBeforeStep: Then I should not see "Alice Johnson"
+[92m➔ [/features/dashboard/employee_directory.feature:111] [93mExecuting step: Then I should not see "Alice Johnson"[0m
+[DEBUG HOOK] onAfterStep: Then I should not see "Alice Johnson"
+[DEBUG HOOK] onBeforeStep: And the empty employee text should be visible
+[92m➔ [/features/dashboard/employee_directory.feature:112] [93mExecuting step: And the empty employee text should be visible[0m
+[DEBUG HOOK] onAfterStep: And the empty employee text should be visible
+[DEBUG HOOK] onAfterScenario: Searching by name narrows the displayed employees empty state (passed)
+00:39 +18: Feature: Employee Directory Dashboard Scenario: Searching by name narrows the displayed employees empty state                                                                               00:39 +18: Feature: Employee Directory Dashboard Scenario: Employee table displays all required columns                                                                                                00:39 +18: Feature: Employee Directory Dashboard Scenario: Employee table displays all required columns                                                                                                
+[DEBUG HOOK] onBeforeScenario: Employee table displays all required columns
+[DEBUG HOOK] onBeforeStep: Given the application is launched
+[92m➔ [/features/dashboard/employee_directory.feature:8] [38;5;208mExecuting background step: Given the application is launched[0m
+[DEBUG HOOK] onAfterStep: Given the application is launched
+[DEBUG HOOK] onBeforeStep: And I fill the username field with "admin"
+[92m➔ [/features/dashboard/employee_directory.feature:9] [38;5;208mExecuting background step: And I fill the username field with "admin"[0m
+[DEBUG HOOK] onAfterStep: And I fill the username field with "admin"
+[DEBUG HOOK] onBeforeStep: And I fill the password field with "password123"
+[92m➔ [/features/dashboard/employee_directory.feature:10] [38;5;208mExecuting background step: And I fill the password field with "password123"[0m
+[DEBUG HOOK] onAfterStep: And I fill the password field with "password123"
+[DEBUG HOOK] onBeforeStep: And I tap the login button
+[92m➔ [/features/dashboard/employee_directory.feature:11] [38;5;208mExecuting background step: And I tap the login button[0m
+[DEBUG HOOK] onAfterStep: And I tap the login button
+[DEBUG HOOK] onBeforeStep: Then I should see "Welcome to the Dashboard!"
+[92m➔ [/features/dashboard/employee_directory.feature:12] [38;5;208mExecuting background step: Then I should see "Welcome to the Dashboard!"[0m
+[DEBUG HOOK] onAfterStep: Then I should see "Welcome to the Dashboard!"
+[DEBUG HOOK] onBeforeStep: Then I should see "ID"
+[92m➔ [/features/dashboard/employee_directory.feature:115] [93mExecuting step: Then I should see "ID"[0m
+[DEBUG HOOK] onAfterStep: Then I should see "ID"
+[DEBUG HOOK] onBeforeStep: And I should see "Name"
+[92m➔ [/features/dashboard/employee_directory.feature:116] [93mExecuting step: And I should see "Name"[0m
+[DEBUG HOOK] onAfterStep: And I should see "Name"
+[DEBUG HOOK] onBeforeStep: And I should see "Role"
+[92m➔ [/features/dashboard/employee_directory.feature:117] [93mExecuting step: And I should see "Role"[0m
+[DEBUG HOOK] onAfterStep: And I should see "Role"
+[DEBUG HOOK] onBeforeStep: And I should see "Age"
+[92m➔ [/features/dashboard/employee_directory.feature:118] [93mExecuting step: And I should see "Age"[0m
+[DEBUG HOOK] onAfterStep: And I should see "Age"
+[DEBUG HOOK] onBeforeStep: And I should see "Biography"
+[92m➔ [/features/dashboard/employee_directory.feature:119] [93mExecuting step: And I should see "Biography"[0m
+[DEBUG HOOK] onAfterStep: And I should see "Biography"
+[DEBUG HOOK] onBeforeStep: And I should see "Actions"
+[92m➔ [/features/dashboard/employee_directory.feature:120] [93mExecuting step: And I should see "Actions"[0m
+[DEBUG HOOK] onAfterStep: And I should see "Actions"
+[DEBUG HOOK] onAfterScenario: Employee table displays all required columns (passed)
+00:40 +19: Feature: Employee Directory Dashboard Scenario: Employee table displays all required columns                                                                                                00:40 +19: Feature: Employee Directory Dashboard Scenario: Cancelling the Add Employee dialog saves nothing                                                                                            00:40 +19: Feature: Employee Directory Dashboard Scenario: Cancelling the Add Employee dialog saves nothing                                                                                            
+[DEBUG HOOK] onBeforeScenario: Cancelling the Add Employee dialog saves nothing
+[DEBUG HOOK] onBeforeStep: Given the application is launched
+[92m➔ [/features/dashboard/employee_directory.feature:8] [38;5;208mExecuting background step: Given the application is launched[0m
+[DEBUG HOOK] onAfterStep: Given the application is launched
+[DEBUG HOOK] onBeforeStep: And I fill the username field with "admin"
+[92m➔ [/features/dashboard/employee_directory.feature:9] [38;5;208mExecuting background step: And I fill the username field with "admin"[0m
+[DEBUG HOOK] onAfterStep: And I fill the username field with "admin"
+[DEBUG HOOK] onBeforeStep: And I fill the password field with "password123"
+[92m➔ [/features/dashboard/employee_directory.feature:10] [38;5;208mExecuting background step: And I fill the password field with "password123"[0m
+[DEBUG HOOK] onAfterStep: And I fill the password field with "password123"
+[DEBUG HOOK] onBeforeStep: And I tap the login button
+[92m➔ [/features/dashboard/employee_directory.feature:11] [38;5;208mExecuting background step: And I tap the login button[0m
+[DEBUG HOOK] onAfterStep: And I tap the login button
+[DEBUG HOOK] onBeforeStep: Then I should see "Welcome to the Dashboard!"
+[92m➔ [/features/dashboard/employee_directory.feature:12] [38;5;208mExecuting background step: Then I should see "Welcome to the Dashboard!"[0m
+[DEBUG HOOK] onAfterStep: Then I should see "Welcome to the Dashboard!"
+[DEBUG HOOK] onBeforeStep: Given I should see "Alice Johnson"
+[92m➔ [/features/dashboard/employee_directory.feature:123] [93mExecuting step: Given I should see "Alice Johnson"[0m
+[DEBUG HOOK] onAfterStep: Given I should see "Alice Johnson"
+[DEBUG HOOK] onBeforeStep: When I tap the add employee button
+[92m➔ [/features/dashboard/employee_directory.feature:124] [93mExecuting step: When I tap the add employee button[0m
+[DEBUG HOOK] onAfterStep: When I tap the add employee button
+[DEBUG HOOK] onBeforeStep: And I fill the employee name field with "Ghost Employee"
+[92m➔ [/features/dashboard/employee_directory.feature:125] [93mExecuting step: And I fill the employee name field with "Ghost Employee"[0m
+[DEBUG HOOK] onAfterStep: And I fill the employee name field with "Ghost Employee"
+[DEBUG HOOK] onBeforeStep: And I tap the cancel employee button
+[92m➔ [/features/dashboard/employee_directory.feature:126] [93mExecuting step: And I tap the cancel employee button[0m
+[DEBUG HOOK] onAfterStep: And I tap the cancel employee button
+[DEBUG HOOK] onBeforeStep: Then the employee dialog title should not be visible
+[92m➔ [/features/dashboard/employee_directory.feature:127] [93mExecuting step: Then the employee dialog title should not be visible[0m
+[DEBUG HOOK] onAfterStep: Then the employee dialog title should not be visible
+[DEBUG HOOK] onBeforeStep: And I should not see "Ghost Employee"
+[92m➔ [/features/dashboard/employee_directory.feature:128] [93mExecuting step: And I should not see "Ghost Employee"[0m
+[DEBUG HOOK] onAfterStep: And I should not see "Ghost Employee"
+[DEBUG HOOK] onAfterScenario: Cancelling the Add Employee dialog saves nothing (passed)
+00:42 +20: Feature: Employee Directory Dashboard Scenario: Cancelling the Add Employee dialog saves nothing                                                                                            00:42 +20: Feature: Employee Directory Dashboard (tearDownAll)                                                                                                                                         00:42 +20: (tearDownAll)                                                                                                                                                                               00:42 +20: (tearDownAll)                                                                                                                                                                               
+[DEBUG HOOK] onAfterAll
+
+20 scenarios ([92m20 passed[0m, [91m0 failed[0m, [93m0 skipped[0m)
+0m33.823s
+
+
+[96m╔[0m══════════════════════════╗
+[96m║[0m Summary                  ║
+[96m╠[0m══════════════════════════╣
+[96m║[0m Total scenarios : 20     ║
+[96m║[0m Passed : [92m✓20[0m             ║
+[96m║[0m Failed : [91m✗0[0m              ║
+[96m║[0m Skipped : [93m↺0[0m             ║
+[96m║[0m Elapsed Time : 0m33.824s ║
+[96m╚[0m══════════════════════════╝
+[0m
+
+[JsonReporter] onAfterAll started. features=2 path=./report/report.json
+[bridge] [IntegrationTestServer] Report saved at: /Users/angel609/Development/Personal/flutter/flutter_bdd_suite/example/./report/report.json
+[JsonReporter] Report saved successfully. status=200
+[JsonReporter] onAfterAll finished.
+00:42 +20: All tests passed!                                                                                                                                                                           

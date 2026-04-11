@@ -1,8 +1,7 @@
 import 'package:flutter_bdd_suite/lifecycle_listener.dart';
 import 'package:flutter_bdd_suite/models/feature_model.dart';
 import 'package:flutter_bdd_suite/models/scenario_model.dart';
-import 'package:flutter_bdd_suite/steps/step_result.dart';
-import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
+import 'package:flutter_bdd_suite/models/step_hook_contexts.dart';
 
 /// A base class for creating hooks that tap into the BDD test lifecycle.
 ///
@@ -16,13 +15,18 @@ abstract class IntegrationHook implements LifecycleListener {
   @override
   int get priority => 0;
 
+  /// An optional tag expression to conditionally execute this hook.
+  /// For example: `@browser and not @headless`.
+  @override
+  String? get tagExpression => null;
+
   /// Invoked once before the entire test suite begins execution.
   @override
   Future<void> onBeforeAll() async {}
 
   /// Invoked before the execution of a specific [FeatureInfo].
   @override
-  Future<void> onFeatureStarted(FeatureInfo feature) async {}
+  Future<void> onBeforeFeature(FeatureInfo feature) async {}
 
   /// Invoked after the execution of a specific [FeatureInfo].
   @override
@@ -43,11 +47,26 @@ abstract class IntegrationHook implements LifecycleListener {
   @override
   Future<void> onAfterScenario(ScenarioResult result) async {}
 
-  /// Invoked immediately before a step executes. Provides the raw [stepText] and the current [world].
+  /// Invoked immediately before a step executes.
+  ///
+  /// [context.stepText] is the resolved step text (after parameter substitution
+  /// for Scenario Outlines).  [context.world] is the shared
+  /// [WidgetTesterWorld].  [context.scenario] provides the context of the
+  /// currently running scenario, allowing hooks to inspect its name and tags.
+  ///
+  /// Per the Cucumber specification, this method is **not** called for steps
+  /// that are skipped because a prior step in the same scenario did not pass.
   @override
-  Future<void> onBeforeStep(String stepText, WidgetTesterWorld world) async {}
+  Future<void> onBeforeStep(BeforeStepContext context) async {}
 
-  /// Invoked immediately after a step completes execution. Provides the [StepResult] and the current [world].
+  /// Invoked immediately after a step completes execution.
+  ///
+  /// [context.result] carries the outcome (passed, failed, pending, undefined,
+  /// or ambiguous) along with timing and step metadata.  [context.scenario]
+  /// provides the context of the currently running scenario.
+  ///
+  /// Per the Cucumber specification, this method is **not** called for steps
+  /// that are skipped because a prior step in the same scenario did not pass.
   @override
-  Future<void> onAfterStep(StepResult result, WidgetTesterWorld world) async {}
+  Future<void> onAfterStep(AfterStepContext context) async {}
 }

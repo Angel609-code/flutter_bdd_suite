@@ -1,8 +1,7 @@
 import 'package:flutter_bdd_suite/hooks/integration_hook.dart';
 import 'package:flutter_bdd_suite/logger.dart';
 import 'package:flutter_bdd_suite/models/models.dart';
-import 'package:flutter_bdd_suite/steps/step_result.dart';
-import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
+import 'package:flutter_bdd_suite/models/step_hook_contexts.dart';
 
 import '../integration_endpoints/say_hello.dart';
 
@@ -28,8 +27,8 @@ class DebugLifecycleHook extends IntegrationHook {
   }
 
   @override
-  Future<void> onFeatureStarted(FeatureInfo feature) async {
-    logLine('[DEBUG HOOK] onFeatureStarted');
+  Future<void> onBeforeFeature(FeatureInfo feature) async {
+    logLine('[DEBUG HOOK] onBeforeFeature');
   }
 
   @override
@@ -45,12 +44,12 @@ class DebugLifecycleHook extends IntegrationHook {
   }
 
   @override
-  Future<void> onBeforeStep(String stepText, WidgetTesterWorld world) async {
-    logLine('[DEBUG HOOK] onBeforeStep: $stepText');
+  Future<void> onBeforeStep(BeforeStepContext context) async {
+    logLine('[DEBUG HOOK] onBeforeStep: ${context.stepText}');
   }
 
   @override
-  Future<void> onAfterStep(StepResult result, WidgetTesterWorld world) async {
-    logLine('[DEBUG HOOK] onAfterStep: ${result.stepText}');
+  Future<void> onAfterStep(AfterStepContext context) async {
+    logLine('[DEBUG HOOK] onAfterStep: ${context.result.stepText}');
   }
 }

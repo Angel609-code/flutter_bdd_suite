@@ -8,8 +8,9 @@ import 'package:flutter_bdd_suite/server/integration_test_server.dart';
 Future<void> main(List<String> args) async {
   final delimiterIndex = args.indexOf('--');
   final myArgs = delimiterIndex >= 0 ? args.sublist(0, delimiterIndex) : args;
-  final passthroughArgs =
-      delimiterIndex >= 0 ? args.sublist(delimiterIndex + 1) : <String>[];
+  final passthroughArgs = delimiterIndex >= 0
+      ? args.sublist(delimiterIndex + 1)
+      : <String>[];
 
   if (_hasHelpFlag(myArgs)) {
     _printUsage();
@@ -539,7 +540,8 @@ Future<String> _writeGeneratedBridgeRunner({
   final generatedFile = File('${generatedDir.path}/bridge_runner.dart');
   final setupImport = bridgeSetupPath.replaceAll('\\', '/');
 
-  final content = '''// GENERATED FILE. DO NOT EDIT.
+  final content =
+      '''// GENERATED FILE. DO NOT EDIT.
 import 'package:flutter_bdd_suite/server/integration_test_server.dart';
 import '../../$setupImport';
 

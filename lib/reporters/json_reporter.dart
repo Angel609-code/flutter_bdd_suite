@@ -4,12 +4,46 @@ import 'package:flutter_bdd_suite/models/feature_model.dart';
 import 'package:flutter_bdd_suite/models/json_step_model.dart';
 import 'package:flutter_bdd_suite/models/report_model.dart';
 import 'package:flutter_bdd_suite/models/scenario_model.dart';
+import 'package:flutter_bdd_suite/models/step_hook_contexts.dart';
 import 'package:flutter_bdd_suite/reporters/integration_reporter.dart';
 import 'package:flutter_bdd_suite/server/integration_endpoints.dart';
 import 'package:flutter_bdd_suite/steps/step_result.dart';
-import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
 
-/// Creates a JSON file with the results of the test run.
+// ── Private constants ────────────────────────────────────────────────────────
+
+/// Cucumber JSON report status strings used by [JsonReporter].
+///
+/// These values must match the strings expected by downstream tooling such as
+/// [cucumber-html-reporter](https://www.npmjs.com/package/cucumber-html-reporter).
+abstract final class _StepStatus {
+  static const passed = 'passed';
+  static const skipped = 'skipped';
+  static const undefined = 'undefined';
+  static const pending = 'pending';
+  static const ambiguous = 'ambiguous';
+  static const failed = 'failed';
+}
+
+/// Identifiers for the synthetic `Background` element emitted in the JSON
+/// report when background steps are present.
+abstract final class _BackgroundElement {
+  /// Display keyword used as the `keyword` field in the JSON element.
+  static const keyword = 'Background';
+
+  /// Element type used as the `type` field in the JSON element.
+  static const type = 'background';
+
+  /// Separator used when building the `id` field: `<featureId>;background`.
+  static const idSuffix = 'background';
+}
+
+/// Maximum number of characters included in a log message for the report-save
+/// response body.  Longer messages are truncated and suffixed with `...`.
+const _maxLogMessageLength = 300;
+
+// ── Reporter ─────────────────────────────────────────────────────────────────
+
+/// Creates a Cucumber-compatible JSON report file with the results of the test run.
 ///
 /// This JSON file can be used by the [cucumber-html-reporter](https://www.npmjs.com/package/cucumber-html-reporter)
 /// npm package to create a comprehensive HTML report.
@@ -17,17 +51,43 @@ import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
 /// This reporter was inspired by the reporting implementation in the `flutter_gherkin` package,
 /// but has been specifically adapted for `integration_test` to replace the older `flutter_driver` approach.
 class JsonReporter extends IntegrationReporter {
+  /// Accumulated list of all features observed during the test run.
   final List<JsonFeature> _features = [];
+
+  /// JSON model for the scenario that is currently executing.
   JsonScenario? _currentScenario;
+
+  /// JSON model for the feature that is currently executing.
   JsonFeature? _currentFeature;
 
+  /// JSON model for the synthetic Background element of the current feature.
+  ///
+  /// Created lazily on the first background step result received after
+  /// [onBeforeFeature] or [onAfterScenario].
   JsonScenario? _background;
-  bool? _inBackground;
+
+  /// Whether the reporter is currently recording steps for the Background
+  /// section (`true`) or for an active Scenario (`false`).
+  ///
+  /// Set to `true` when a feature begins (or after a scenario ends) so that
+  /// the next batch of steps is attributed to the background element.  Set to
+  /// `false` when [onBeforeScenario] fires.
+  ///
+  /// Initialised to `false` as a safe default.  This value is never read
+  /// before the first [onBeforeFeature] call (which sets it to `true`),
+  /// because [onAfterStep] can only be invoked while a feature is executing.
+  bool _inBackground = false;
 
   JsonReporter({required super.path});
 
+  /// Initialises state for the new feature and prepares the background slot.
+  ///
+  /// Note: tags are mapped to the line immediately preceding the feature
+  /// keyword (`feature.line - 1`) because the Gherkin parser records the
+  /// feature's own line, but tags always appear on the line above in the
+  /// Cucumber JSON schema.
   @override
-  Future<void> onFeatureStarted(FeatureInfo feature) async {
+  Future<void> onBeforeFeature(FeatureInfo feature) async {
     _currentFeature = JsonFeature(
       uri: feature.uri,
       id: feature.featureName.toLowerCase().replaceAll(' ', '-'),
@@ -42,6 +102,11 @@ class JsonReporter extends IntegrationReporter {
     _background = null;
   }
 
+  /// Creates a new [JsonScenario] entry for the scenario that is about to run
+  /// and switches the reporter out of background-recording mode.
+  ///
+  /// Note: tags are mapped to `scenario.line - 1` for the same reason as in
+  /// [onBeforeFeature] — tags precede the scenario keyword in the feature file.
   @override
   Future<void> onBeforeScenario(ScenarioInfo scenario) async {
     _inBackground = false;
@@ -57,20 +122,29 @@ class JsonReporter extends IntegrationReporter {
     _currentFeature!.elements.add(_currentScenario!);
   }
 
+  /// Resets the background slot so that the next feature's background steps
+  /// are captured in a fresh element.
   @override
   Future<void> onAfterScenario(ScenarioResult result) async {
     _inBackground = true;
     _background = null;
   }
 
+  /// Appends a [JsonStep] to either the background element or the current
+  /// scenario element depending on [_inBackground].
+  ///
+  /// If this is the first background step for the current feature, the
+  /// [_BackgroundElement] is created lazily and added to the feature's element
+  /// list before the step is appended.
   @override
-  Future<void> onAfterStep(StepResult result, WidgetTesterWorld world) async {
-    if (_inBackground == true && _background == null) {
+  Future<void> onAfterStep(AfterStepContext context) async {
+    final result = context.result;
+    if (_inBackground && _background == null) {
       _background = JsonScenario(
-        id: '${_currentFeature!.id};background',
-        keyword: 'Background',
+        id: '${_currentFeature!.id};${_BackgroundElement.idSuffix}',
+        keyword: _BackgroundElement.keyword,
         name: '',
-        type: 'background',
+        type: _BackgroundElement.type,
         line: result.line - 1,
       );
 
@@ -86,21 +160,21 @@ class JsonReporter extends IntegrationReporter {
     String? errorMessage;
 
     if (result is StepSuccess) {
-      status = 'passed';
+      status = _StepStatus.passed;
     } else if (result is StepSkipped) {
-      status = 'skipped';
+      status = _StepStatus.skipped;
     } else if (result is StepUndefined) {
-      status = 'undefined';
+      status = _StepStatus.undefined;
     } else if (result is StepPending) {
-      status = 'pending';
+      status = _StepStatus.pending;
     } else if (result is StepAmbiguous) {
-      status = 'ambiguous';
+      status = _StepStatus.ambiguous;
       errorMessage = '${result.error}';
     } else if (result is StepFailure) {
-      status = 'failed';
+      status = _StepStatus.failed;
       errorMessage = '${result.error}';
     } else {
-      status = 'failed';
+      status = _StepStatus.failed;
       errorMessage = 'Unknown step result type: ${result.runtimeType}';
     }
 
@@ -114,13 +188,15 @@ class JsonReporter extends IntegrationReporter {
       table: result.table,
     );
 
-    if (_inBackground == true) {
+    if (_inBackground) {
       _background?.steps.add(jsonStep);
     } else {
       _currentScenario?.steps.add(jsonStep);
     }
   }
 
+  /// Serialises all accumulated features to JSON and persists the report via
+  /// the bridge server.
   @override
   Future<void> onAfterAll() async {
     final jsonString = jsonEncode(_features.map((f) => f.toJson()).toList());
@@ -133,10 +209,9 @@ class JsonReporter extends IntegrationReporter {
     );
 
     final rawMessage = result.message ?? '';
-    final message =
-        rawMessage.length > 300
-            ? '${rawMessage.substring(0, 300)}...'
-            : rawMessage;
+    final message = rawMessage.length > _maxLogMessageLength
+        ? '${rawMessage.substring(0, _maxLogMessageLength)}...'
+        : rawMessage;
 
     if (result.success) {
       logLine(
@@ -153,8 +228,10 @@ class JsonReporter extends IntegrationReporter {
 
   @override
   Future<void> onBeforeAll() async {}
+
   @override
-  Future<void> onBeforeStep(String stepText, WidgetTesterWorld world) async {}
+  Future<void> onBeforeStep(BeforeStepContext context) async {}
+
   @override
   Future<void> onAfterFeature(FeatureInfo feature) async {}
 

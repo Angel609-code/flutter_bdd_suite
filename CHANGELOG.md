@@ -10,7 +10,7 @@ Initial release of `flutter_bdd_suite`.
 - **Step Definition Framework:** Typed builder functions `generic` through `generic6` (0–6 captures) with support for `{string}`, `{int}`, `{float}`, and `{word}` placeholders. Data tables and doc-strings are delivered via the `WidgetTesterWorld` context object (`world.table`, `world.docString`).
 - **Built-in Step:** `I fill the {string} field with {string}` — enters text into a widget found by `ValueKey`.
 - **`WidgetTesterWorld`:** Context object passed to every step, providing access to `WidgetTester`, `IntegrationTestWidgetsFlutterBinding`, and a key-value attachment store for sharing state between steps.
-- **Lifecycle Hooks:** `IntegrationHook` base class with `onBeforeAll`, `onAfterAll`, `onFeatureStarted`, `onBeforeScenario`, `onAfterScenario`, `onBeforeStep`, and `onAfterStep` callbacks. Hooks are executed in descending priority order.
+- **Lifecycle Hooks:** `IntegrationHook` base class with `onBeforeAll`, `onAfterAll`, `onBeforeFeature`, `onAfterFeature`, `onBeforeScenario`, `onAfterScenario`, `onBeforeStep`, and `onAfterStep` callbacks. Hooks are executed in descending priority order. Step hooks receive the current `ScenarioInfo` for context. Per the Cucumber specification, `onBeforeStep`/`onAfterStep` are not invoked for steps that are skipped because a prior step in the same scenario did not pass.
 - **Reporters:**
   - `SummaryReporter` — prints scenario pass/fail/skip counts and elapsed time to the terminal.
   - `JsonReporter` — generates a Cucumber-compatible JSON report for use with `cucumber-html-reporter`.

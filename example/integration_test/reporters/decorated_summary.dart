@@ -3,14 +3,21 @@ import 'package:flutter_bdd_suite/logger.dart';
 import 'package:wcwidth/wcwidth.dart';
 import 'package:flutter_bdd_suite/models/feature_model.dart';
 import 'package:flutter_bdd_suite/models/scenario_model.dart';
+import 'package:flutter_bdd_suite/models/step_hook_contexts.dart';
 import 'package:flutter_bdd_suite/reporters/integration_reporter.dart';
 import 'package:flutter_bdd_suite/steps/step_result.dart';
 import 'package:flutter_bdd_suite/utils/enums.dart';
 import 'package:flutter_bdd_suite/utils/terminal_colors.dart';
-import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
 
 class DecoratedSummaryReporter extends IntegrationReporter {
-  final _ansiEscape = RegExp(r'\x1B\[[0-9;]*m');
+  /// Matches any ANSI colour/style escape sequence so that visible width can
+  /// be measured after stripping the non-printable bytes.
+  static final _ansiEscapePattern = RegExp(r'\x1B\[[0-9;]*m');
+
+  /// Total number of characters added around the content inside a box line:
+  /// `║ ` (2) on the left + ` ║` (2) on the right = 4.
+  static const _boxPadding = 4;
+
   DateTime? _startTime;
   int _totalScenarios = 0,
       _passedScenarios = 0,
@@ -31,7 +38,8 @@ class DecoratedSummaryReporter extends IntegrationReporter {
   }
 
   @override
-  Future<void> onAfterStep(StepResult result, WidgetTesterWorld _) async {
+  Future<void> onAfterStep(AfterStepContext context) async {
+    final result = context.result;
     if (result is StepFailure) {
       _currentStatus = ScenarioStatus.failed;
     } else if (result is StepSkipped &&
@@ -66,7 +74,6 @@ class DecoratedSummaryReporter extends IntegrationReporter {
     String? symbol,
     String? colorCode,
   }) {
-    const reset = '\x1B[0m';
     final rawValue = symbol != null ? '$symbol$value' : value;
     final colored = colorCode != null ? '$colorCode$rawValue$reset' : rawValue;
     final text = '$label : $rawValue';
@@ -89,7 +96,7 @@ class DecoratedSummaryReporter extends IntegrationReporter {
       ['Elapsed Time', '${mins}m$secs.${millis}s', null, null],
     ];
 
-    // Compute inner content width W
+    // Determine the widest content line so that all box rows are the same width.
     final contentWidths = entries.map((e) {
       final label = e[0] as String;
       final val = e[1] as String;
@@ -97,15 +104,13 @@ class DecoratedSummaryReporter extends IntegrationReporter {
       final raw = sym != null ? '$sym$val' : val;
       return _visibleWidth('$label : $raw');
     });
-    final W = contentWidths.reduce(max);
+    final maxContentWidth = contentWidths.reduce(max);
 
-    // Border length = W + 2 (spaces)
-    final border = '═' * (W + 2);
-    const cyan = '\x1B[96m';
-    const reset = '\x1B[0m';
+    // Border row: one '═' per content character + 2 padding spaces.
+    final border = '═' * (maxContentWidth + 2);
 
-    // Header centered/padded to W
-    final header = 'Summary'.padRight(W);
+    // Header padded to fill the full content width.
+    final header = 'Summary'.padRight(maxContentWidth);
 
     final lines = [
       '╔$border╗',
@@ -115,26 +120,31 @@ class DecoratedSummaryReporter extends IntegrationReporter {
         _buildLine(
           e[0] as String,
           e[1] as String,
-          W,
+          maxContentWidth,
           symbol: e[2],
           colorCode: e[3],
         ),
       '╚$border╝',
     ];
 
-    final expected = W + 4;
+    final expectedWidth = maxContentWidth + _boxPadding;
     for (var raw in lines) {
-      final noAnsi = raw.replaceAll(_ansiEscape, '');
+      final noAnsi = raw.replaceAll(_ansiEscapePattern, '');
       final actual = _visibleWidth(noAnsi);
-      if (actual != expected) {
-        logLine('DEBUG MISMATCH: got $actual, expected $expected → "$noAnsi"');
+      if (actual != expectedWidth) {
+        logLine(
+          'DEBUG MISMATCH: got $actual, expected $expectedWidth → "$noAnsi"',
+        );
       }
     }
 
     logLine('');
     for (var l in lines) {
       logLine(
-        l.replaceAllMapped(RegExp(r'^[╔╠╚║]'), (m) => '$cyan${m[0]}$reset'),
+        l.replaceAllMapped(
+          RegExp(r'^[╔╠╚║]'),
+          (m) => '$cyan${m[0]}$reset',
+        ),
       );
     }
     logLine(reset);
@@ -142,11 +152,14 @@ class DecoratedSummaryReporter extends IntegrationReporter {
   }
 
   @override
-  Future<void> onBeforeStep(String _, WidgetTesterWorld __) async {}
+  Future<void> onBeforeStep(BeforeStepContext _) async {}
+
   @override
-  Future<void> onFeatureStarted(FeatureInfo _) async {}
+  Future<void> onBeforeFeature(FeatureInfo _) async {}
+
   @override
   Future<void> onAfterFeature(FeatureInfo _) async {}
+
   @override
   Map<String, dynamic> toJson() => {};
 }

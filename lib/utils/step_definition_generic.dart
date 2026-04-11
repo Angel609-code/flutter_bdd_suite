@@ -298,13 +298,9 @@ StepDefinitionGeneric stepRegExp(
       );
     }
 
-    final List<dynamic> parsedArgs =
-        (converters != null)
-            ? [
-              for (int i = 0; i < rawArgs.length; i++)
-                converters[i](rawArgs[i]),
-            ]
-            : rawArgs;
+    final List<dynamic> parsedArgs = (converters != null)
+        ? [for (int i = 0; i < rawArgs.length; i++) converters[i](rawArgs[i])]
+        : rawArgs;
 
     final ctx = StepContext(
       tester: world.tester,

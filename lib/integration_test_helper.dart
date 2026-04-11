@@ -14,6 +14,14 @@ import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class IntegrationTestHelper {
+  /// The package name prefix used to filter out framework frames when printing
+  /// a condensed stack trace on step failure.
+  static const _ownPackagePrefix = 'flutter_bdd_suite';
+
+  /// Pattern that matches the Dart file path portion of a stack-trace frame,
+  /// e.g. `package:my_app/steps/login_steps.dart`.
+  static final _dartFilePattern = RegExp(r'^(.*\.dart)');
+
   final IntegrationTestConfig config;
   List<Step> _backgroundSteps = [];
   List<Step> get backgroundSteps => _backgroundSteps;
@@ -150,13 +158,25 @@ class IntegrationTestHelper {
     _scenarioStatus = ScenarioExecutionStatus.passed;
     _executedError = false;
 
-    await _hookManager.onFeatureStarted(featureInfo);
-    await _reporterManager.onFeatureStarted(featureInfo);
+    await _hookManager.onBeforeFeature(featureInfo);
+    await _reporterManager.onBeforeFeature(featureInfo);
   }
 
   Future<void> setUp(WidgetTester tester, ScenarioInfo scenario) async {
+    // Reset all per-scenario execution state at the start of every scenario.
+    //
+    // The same fields are also reset in [setUpFeature] for orchestrated multi-
+    // feature runs, but that reset happens only once per feature group (via
+    // setUpAll).  This per-scenario reset ensures that each testWidgets call
+    // starts with a clean slate — regardless of how many scenarios have already
+    // run in the same feature.
     _skipRemaining = false;
     _errorOnBackground = false;
+    _scenarioStatus = ScenarioExecutionStatus.passed;
+    _executedError = false;
+    _firstError = null;
+    _firstStackTrace = null;
+    _scenarioName = '';
 
     _world.testerOrNull = tester;
 
@@ -176,17 +196,17 @@ class IntegrationTestHelper {
       }
     }
 
+    await _hookManager.onBeforeScenario(scenario);
+    await _reporterManager.onBeforeScenario(scenario);
+
     if (backgroundSteps.isNotEmpty) {
       for (final step in backgroundSteps) {
-        await _executeStep(step, true);
+        await _executeStep(step, true, scenario: scenario);
       }
     }
   }
 
   Future<void> runStepsForScenario(ScenarioInfo scenario) async {
-    await _hookManager.onBeforeScenario(scenario);
-    await _reporterManager.onBeforeScenario(scenario);
-
     final steps = _parseStepsFromJsonList(scenario.steps);
 
     for (final step in steps) {
@@ -241,13 +261,35 @@ class IntegrationTestHelper {
     final start = DateTime.now().microsecondsSinceEpoch;
     late StepResult result;
 
+    // Per Cucumber specification: if a prior step did not pass, the following
+    // step and its hooks are skipped. Reporters still receive onAfterStep for
+    // skipped steps so they can accurately reflect every step in their output.
+    if (_skipRemaining) {
+      final duration = DateTime.now().microsecondsSinceEpoch - start;
+      result = StepSkipped(
+        step.text,
+        step.line,
+        duration,
+        table: step.table,
+        docString: step.docString,
+      );
+
+      if (!isBackground) _scenarioStatus = ScenarioExecutionStatus.skipped;
+
+      logLine(
+        '$red➔ [${_featureInfo?.uri}:${step.line}] '
+        'Skipping ${isBackground ? 'background step' : 'step'}: ${step.text}$reset',
+      );
+
+      // Only reporters receive the skipped-step notification; user hooks are
+      // intentionally omitted in line with the Cucumber invoke-around contract.
+      await _reporterManager.onAfterStep(result, _world);
+      return;
+    }
+
+    // Step is being executed: fire BeforeStep on both hooks and reporters.
     await _hookManager.onBeforeStep(step.text, _world);
     await _reporterManager.onBeforeStep(step.text, _world);
-
-    // Reset per-scenario status at the start of the first step.
-    if (!_skipRemaining && !isBackground) {
-      _scenarioStatus = ScenarioExecutionStatus.passed;
-    }
 
     // Resolve the step function from the per-execution registry. The
     // multiline argument (table or doc-string) is constructed once from the
@@ -272,28 +314,6 @@ class IntegrationTestHelper {
     final multilineArg = _buildMultilineArg(step);
     _world.multilineArgToInject = multilineArg;
 
-    if (_skipRemaining) {
-      final duration = DateTime.now().microsecondsSinceEpoch - start;
-      result = StepSkipped(
-        step.text,
-        step.line,
-        duration,
-        table: step.table,
-        docString: step.docString,
-      );
-
-      if (!isBackground) _scenarioStatus = ScenarioExecutionStatus.skipped;
-
-      logLine(
-        '$red➔ [${_featureInfo?.uri}:${step.line}] '
-        'Skipping ${isBackground ? 'background step' : 'step'}: ${step.text}$reset',
-      );
-
-      await _hookManager.onAfterStep(result, _world);
-      await _reporterManager.onAfterStep(result, _world);
-      return;
-    }
-
     if (stepFunction != null) {
       try {
         logLine(
@@ -303,13 +323,7 @@ class IntegrationTestHelper {
         );
 
         // Inject the multiline argument into the world context before execution.
-
-        try {
-          // Forward execution to the step implementation.
-          await stepFunction(_world);
-        } finally {
-          // Clear current step data to prevent leakage.
-        }
+        await stepFunction(_world);
 
         final duration = DateTime.now().microsecondsSinceEpoch - start;
         result = StepSuccess(
@@ -400,7 +414,7 @@ class IntegrationTestHelper {
       '${red}Error in ${_errorOnBackground ? 'background' : 'scenario "$_scenarioName"'}:\n$error.$reset',
     );
 
-    const blockedPrefixes = ['flutter_bdd_suite'];
+    const blockedPrefixes = [_ownPackagePrefix];
 
     final lines = stackTrace.toString().trim().split('\n');
     final lastByFile = <String, String>{};
@@ -409,7 +423,7 @@ class IntegrationTestHelper {
       final trimmed = line.trim();
       if (trimmed.contains('package') &&
           !blockedPrefixes.any((prefix) => trimmed.contains(prefix))) {
-        final match = RegExp(r'^(.*\.dart)').firstMatch(trimmed);
+        final match = _dartFilePattern.firstMatch(trimmed);
         if (match != null) {
           final file = match.group(1)!;
           lastByFile[file] = line;

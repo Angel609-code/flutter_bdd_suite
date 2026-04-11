@@ -26,8 +26,10 @@ class FeatureParser {
 
       // Collect tags
       if (line.startsWith('@')) {
-        final tagsInLine =
-            line.split(RegExp(r'\s+')).where((t) => t.startsWith('@')).toList();
+        final tagsInLine = line
+            .split(RegExp(r'\s+'))
+            .where((t) => t.startsWith('@'))
+            .toList();
         pendingTags.addAll(tagsInLine);
         continue;
       }
@@ -73,10 +75,9 @@ class FeatureParser {
           line.startsWith(GherkinKeywords.scenarioTemplate)) {
         inBackground = false;
         currentScenario = null;
-        final prefix =
-            line.startsWith(GherkinKeywords.scenarioOutline)
-                ? GherkinKeywords.scenarioOutline
-                : GherkinKeywords.scenarioTemplate;
+        final prefix = line.startsWith(GherkinKeywords.scenarioOutline)
+            ? GherkinKeywords.scenarioOutline
+            : GherkinKeywords.scenarioTemplate;
         currentOutline = Scenario(
           name: line.substring(prefix.length).trim(),
           line: i + 1,
@@ -157,8 +158,9 @@ class FeatureParser {
                 String substitutedText = step.text;
                 for (var colIdx = 0; colIdx < keys.length; colIdx++) {
                   final key = keys[colIdx];
-                  final val =
-                      (colIdx < row.columns.length) ? row.columns[colIdx] : '';
+                  final val = (colIdx < row.columns.length)
+                      ? row.columns[colIdx]
+                      : '';
                   substitutedText = substitutedText.replaceAll(
                     '<$key>',
                     val ?? '',
@@ -188,10 +190,9 @@ class FeatureParser {
         // Stop background collection once a scenario begins
         inBackground = false;
         currentOutline = null;
-        final prefix =
-            line.startsWith(GherkinKeywords.scenario)
-                ? GherkinKeywords.scenario
-                : GherkinKeywords.example;
+        final prefix = line.startsWith(GherkinKeywords.scenario)
+            ? GherkinKeywords.scenario
+            : GherkinKeywords.example;
         currentScenario = Scenario(
           name: line.substring(prefix.length).trim(),
           line: i + 1,

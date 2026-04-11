@@ -72,11 +72,10 @@ class IntegrationTestServer {
       }
       try {
         final method = req.method.toUpperCase();
-        final handlers =
-            {
-              'POST': {'/save-report': _handleReport, ...?_custom['POST']},
-              'GET': {...?_custom['GET']},
-            }[method];
+        final handlers = {
+          'POST': {'/save-report': _handleReport, ...?_custom['POST']},
+          'GET': {...?_custom['GET']},
+        }[method];
         final handler = handlers?[req.uri.path];
         if (handler != null) {
           await handler(req);
@@ -106,10 +105,9 @@ class IntegrationTestServer {
 
       // 2. Build the Absolute Path
       // If the path is already absolute, use it. Otherwise, join it with project root.
-      final absolutePath =
-          pathFromClient.startsWith('/')
-              ? pathFromClient
-              : '$projectRoot/$pathFromClient';
+      final absolutePath = pathFromClient.startsWith('/')
+          ? pathFromClient
+          : '$projectRoot/$pathFromClient';
 
       final file = File(absolutePath);
 
