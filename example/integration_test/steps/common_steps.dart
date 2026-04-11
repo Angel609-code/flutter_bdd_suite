@@ -66,7 +66,7 @@ String resolveKey(String type) {
   if (type == 'delete for "Eve Torres"') return 'delete_employee_3';
 
 
-  throw Exception('Unknown element: \$type');
+  throw Exception('Unknown element: $type');
 }
 
 StepDefinitionGeneric theApplicationIsLaunched() {
