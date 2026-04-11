@@ -772,54 +772,114 @@ StepDefinitionGeneric iVerifyTheText() => generic(
 
 ## Hooks
 
-Hooks let you execute custom Dart code at specific points in the test lifecycle. Create a class that extends `IntegrationHook`:
+Hooks are blocks of code that run at various points in the BDD execution cycle. They are typically used to set up and tear down environments, seed databases, or manage Flutter state before and after features or scenarios.
+
+By extending `IntegrationHook`, you can implement methods that map perfectly to the Cucumber lifecycle, fully adapted for Dart and Flutter Integration Tests.
+
+### Execution Order (The Onion Model)
+Hooks are composable and define an execution `priority` (default is 0). `onBefore*` hooks execute in **descending** order (highest priority first). `onAfter*` hooks execute in **reverse** order (lowest priority first). This guarantees symmetric teardown (if Hook A sets up a database, and Hook B populates it, Hook B cleans up before Hook A destroys the database).
+
+### Global Hooks
+Global hooks run once for the entire test suite.
 
 ```dart
-import 'package:flutter_bdd_suite/hooks/integration_hook.dart';
-import 'package:flutter_bdd_suite/models/models.dart';
-import 'package:flutter_bdd_suite/steps/step_result.dart';
-import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
-
-class MyHook extends IntegrationHook {
-  @override
-  int get priority => 10; // higher priority runs first
-
+class GlobalSetupHook extends IntegrationHook {
   @override
   Future<void> onBeforeAll() async {
-    // Runs once before the entire test suite starts
+    // Runs once before any scenario is run
   }
 
   @override
   Future<void> onAfterAll() async {
-    // Runs once after the entire test suite finishes
+    // Runs once after all scenarios have been executed
   }
+}
+```
 
+### Feature Hooks
+These run before and after an entire feature file.
+
+```dart
+class FeatureLifecycleHook extends IntegrationHook {
   @override
   Future<void> onFeatureStarted(FeatureInfo feature) async {
-    print('Starting feature: ${feature.featureName}');
+    // Access feature.featureName, feature.tags, etc.
   }
 
+  @override
+  Future<void> onAfterFeature(FeatureInfo feature) async {
+    // Clean up resources used by the feature
+  }
+}
+```
+
+### Scenario Hooks
+Scenario hooks run before the first step of each scenario (including `Background` steps) and after the last step.
+
+```dart
+class ScenarioLifecycleHook extends IntegrationHook {
   @override
   Future<void> onBeforeScenario(ScenarioInfo scenario) async {
-    // Seed database, reset app state, etc.
+    // Seed database, clear caches, etc.
+    // NOTE: Avoid using this for UI setup; use Background steps instead for better readability.
   }
 
   @override
-  Future<void> onAfterScenario(String scenarioName) async {
-    // Clean up resources
+  Future<void> onAfterScenario(ScenarioResult result) async {
+    // Clean up scenario resources. You can inspect the final status:
+    switch (result.status) {
+      case ScenarioExecutionStatus.passed:
+        break;
+      case ScenarioExecutionStatus.failed:
+      case ScenarioExecutionStatus.skipped:
+        print('Scenario failed or skipped: ${result.scenarioName}');
+        break;
+    }
   }
+}
+```
 
+### Step Hooks
+Step hooks wrap individual steps. Because Flutter testing exposes the `WidgetTester` per scenario, these hooks inject the `WidgetTesterWorld`.
+
+```dart
+import 'dart:io';
+
+class StepLifecycleHook extends IntegrationHook {
   @override
   Future<void> onBeforeStep(String stepText, WidgetTesterWorld world) async {
-    // Prepare for a step (e.g., clear a text field)
+    // Executed right before the step function is invoked
   }
 
   @override
   Future<void> onAfterStep(StepResult result, WidgetTesterWorld world) async {
-    // React to a step result (e.g., take a screenshot on failure)
+    // Leveraging Dart pattern matching to handle results
     if (result is StepFailure) {
-      // capture screenshot, log error, etc.
+       final tester = world.testerOrNull;
+       if (tester != null) {
+         // Leverage Flutter tester to take screenshots upon failure!
+         // Note: Actually writing a screenshot requires native platform code
+         // or host-side bridge interaction.
+         print('Taking screenshot for failed step: ${result.stepText}');
+       }
     }
+  }
+}
+```
+
+### Conditional Hooks
+Hooks can be conditionally selected based on Gherkin tags using a tag expression. Provide an expression overriding `tagExpression` to run a hook only when those tags are active on a feature or scenario.
+
+```dart
+class WebOnlyHook extends IntegrationHook {
+  // Only execute this hook if the scenario or feature has the @web tag
+  // and does NOT have the @headless tag.
+  @override
+  String? get tagExpression => '@web and not @headless';
+
+  @override
+  Future<void> onBeforeScenario(ScenarioInfo scenario) async {
+    // Configure web-specific driver settings
   }
 }
 ```
