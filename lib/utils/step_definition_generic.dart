@@ -8,7 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 /// The execution context for a single step.
 ///
 /// Contains the typed [args] parsed from the step text, the Flutter [tester],
-/// the active [world] state, and any attached [table] or [docString].
+/// the active [world] state, and any attached multiline arguments via
+/// [table] and [docString].
 class StepContext {
   final WidgetTester tester;
   final WidgetTesterWorld world;
@@ -22,12 +23,11 @@ class StepContext {
     StepMultilineArg? multilineArg,
   }) : _multilineArg = multilineArg;
 
-  GherkinTable? get table => _multilineArg?.table;
-  String? get docString => _multilineArg?.docString;
-
-  /// Returns the attached data table, or throws a [StateError] if none was provided.
-  GherkinTable tableOrThrow() {
-    final t = table;
+  /// Returns the attached data table.
+  ///
+  /// Throws a [StateError] if this step has no table argument.
+  GherkinTable table() {
+    final t = _multilineArg?.table;
     if (t == null) {
       throw StateError(
         'Expected a DataTable attached to this step, but none was found.',
@@ -37,9 +37,11 @@ class StepContext {
     return t;
   }
 
-  /// Returns the attached doc-string content, or throws a [StateError] if none was provided.
-  String docStringOrThrow() {
-    final d = docString;
+  /// Returns the attached doc-string content.
+  ///
+  /// Throws a [StateError] if this step has no doc-string argument.
+  String docString() {
+    final d = _multilineArg?.docString;
     if (d == null) {
       throw StateError(
         'Expected a DocString attached to this step, but none was found.',

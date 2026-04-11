@@ -24,7 +24,7 @@ StepDefinitionGeneric iEnterTextDocString() {
   ) async {
     print('ctx.args: ${ctx.args.debugSource.toString()}');
     print('ctx.args: ${ctx.args.toString()}');
-    print('${ctx.docString}');
+    print(ctx.docString());
   });
 }
 

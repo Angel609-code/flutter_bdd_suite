@@ -199,7 +199,7 @@ Scenario: Add multiple employees
     | Bob     | Designer  | 80000  |
 ```
 
-In your step definition, access the table via the `world.table` property (see [Working with Tables in Steps](#working-with-tables-in-steps)).
+In your step definition, access the table via `ctx.table()` (see [Working with Tables in Steps](#working-with-tables-in-steps)).
 
 ### Doc Strings
 
@@ -693,40 +693,37 @@ Patterns are strings that get compiled to `RegExp` for matching. The following c
 
 Data tables are **first-class properties** on the `Step` model — they are never embedded in the step text string. When the runner matches a step, it attaches the table or doc-string to the `WidgetTesterWorld` context object.
 
-You can access them inside any `generic` (and `genericN`) builder via the `table` and `docString` properties.
+For `step()` and `stepRegExp()` definitions, access multiline arguments from `StepContext` using:
+
+- `ctx.table()`
+- `ctx.docString()`
+
+Both methods return the parsed value when present, and throw a `StateError` when missing. This keeps step code explicit and fail-fast.
 
 ```dart
-// Step with no string captures, but accesses the attached table
-StepDefinitionGeneric givenEmployeesExist() => generic<WidgetTesterWorld>(
+// Step with no captures, but reads an attached table
+StepDefinitionGeneric givenEmployeesExist() => step(
   'the following employees exist',
-  (WidgetTesterWorld world) async {
-    // Access the table directly from the world context
-    final table = world.table;
-    
-    // Iterate rows as Map<String, String?>
-    // (the Gherkin spec ensures table! will not be null if the step has a table)
-    for (final row in table!.asMap()) {
+  (ctx) async {
+    final table = ctx.table();
+    for (final row in table.asMap()) {
       print('Name: ${row['name']}, Role: ${row['role']}');
     }
   },
 );
 
-// Step with captures AND multiline content
-StepDefinitionGeneric givenDataForEntity() => generic1<String, WidgetTesterWorld>(
-  'the following data exists for {string}',
-  (String entity, WidgetTesterWorld world) async {
-    // Access via world.multilineArg (the raw union type) if needed,
-    // or use the shortcuts:
-    if (world.table != null) {
-      print('Handling table for $entity');
-    } else if (world.docString != null) {
-      print('Handling docstring: ${world.docString}');
-    }
+// Step with captures AND doc-string content
+StepDefinitionGeneric fillFieldWithDocString() => stepRegExp(
+  RegExp(r'^I fill the (.+?) field with$'),
+  (ctx) async {
+    final (field,) = ctx.args.one<String>();
+    final content = ctx.docString();
+    print('Fill $field with: $content');
   },
 );
 ```
 
-The `world.table` and `world.docString` properties are `null` when the step in the feature file has no attached data. Since they are properties of the context object, you don't need to change your function signature to use them.
+If you use `generic`/`genericN` APIs directly with `WidgetTesterWorld`, you can still inspect `world.multilineArg` and pattern-match the union type manually.
 
 `GherkinTable` API:
 
