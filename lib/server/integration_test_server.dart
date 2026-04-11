@@ -98,7 +98,7 @@ class IntegrationTestServer {
   Future<void> _handleReport(HttpRequest req) async {
     try {
       final data = jsonDecode(await utf8.decoder.bind(req).join());
-      String pathFromClient = data['path'];
+      String pathFromClient = data['path'] is String ? data['path'] as String : 'report.json';
 
       // 1. Get the Project Root (where the dev is running the app/test)
       final projectRoot = Directory.current.path;
@@ -113,7 +113,8 @@ class IntegrationTestServer {
 
       // 3. Create directories if they don't exist and write
       await file.create(recursive: true);
-      await file.writeAsString(data['content']);
+      final String content = data['content'] is String ? data['content'] as String : '';
+      await file.writeAsString(content);
 
       stdout.writeln('[IntegrationTestServer] Report saved at: $absolutePath');
 

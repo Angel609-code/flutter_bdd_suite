@@ -52,8 +52,13 @@ class StepContext {
   }
 }
 
-/// The concrete function type executed by the test runner for each matched step.
+/// Type definition for resolved step functions.
+///
+/// Receive the active [world]. Any attached data (table or doc-string) can be
+/// accessed via [world.multilineArg] or the convenience shortcuts [world.table]
+/// and [world.docString].
 typedef StepFunction = Future<void> Function(WidgetTesterWorld world);
+
 
 /// The callback signature for user-defined steps.
 typedef StepAction = Future<void> Function(StepContext ctx);
@@ -234,7 +239,7 @@ StepDefinitionGeneric step(
     registry ?? defaultParameterTypes,
   );
   return StepDefinitionGeneric(compiled.regex, (rawArgs, world, multilineArg) async {
-    final parsedArgs = [
+    final List<Object?> parsedArgs = [
       for (int i = 0; i < compiled.tokens.length; i++)
         compiled.tokens[i].parser(rawArgs[i]),
     ];
@@ -275,7 +280,7 @@ StepDefinitionGeneric step(
 StepDefinitionGeneric stepRegExp(
   RegExp pattern,
   StepAction action, {
-  List<dynamic Function(String)>? converters,
+  List<Object? Function(String)>? converters,
 }) {
   _validateRawRegExp(pattern);
 
@@ -304,7 +309,7 @@ StepDefinitionGeneric stepRegExp(
       );
     }
 
-    final List<dynamic> parsedArgs = (converters != null)
+    final List<Object?> parsedArgs = (converters != null)
         ? [for (int i = 0; i < rawArgs.length; i++) converters[i](rawArgs[i])]
         : rawArgs;
 

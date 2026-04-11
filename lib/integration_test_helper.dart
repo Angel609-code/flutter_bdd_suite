@@ -8,6 +8,7 @@ import 'package:flutter_bdd_suite/steps/step_exceptions.dart';
 import 'package:flutter_bdd_suite/steps/step_result.dart';
 import 'package:flutter_bdd_suite/steps/steps_registry.dart';
 import 'package:flutter_bdd_suite/bootstrap.dart';
+import 'package:flutter_bdd_suite/utils/step_definition_generic.dart';
 import 'package:flutter_bdd_suite/utils/terminal_colors.dart';
 import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
 
@@ -444,8 +445,11 @@ class IntegrationTestHelper {
 
   List<Step> _parseStepsFromJsonList(List<String> jsonList) {
     return jsonList.map((str) {
-      final Map<String, dynamic> m = jsonDecode(str);
-      return Step.fromJson(m);
+      final dynamic decoded = jsonDecode(str);
+      if (decoded is! Map<String, dynamic>) {
+        throw FormatException('Expected JSON object for step, got: $decoded');
+      }
+      return Step.fromJson(decoded);
     }).toList();
   }
 }

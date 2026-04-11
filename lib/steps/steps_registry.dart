@@ -2,14 +2,6 @@ import 'package:flutter_bdd_suite/steps/step_exceptions.dart';
 import 'package:flutter_bdd_suite/steps/when_fill_field_step.dart';
 import 'package:flutter_bdd_suite/utils/step_definition_generic.dart';
 import 'package:flutter_bdd_suite/utils/steps_keywords.dart';
-import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
-
-/// Type definition for resolved step functions.
-///
-/// Receive the active [world]. Any attached data (table or doc-string) can be
-/// accessed via [world.multilineArg] or the convenience shortcuts [world.table]
-/// and [world.docString].
-typedef StepFunction = Future<void> Function(WidgetTesterWorld world);
 
 /// A per-execution registry that maps Gherkin step patterns to their Dart
 /// implementations.

@@ -3,7 +3,7 @@
 /// Use the [one], [two], [three], etc., helpers to safely extract and type-cast
 /// parameters using Dart 3 records.
 class StepArgs {
-  final List<dynamic> _values;
+  final List<Object?> _values;
   final String debugSource;
 
   StepArgs(this._values, {required this.debugSource});
@@ -14,9 +14,9 @@ class StepArgs {
   void _requireLength(int expected) {
     if (_values.length != expected) {
       throw ArgumentError(
-        'Expected \$expected argument(s) but regex produced \${_values.length} capture groups.\\n'
+        'Expected $expected argument(s) but regex produced ${_values.length} capture groups.\\n'
         'Check your capturing groups `(...)` vs non-capturing groups `(?:...)`.\\n'
-        'Source: \$debugSource',
+        'Source: $debugSource',
       );
     }
   }
@@ -28,16 +28,16 @@ class StepArgs {
   T at<T>(int index) {
     if (index < 0 || index >= _values.length) {
       throw RangeError(
-        'StepArgs index \$index out of range (len=\$length). \$debugSource',
+        'StepArgs index $index out of range (len=$length). $debugSource',
       );
     }
     final v = _values[index];
     if (v is T) return v;
 
     throw StateError(
-      'Step arg \$index has type \${v.runtimeType} but expected \$T.\\n'
-      'Value = \$v.\\n'
-      'Source = \$debugSource',
+      'Step arg $index has type ${v.runtimeType} but expected $T.\\n'
+      'Value = $v.\\n'
+      'Source = $debugSource',
     );
   }
 

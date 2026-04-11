@@ -1,10 +1,11 @@
 import 'dart:collection';
+import 'package:flutter_bdd_suite/models/step_multiline_arg.dart';
 import 'package:flutter_bdd_suite/world/test_world.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
-/// A default dynamic implementation of [World].
+/// Default [World] implementation used by the runner.
 ///
 /// It acts as a state container, allowing data to be shared between different steps
 /// in the same scenario using the attachments map ([setAttachment] and [getAttachment]).
@@ -14,7 +15,7 @@ class WidgetTesterWorld implements World {
   WidgetTester? testerOrNull;
 
   final Map<String, Object> _attachments = HashMap();
-  dynamic multilineArgToInject;
+  StepMultilineArg? multilineArgToInject;
 
   WidgetTester get tester {
     if (testerOrNull == null) {
