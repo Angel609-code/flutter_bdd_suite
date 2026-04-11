@@ -31,6 +31,7 @@ final config = IntegrationTestConfig(
     iShouldSeeText(),
     iShouldSeeMultipleTexts(),
     iEnterText(),
+    iEnterTextDocString(),
     iInteractWithButton(),
   ],
 );

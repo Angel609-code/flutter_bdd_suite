@@ -58,7 +58,11 @@ typedef StepAction = Future<void> Function(StepContext ctx);
 
 class StepDefinitionGeneric {
   final RegExp pattern;
-  final Future<void> Function(List<String> args, WidgetTesterWorld world)
+  final Future<void> Function(
+    List<String> args,
+    WidgetTesterWorld world,
+    StepMultilineArg? multilineArg,
+  )
   execute;
 
   StepDefinitionGeneric(this.pattern, this.execute);
@@ -78,7 +82,7 @@ class StepDefinitionGeneric {
       args.add(match.group(i) ?? '');
     }
 
-    await execute(args, world);
+    await execute(args, world, multilineArg);
   }
 }
 
@@ -227,7 +231,7 @@ StepDefinitionGeneric step(
     pattern,
     registry ?? defaultParameterTypes,
   );
-  return StepDefinitionGeneric(compiled.regex, (rawArgs, world) async {
+  return StepDefinitionGeneric(compiled.regex, (rawArgs, world, multilineArg) async {
     final parsedArgs = [
       for (int i = 0; i < compiled.tokens.length; i++)
         compiled.tokens[i].parser(rawArgs[i]),
@@ -236,7 +240,7 @@ StepDefinitionGeneric step(
       tester: world.tester,
       world: world,
       args: StepArgs(parsedArgs, debugSource: 'Pattern: $pattern'),
-      multilineArg: null /* injected by the runner */,
+      multilineArg: multilineArg,
     );
     await action(ctx);
   });
@@ -286,7 +290,7 @@ StepDefinitionGeneric stepRegExp(
     unicode: pattern.isUnicode,
   );
 
-  return StepDefinitionGeneric(anchored, (rawArgs, world) async {
+  return StepDefinitionGeneric(anchored, (rawArgs, world, multilineArg) async {
     // If converters were supplied, their count must equal the number of
     // captured groups; a mismatch means the caller made a configuration error
     // that would otherwise surface as a confusing type error later.
@@ -306,7 +310,7 @@ StepDefinitionGeneric stepRegExp(
       tester: world.tester,
       world: world,
       args: StepArgs(parsedArgs, debugSource: 'RegExp: ${pattern.pattern}'),
-      multilineArg: null /* injected by the runner */,
+      multilineArg: multilineArg,
     );
     await action(ctx);
   });

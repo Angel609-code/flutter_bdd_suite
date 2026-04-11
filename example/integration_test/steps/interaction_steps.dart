@@ -17,6 +17,17 @@ StepDefinitionGeneric iEnterText() {
   });
 }
 
+StepDefinitionGeneric iEnterTextDocString() {
+  // Use non-capturing groups `(?:enter|fill)` to simplify the callback signature.
+  return stepRegExp(RegExp(r'^I fill the (.+?) field with$'), (
+    ctx,
+  ) async {
+    print('ctx.args: ${ctx.args.debugSource.toString()}');
+    print('ctx.args: ${ctx.args.toString()}');
+    print('${ctx.docString}');
+  });
+}
+
 StepDefinitionGeneric iInteractWithButton() {
   return stepRegExp(RegExp(r'^I tap the (.+?) button(?: for "([^"]+)")?$'), (
     ctx,

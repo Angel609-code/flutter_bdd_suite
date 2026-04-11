@@ -24,6 +24,7 @@ Feature: Employee Directory Dashboard
     And I should see "Average Age"
 
   Rule: Employee records must pass validation
+    @docString
     Scenario: Adding employee with valid data adds a table row
       When I tap the add employee button
       Then the employee dialog title should be visible
@@ -31,7 +32,11 @@ Feature: Employee Directory Dashboard
       When I fill the employee name field with "David Kim"
       And I fill the employee role field with "Analyst"
       And I fill the employee age field with "35"
-      And I fill the employee bio field with "Business analyst with expertise in data.\nSix years experience."
+      And I fill the employee bio field with
+        """
+        Business analyst with expertise in data.
+        Six years experience.
+        """
       And I tap the save employee button
       Then the employee dialog title should not be visible
       And I should see "David Kim"
