@@ -125,7 +125,7 @@ void main() {
           // Background: Given the app is freshly launched at the login screen
           await launchApp(tester);
 
-          // Given the login screen should be visible
+          // Given the login form fields should be visible
           expect(find.byKey(const Key('username_field')), findsOneWidget);
           expect(find.byKey(const Key('password_field')), findsOneWidget);
           expect(find.byKey(const Key('login_button')), findsOneWidget);

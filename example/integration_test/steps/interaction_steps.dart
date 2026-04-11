@@ -19,10 +19,15 @@ StepDefinitionGeneric iEnterText() {
 }
 
 
+
+
+
 StepDefinitionGeneric iInteractWithButton() {
   return stepRegExp(RegExp(r'^I tap the (.+?) button(?: for "([^"]+)")?$'), (ctx) async {
     final (type, name) = ctx.args.two<String, String?>();
-    final elementKey = name != null ? '$type for "$name"' : type;
+
+    final String elementKey = (name != null && name.isNotEmpty) ? '$type for "$name"' : type;
+
     final key = resolveKey(elementKey);
     final finder = find.byKey(Key(key));
 
