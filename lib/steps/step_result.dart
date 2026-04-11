@@ -20,6 +20,8 @@ abstract class StepResult {
   });
 }
 
+/// When Cucumber finds a matching step definition it will execute it. If the block
+/// in the step definition doesn't raise an error, the step is marked as successful (green).
 class StepSuccess extends StepResult {
   StepSuccess(
     super.stepText,
@@ -30,6 +32,8 @@ class StepSuccess extends StepResult {
   });
 }
 
+/// Steps that follow undefined, pending, or failed steps are never executed, even if
+/// there is a matching step definition. These steps are marked as skipped (cyan).
 class StepSkipped extends StepResult {
   StepSkipped(
     super.stepText,
@@ -40,12 +44,20 @@ class StepSkipped extends StepResult {
   });
 }
 
-/// Represents a Gherkin step that is defined in a feature file but has no
-/// corresponding Dart step implementation registered in [StepsRegistry].
-///
-/// This is different from [StepSkipped], which is used for steps that are
-/// intentionally skipped due to a prior step failure. [StepPending] means
-/// the automation is incomplete and needs to be written.
+/// When Cucumber can't find a matching step definition, the step gets marked as
+/// undefined (yellow), and all subsequent steps in the scenario are skipped.
+class StepUndefined extends StepResult {
+  StepUndefined(
+    super.stepText,
+    super.line,
+    super.duration, {
+    super.table,
+    super.docString,
+  });
+}
+
+/// When a step definition's method invokes the pending method (or throws PendingStepException),
+/// the step is marked as pending (yellow, as with undefined ones), indicating that you have work to do.
 class StepPending extends StepResult {
   StepPending(
     super.stepText,
@@ -56,6 +68,7 @@ class StepPending extends StepResult {
   });
 }
 
+/// When a step definition's method is executed and raises an error, the step is marked as failed (red).
 class StepFailure extends StepResult {
   final Object error;
   final StackTrace? stackTrace;
@@ -66,6 +79,21 @@ class StepFailure extends StepResult {
     super.duration, {
     required this.error,
     this.stackTrace,
+    super.table,
+    super.docString,
+  });
+}
+
+/// Step definitions have to be unique for Cucumber to know what to execute. If more than one
+/// step definition is matched for the same step, Cucucmber can't resolve the ambiguity on its own.
+class StepAmbiguous extends StepResult {
+  final Object error;
+
+  StepAmbiguous(
+    super.stepText,
+    super.line,
+    super.duration, {
+    required this.error,
     super.table,
     super.docString,
   });

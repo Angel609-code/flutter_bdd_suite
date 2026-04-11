@@ -33,7 +33,7 @@ class StepContext {
         'Expected a DataTable attached to this step, but none was found.',
       );
     }
-    
+
     return t;
   }
 
@@ -96,14 +96,14 @@ class _ParsedStepRegex {
 void _validateCucumberExpression(String pattern) {
   // Sequences that are unambiguously regex and never valid Cucumber text.
   const regexOnlySequences = [
-    '(?:',  // non-capturing group
-    '(?=',  // positive lookahead
-    '(?!',  // negative lookahead
-    r'\d',  // digit shorthand
-    r'\w',  // word shorthand
-    r'\s',  // whitespace shorthand
-    '[',    // character class
-    '|',    // alternation — use stepRegExp() for alternatives
+    '(?:', // non-capturing group
+    '(?=', // positive lookahead
+    '(?!', // negative lookahead
+    r'\d', // digit shorthand
+    r'\w', // word shorthand
+    r'\s', // whitespace shorthand
+    '[', // character class
+    '|', // alternation — use stepRegExp() for alternatives
   ];
   for (final seq in regexOnlySequences) {
     if (pattern.contains(seq)) {
@@ -223,7 +223,10 @@ StepDefinitionGeneric step(
   StepAction action, {
   ParameterTypeRegistry? registry,
 }) {
-  final compiled = _compileExpression(pattern, registry ?? defaultParameterTypes);
+  final compiled = _compileExpression(
+    pattern,
+    registry ?? defaultParameterTypes,
+  );
   return StepDefinitionGeneric(compiled.regex, (rawArgs, world) async {
     final parsedArgs = [
       for (int i = 0; i < compiled.tokens.length; i++)
@@ -295,9 +298,13 @@ StepDefinitionGeneric stepRegExp(
       );
     }
 
-    final List<dynamic> parsedArgs = (converters != null)
-        ? [for (int i = 0; i < rawArgs.length; i++) converters[i](rawArgs[i])]
-        : rawArgs;
+    final List<dynamic> parsedArgs =
+        (converters != null)
+            ? [
+              for (int i = 0; i < rawArgs.length; i++)
+                converters[i](rawArgs[i]),
+            ]
+            : rawArgs;
 
     final ctx = StepContext(
       tester: world.tester,

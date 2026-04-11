@@ -61,26 +61,14 @@ final class ParameterType<T> {
 /// ```
 final class ParameterTypeRegistry {
   static const List<ParameterType<dynamic>> _builtins = [
-    ParameterType(
-      name: 'string',
-      regexPart: r'"(.*?)"',
-      parser: _identity,
-    ),
-    ParameterType(
-      name: 'int',
-      regexPart: r'(-?\d+)',
-      parser: int.parse,
-    ),
+    ParameterType(name: 'string', regexPart: r'"(.*?)"', parser: _identity),
+    ParameterType(name: 'int', regexPart: r'(-?\d+)', parser: int.parse),
     ParameterType(
       name: 'float',
       regexPart: r'(-?\d+(?:\.\d+)?)',
       parser: double.parse,
     ),
-    ParameterType(
-      name: 'word',
-      regexPart: r'(\S+)',
-      parser: _identity,
-    ),
+    ParameterType(name: 'word', regexPart: r'(\S+)', parser: _identity),
   ];
 
   static String _identity(String s) => s;

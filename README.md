@@ -1088,6 +1088,34 @@ All bridge calls return an `IntegrationServerResult`:
 
 ---
 
+## Step Results
+
+Each executed step in a scenario resolves to one of the standard Cucumber step results:
+
+* **Success**: The step definition matched and executed without error.
+* **Skipped**: The step was not executed because a prior step failed, became pending, or was undefined.
+* **Undefined**: No matching step definition was found in the `StepsRegistry`. This will fail the scenario.
+* **Pending**: The step explicitly threw a `PendingStepException`. Indicates that the automation is explicitly marked as work-in-progress. This will fail the scenario.
+* **Failure**: The step definition matched but execution threw an error or an assertion failed. This will fail the scenario.
+* **Ambiguous**: More than one step definition matched the step text. This throws an `AmbiguousStepException` internally and yields this result. This will fail the scenario.
+
+### Pending Steps
+
+If you want to explicitly mark a step as pending (work-in-progress) without failing the execution abruptly via a crash, throw a `PendingStepException` in your step definition:
+
+```dart
+import 'package:flutter_bdd_suite/steps/step_exceptions.dart';
+
+StepDefinitionGeneric myPendingStep() => generic(
+  'I am doing some work in progress',
+  (world) async {
+    throw PendingStepException('Automation not ready yet');
+  },
+);
+```
+
+---
+
 ## Tag Filtering
 
 Use the `--tags` CLI flag with a boolean tag expression to run only matching scenarios:

@@ -55,8 +55,7 @@ String resolveKey(String type) {
     'volume slider': 'volume_slider',
 
     'login form fields': 'username_field',
-};
-
+  };
 
   if (map.containsKey(type)) return map[type]!;
 
@@ -64,7 +63,6 @@ String resolveKey(String type) {
   if (type == 'edit for "Bob Martinez"') return 'edit_employee_1';
   if (type == 'edit for "Eve Torres"') return 'edit_employee_3';
   if (type == 'delete for "Eve Torres"') return 'delete_employee_3';
-
 
   throw Exception('Unknown element: $type');
 }
@@ -77,60 +75,53 @@ StepDefinitionGeneric theApplicationIsLaunched() {
   });
 }
 
-
 StepDefinitionGeneric theElementShouldBeVisible() {
-  return stepRegExp(
-    RegExp(r'^the (.+?) should (not )?be visible$'),
-    (ctx) async {
-      final (type, notMatch) = ctx.args.two<String, String?>();
-      final shouldNot = notMatch != null && notMatch.isNotEmpty;
+  return stepRegExp(RegExp(r'^the (.+?) should (not )?be visible$'), (
+    ctx,
+  ) async {
+    final (type, notMatch) = ctx.args.two<String, String?>();
+    final shouldNot = notMatch != null && notMatch.isNotEmpty;
 
-      final key = resolveKey(type);
-      final finder = find.byKey(Key(key));
+    final key = resolveKey(type);
+    final finder = find.byKey(Key(key));
 
-      if (shouldNot) {
-        expect(finder, findsNothing);
-      } else {
-        expect(finder, findsWidgets);
-      }
-    },
-  );
+    if (shouldNot) {
+      expect(finder, findsNothing);
+    } else {
+      expect(finder, findsWidgets);
+    }
+  });
 }
 
 StepDefinitionGeneric iShouldSeeText() {
-  return stepRegExp(
-    RegExp(r'^I should (not )?see "([^"]+)"$'),
-    (ctx) async {
-      final (notMatch, textRaw) = ctx.args.two<String?, String>();
-      final shouldNot = notMatch != null && notMatch.isNotEmpty;
+  return stepRegExp(RegExp(r'^I should (not )?see "([^"]+)"$'), (ctx) async {
+    final (notMatch, textRaw) = ctx.args.two<String?, String>();
+    final shouldNot = notMatch != null && notMatch.isNotEmpty;
 
-      final finder = find.textContaining(textRaw);
+    final finder = find.textContaining(textRaw);
 
-      if (shouldNot) {
-        expect(finder, findsNothing);
-      } else {
-        expect(finder, findsWidgets);
-      }
-    },
-  );
+    if (shouldNot) {
+      expect(finder, findsNothing);
+    } else {
+      expect(finder, findsWidgets);
+    }
+  });
 }
 
 StepDefinitionGeneric iShouldSeeMultipleTexts() {
-  return stepRegExp(
-    RegExp(r'^I should see multiple "([^"]+)" texts$'),
-    (ctx) async {
-      final (textRaw,) = ctx.args.one<String>();
-      final count = int.tryParse(textRaw);
+  return stepRegExp(RegExp(r'^I should see multiple "([^"]+)" texts$'), (
+    ctx,
+  ) async {
+    final (textRaw,) = ctx.args.one<String>();
+    final count = int.tryParse(textRaw);
 
-      if (count != null) {
-        expect(find.text(textRaw), findsNWidgets(count));
-      } else {
-        expect(find.text(textRaw), findsWidgets);
-      }
-    },
-  );
+    if (count != null) {
+      expect(find.text(textRaw), findsNWidgets(count));
+    } else {
+      expect(find.text(textRaw), findsWidgets);
+    }
+  });
 }
-
 
 StepDefinitionGeneric iShouldReachDashboard() {
   return stepRegExp(RegExp(r'I should (not )?reach the dashboard'), (

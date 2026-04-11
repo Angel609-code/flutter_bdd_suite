@@ -5,15 +5,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_bdd_suite/integration_test_helper.dart';
 
 void main() async {
-  final helper = await IntegrationTestHelper.create(
-    config: config,
-  );
+  final helper = await IntegrationTestHelper.create(config: config);
 
   run(helper);
 }
 
 void run(IntegrationTestHelper helper) {
-
   group('Feature: Employee Directory Dashboard', () {
     setUpAll(() async {
       await helper.setUpFeature(
@@ -22,7 +19,9 @@ void run(IntegrationTestHelper helper) {
       );
     });
 
-    testWidgets('Scenario: Dashboard shows welcome message and employee table', (WidgetTester tester) async {
+    testWidgets('Scenario: Dashboard shows welcome message and employee table', (
+      WidgetTester tester,
+    ) async {
       await helper.testScenario(
         tester,
         ScenarioInfo(
@@ -39,7 +38,9 @@ void run(IntegrationTestHelper helper) {
       );
     });
 
-    testWidgets('Scenario: Dashboard stat cards reflect employee data', (WidgetTester tester) async {
+    testWidgets('Scenario: Dashboard stat cards reflect employee data', (
+      WidgetTester tester,
+    ) async {
       await helper.testScenario(
         tester,
         ScenarioInfo(
@@ -54,7 +55,9 @@ void run(IntegrationTestHelper helper) {
       );
     });
 
-    testWidgets('Scenario: Adding employee with valid data adds a table row', (WidgetTester tester) async {
+    testWidgets('Scenario: Adding employee with valid data adds a table row', (
+      WidgetTester tester,
+    ) async {
       await helper.testScenario(
         tester,
         ScenarioInfo(
@@ -77,7 +80,9 @@ void run(IntegrationTestHelper helper) {
       );
     });
 
-    testWidgets('Scenario: Adding employees with boundary ages (Example 1)', (WidgetTester tester) async {
+    testWidgets('Scenario: Adding employees with boundary ages (Example 1)', (
+      WidgetTester tester,
+    ) async {
       await helper.testScenario(
         tester,
         ScenarioInfo(
@@ -96,7 +101,9 @@ void run(IntegrationTestHelper helper) {
       );
     });
 
-    testWidgets('Scenario: Adding employees with boundary ages (Example 2)', (WidgetTester tester) async {
+    testWidgets('Scenario: Adding employees with boundary ages (Example 2)', (
+      WidgetTester tester,
+    ) async {
       await helper.testScenario(
         tester,
         ScenarioInfo(
@@ -115,7 +122,9 @@ void run(IntegrationTestHelper helper) {
       );
     });
 
-    testWidgets('Scenario: Adding employees with boundary ages (Example 3)', (WidgetTester tester) async {
+    testWidgets('Scenario: Adding employees with boundary ages (Example 3)', (
+      WidgetTester tester,
+    ) async {
       await helper.testScenario(
         tester,
         ScenarioInfo(
@@ -134,7 +143,9 @@ void run(IntegrationTestHelper helper) {
       );
     });
 
-    testWidgets('Scenario: Empty name shows validation error', (WidgetTester tester) async {
+    testWidgets('Scenario: Empty name shows validation error', (
+      WidgetTester tester,
+    ) async {
       await helper.testScenario(
         tester,
         ScenarioInfo(
@@ -152,7 +163,9 @@ void run(IntegrationTestHelper helper) {
       );
     });
 
-    testWidgets('Scenario: Non-numeric age shows validation error', (WidgetTester tester) async {
+    testWidgets('Scenario: Non-numeric age shows validation error', (
+      WidgetTester tester,
+    ) async {
       await helper.testScenario(
         tester,
         ScenarioInfo(
@@ -170,7 +183,9 @@ void run(IntegrationTestHelper helper) {
       );
     });
 
-    testWidgets('Scenario: Deleting an employee removes them from the table', (WidgetTester tester) async {
+    testWidgets('Scenario: Deleting an employee removes them from the table', (
+      WidgetTester tester,
+    ) async {
       await helper.testScenario(
         tester,
         ScenarioInfo(
@@ -188,7 +203,9 @@ void run(IntegrationTestHelper helper) {
       );
     });
 
-    testWidgets('Scenario: Cancelling delete keeps the employee in the table', (WidgetTester tester) async {
+    testWidgets('Scenario: Cancelling delete keeps the employee in the table', (
+      WidgetTester tester,
+    ) async {
       await helper.testScenario(
         tester,
         ScenarioInfo(
@@ -206,7 +223,9 @@ void run(IntegrationTestHelper helper) {
       );
     });
 
-    testWidgets('Scenario: Editing an employee updates the table row', (WidgetTester tester) async {
+    testWidgets('Scenario: Editing an employee updates the table row', (
+      WidgetTester tester,
+    ) async {
       await helper.testScenario(
         tester,
         ScenarioInfo(
@@ -225,52 +244,66 @@ void run(IntegrationTestHelper helper) {
       );
     });
 
-    testWidgets('Scenario: Searching by name narrows the displayed employees (Example 1)', (WidgetTester tester) async {
-      await helper.testScenario(
-        tester,
-        ScenarioInfo(
-          scenarioName: 'Searching by name narrows the displayed employees (Example 1)',
-          line: 99,
-          steps: [
-            r'''{"text":"When I fill the search field with \"Alice\"","line":100}''',
-            r'''{"text":"Then I should see \"Alice Johnson\"","line":101}''',
-            r'''{"text":"And I should not see \"Bob Martinez\"","line":102}''',
-          ],
-        ),
-      );
-    });
+    testWidgets(
+      'Scenario: Searching by name narrows the displayed employees (Example 1)',
+      (WidgetTester tester) async {
+        await helper.testScenario(
+          tester,
+          ScenarioInfo(
+            scenarioName:
+                'Searching by name narrows the displayed employees (Example 1)',
+            line: 99,
+            steps: [
+              r'''{"text":"When I fill the search field with \"Alice\"","line":100}''',
+              r'''{"text":"Then I should see \"Alice Johnson\"","line":101}''',
+              r'''{"text":"And I should not see \"Bob Martinez\"","line":102}''',
+            ],
+          ),
+        );
+      },
+    );
 
-    testWidgets('Scenario: Searching by name narrows the displayed employees (Example 2)', (WidgetTester tester) async {
-      await helper.testScenario(
-        tester,
-        ScenarioInfo(
-          scenarioName: 'Searching by name narrows the displayed employees (Example 2)',
-          line: 99,
-          steps: [
-            r'''{"text":"When I fill the search field with \"Manager\"","line":100}''',
-            r'''{"text":"Then I should see \"Carol White\"","line":101}''',
-            r'''{"text":"And I should not see \"Alice Johnson\"","line":102}''',
-          ],
-        ),
-      );
-    });
+    testWidgets(
+      'Scenario: Searching by name narrows the displayed employees (Example 2)',
+      (WidgetTester tester) async {
+        await helper.testScenario(
+          tester,
+          ScenarioInfo(
+            scenarioName:
+                'Searching by name narrows the displayed employees (Example 2)',
+            line: 99,
+            steps: [
+              r'''{"text":"When I fill the search field with \"Manager\"","line":100}''',
+              r'''{"text":"Then I should see \"Carol White\"","line":101}''',
+              r'''{"text":"And I should not see \"Alice Johnson\"","line":102}''',
+            ],
+          ),
+        );
+      },
+    );
 
-    testWidgets('Scenario: Searching by name narrows the displayed employees empty state', (WidgetTester tester) async {
-      await helper.testScenario(
-        tester,
-        ScenarioInfo(
-          scenarioName: 'Searching by name narrows the displayed employees empty state',
-          line: 109,
-          steps: [
-            r'''{"text":"When I fill the search field with \"xyznotfound\"","line":110}''',
-            r'''{"text":"Then I should not see \"Alice Johnson\"","line":111}''',
-            r'''{"text":"And the empty employee text should be visible","line":112}''',
-          ],
-        ),
-      );
-    });
+    testWidgets(
+      'Scenario: Searching by name narrows the displayed employees empty state',
+      (WidgetTester tester) async {
+        await helper.testScenario(
+          tester,
+          ScenarioInfo(
+            scenarioName:
+                'Searching by name narrows the displayed employees empty state',
+            line: 109,
+            steps: [
+              r'''{"text":"When I fill the search field with \"xyznotfound\"","line":110}''',
+              r'''{"text":"Then I should not see \"Alice Johnson\"","line":111}''',
+              r'''{"text":"And the empty employee text should be visible","line":112}''',
+            ],
+          ),
+        );
+      },
+    );
 
-    testWidgets('Scenario: Employee table displays all required columns', (WidgetTester tester) async {
+    testWidgets('Scenario: Employee table displays all required columns', (
+      WidgetTester tester,
+    ) async {
       await helper.testScenario(
         tester,
         ScenarioInfo(
@@ -288,7 +321,9 @@ void run(IntegrationTestHelper helper) {
       );
     });
 
-    testWidgets('Scenario: Cancelling the Add Employee dialog saves nothing', (WidgetTester tester) async {
+    testWidgets('Scenario: Cancelling the Add Employee dialog saves nothing', (
+      WidgetTester tester,
+    ) async {
       await helper.testScenario(
         tester,
         ScenarioInfo(
@@ -322,4 +357,3 @@ final List<String> _backgroundSteps = <String>[
   r'''{"text":"And I tap the login button","line":11}''',
   r'''{"text":"Then I should see \"Welcome to the Dashboard!\"","line":12}''',
 ];
-

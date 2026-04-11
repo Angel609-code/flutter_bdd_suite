@@ -1,3 +1,4 @@
+import 'package:flutter_bdd_suite/steps/step_exceptions.dart';
 import 'package:flutter_bdd_suite/steps/when_fill_field_step.dart';
 import 'package:flutter_bdd_suite/utils/step_definition_generic.dart';
 import 'package:flutter_bdd_suite/utils/steps_keywords.dart';
@@ -94,7 +95,7 @@ class StepsRegistry {
           final patterns = allMatches
               .map((s) => s.pattern.pattern)
               .join('\n  ');
-          throw StateError(
+          throw AmbiguousStepException(
             'Ambiguous match: ${allMatches.length} step definitions matched '
             '"$cleanedStepText":\n  $patterns',
           );
