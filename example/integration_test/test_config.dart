@@ -26,10 +26,8 @@ final config = IntegrationTestConfig(
   ],
   steps: [
     theApplicationIsLaunched(),
-    iShouldSeeTextOrElement(),
-    theLoginUIIsVisible(),
     iShouldReachDashboard(),
-    theElementIsVisible(),
+    theElementShouldBeVisible(),
     iEnterText(),
     iInteractWithButton(),
   ],
