@@ -779,87 +779,78 @@ By extending `IntegrationHook`, you can implement methods that map perfectly to 
 ### Execution Order (The Onion Model)
 Hooks are composable and define an execution `priority` (default is 0). `onBefore*` hooks execute in **descending** order (highest priority first). `onAfter*` hooks execute in **reverse** order (lowest priority first). This guarantees symmetric teardown (if Hook A sets up a database, and Hook B populates it, Hook B cleans up before Hook A destroys the database).
 
-### Global Hooks
-Global hooks run once for the entire test suite.
+You can declare all your hooks in a single class or split them into multiple classes.
 
 ```dart
-class GlobalSetupHook extends IntegrationHook {
+import 'package:flutter_bdd_suite/hooks/integration_hook.dart';
+import 'package:flutter_bdd_suite/models/models.dart';
+import 'package:flutter_bdd_suite/steps/step_result.dart';
+import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
+
+class MyCustomHook extends IntegrationHook {
   @override
-  Future<void> onBeforeAll() async {
-    // Runs once before any scenario is run
-  }
+  int get priority => 10; // higher priority runs first
 
+  // --------------------------------------------------------------------------
+  // Global Hooks: Run once for the entire test suite.
+  // --------------------------------------------------------------------------
+
+  /// Runs once before any scenario is run
   @override
-  Future<void> onAfterAll() async {
-    // Runs once after all scenarios have been executed
-  }
-}
-```
+  Future<void> onBeforeAll() async {}
 
-### Feature Hooks
-These run before and after an entire feature file.
-
-```dart
-class FeatureLifecycleHook extends IntegrationHook {
+  /// Runs once after all scenarios have been executed
   @override
-  Future<void> onFeatureStarted(FeatureInfo feature) async {
-    // Access feature.featureName, feature.tags, etc.
-  }
+  Future<void> onAfterAll() async {}
 
+  // --------------------------------------------------------------------------
+  // Feature Hooks: Run before and after an entire feature file.
+  // --------------------------------------------------------------------------
+
+  /// Access feature.featureName, feature.tags, etc.
   @override
-  Future<void> onAfterFeature(FeatureInfo feature) async {
-    // Clean up resources used by the feature
-  }
-}
-```
+  Future<void> onFeatureStarted(FeatureInfo feature) async {}
 
-### Scenario Hooks
-Scenario hooks run before the first step of each scenario (including `Background` steps) and after the last step.
-
-```dart
-class ScenarioLifecycleHook extends IntegrationHook {
+  /// Clean up resources used by the feature
   @override
-  Future<void> onBeforeScenario(ScenarioInfo scenario) async {
-    // Seed database, clear caches, etc.
-    // NOTE: Avoid using this for UI setup; use Background steps instead for better readability.
-  }
+  Future<void> onAfterFeature(FeatureInfo feature) async {}
 
+  // --------------------------------------------------------------------------
+  // Scenario Hooks: Run for every scenario.
+  // --------------------------------------------------------------------------
+
+  /// Runs before the first step of each scenario (including Background steps).
+  /// Use this for low-level logic (e.g. seeding a database).
+  /// NOTE: Avoid using this for UI setup; use Background steps instead for better readability.
+  @override
+  Future<void> onBeforeScenario(ScenarioInfo scenario) async {}
+
+  /// Runs after the last step of each scenario, even if failed or skipped.
   @override
   Future<void> onAfterScenario(ScenarioResult result) async {
     // Clean up scenario resources. You can inspect the final status:
-    switch (result.status) {
-      case ScenarioExecutionStatus.passed:
-        break;
-      case ScenarioExecutionStatus.failed:
-      case ScenarioExecutionStatus.skipped:
-        print('Scenario failed or skipped: ${result.scenarioName}');
-        break;
+    if (result.status == ScenarioExecutionStatus.failed) {
+        print('Scenario failed: ${result.scenarioName}');
     }
   }
-}
-```
 
-### Step Hooks
-Step hooks wrap individual steps. Because Flutter testing exposes the `WidgetTester` per scenario, these hooks inject the `WidgetTesterWorld`.
+  // --------------------------------------------------------------------------
+  // Step Hooks: Wrap individual steps.
+  // --------------------------------------------------------------------------
 
-```dart
-import 'dart:io';
-
-class StepLifecycleHook extends IntegrationHook {
+  /// Executed right before the step function is invoked
   @override
-  Future<void> onBeforeStep(String stepText, WidgetTesterWorld world) async {
-    // Executed right before the step function is invoked
-  }
+  Future<void> onBeforeStep(String stepText, WidgetTesterWorld world) async {}
 
+  /// Executed right after the step function is invoked.
+  /// Because Flutter testing exposes the WidgetTester per scenario,
+  /// these hooks inject the WidgetTesterWorld.
   @override
   Future<void> onAfterStep(StepResult result, WidgetTesterWorld world) async {
-    // Leveraging Dart pattern matching to handle results
     if (result is StepFailure) {
        final tester = world.testerOrNull;
        if (tester != null) {
          // Leverage Flutter tester to take screenshots upon failure!
-         // Note: Actually writing a screenshot requires native platform code
-         // or host-side bridge interaction.
          print('Taking screenshot for failed step: ${result.stepText}');
        }
     }
