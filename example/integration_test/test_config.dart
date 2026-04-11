@@ -28,6 +28,8 @@ final config = IntegrationTestConfig(
     theApplicationIsLaunched(),
     iShouldReachDashboard(),
     theElementShouldBeVisible(),
+    iShouldSeeText(),
+    iShouldSeeMultipleTexts(),
     iEnterText(),
     iInteractWithButton(),
   ],

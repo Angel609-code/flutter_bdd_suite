@@ -1422,11 +1422,11 @@ void main() {
       // Then I should not see "Eve Torres"
       expect(find.text('Eve Torres'), findsNothing);
 
-      // And I should see \"Alice Johnson\"
+      // And I should see "Alice Johnson"
       expect(find.text('Alice Johnson'), findsOneWidget);
-      // And I should see \"Bob Martinez\"
+      // And I should see "Bob Martinez"
       expect(find.text('Bob Martinez'), findsOneWidget);
-      // And I should see \"Carol White\"
+      // And I should see "Carol White"
       expect(find.text('Carol White'), findsOneWidget);
     });
   });
