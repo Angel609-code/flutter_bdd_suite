@@ -29,8 +29,8 @@ void run(IntegrationTestHelper helper) {
           scenarioName: 'Login with different credential combinations (Example 1)',
           line: 11,
           steps: [
-            r'''{"text":"When I enter the username \"wrong\"","line":12}''',
-            r'''{"text":"And I enter the password \"pass\"","line":13}''',
+            r'''{"text":"When I fill the username field with \"wrong\"","line":12}''',
+            r'''{"text":"And I fill the password field with \"pass\"","line":13}''',
             r'''{"text":"And I tap the login button","line":14}''',
             r'''{"text":"Then I should see \"Invalid credentials.\"","line":15}''',
             r'''{"text":"And I should not reach the dashboard","line":16}''',
@@ -46,8 +46,8 @@ void run(IntegrationTestHelper helper) {
           scenarioName: 'Login with different credential combinations (Example 2)',
           line: 11,
           steps: [
-            r'''{"text":"When I enter the username \"\"","line":12}''',
-            r'''{"text":"And I enter the password \"\"","line":13}''',
+            r'''{"text":"When I fill the username field with \"\"","line":12}''',
+            r'''{"text":"And I fill the password field with \"\"","line":13}''',
             r'''{"text":"And I tap the login button","line":14}''',
             r'''{"text":"Then I should see \"Username and password are required.\"","line":15}''',
             r'''{"text":"And I should not reach the dashboard","line":16}''',
@@ -63,8 +63,8 @@ void run(IntegrationTestHelper helper) {
           scenarioName: 'Login with different credential combinations (Example 3)',
           line: 11,
           steps: [
-            r'''{"text":"When I enter the username \"admin\"","line":12}''',
-            r'''{"text":"And I enter the password \"password123\"","line":13}''',
+            r'''{"text":"When I fill the username field with \"admin\"","line":12}''',
+            r'''{"text":"And I fill the password field with \"password123\"","line":13}''',
             r'''{"text":"And I tap the login button","line":14}''',
             r'''{"text":"Then I should see \"Welcome to the Dashboard!\"","line":15}''',
             r'''{"text":"And I should reach the dashboard","line":16}''',
@@ -82,7 +82,7 @@ void run(IntegrationTestHelper helper) {
           steps: [
             r'''{"text":"Then I should see \"TeamSync\"","line":25}''',
             r'''{"text":"And I should see \"Employee Directory\"","line":26}''',
-            r'''{"text":"And the login form fields are present","line":27}''',
+            r'''{"text":"And the login form fields should be visible","line":27}''',
           ],
         ),
       );
@@ -99,6 +99,6 @@ FeatureInfo _featureInfo = FeatureInfo(
 
 final List<String> _backgroundSteps = <String>[
   r'''{"text":"Given the application is launched","line":8}''',
-  r'''{"text":"And the login screen is visible","line":9}''',
+  r'''{"text":"And the login form fields should be visible","line":9}''',
 ];
 

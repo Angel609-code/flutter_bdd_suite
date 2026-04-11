@@ -6,14 +6,14 @@ Feature: Employee Directory Dashboard
 
   Background:
     Given the application is launched
-    And I enter the username "admin"
-    And I enter the password "password123"
+    And I fill the username field with "admin"
+    And I fill the password field with "password123"
     And I tap the login button
     Then I should see "Welcome to the Dashboard!"
 
   Scenario: Dashboard shows welcome message and employee table
     Then I should see "Welcome to the Dashboard!"
-    And I should see the employee table element
+    And the employee table should be visible
     And I should see "Alice Johnson"
     And I should see "Bob Martinez"
     And I should see "Carol White"
@@ -26,14 +26,14 @@ Feature: Employee Directory Dashboard
   Rule: Employee records must pass validation
     Scenario: Adding employee with valid data adds a table row
       When I tap the add employee button
-      Then I should see the employee dialog title element
+      Then the employee dialog title should be visible
       And I should see "Add Employee"
       When I fill the employee name field with "David Kim"
       And I fill the employee role field with "Analyst"
       And I fill the employee age field with "35"
       And I fill the employee bio field with "Business analyst with expertise in data.\nSix years experience."
       And I tap the save employee button
-      Then I should not see the employee dialog title element
+      Then the employee dialog title should not be visible
       And I should see "David Kim"
       And I should see "Analyst"
 
@@ -43,14 +43,14 @@ Feature: Employee Directory Dashboard
       And I fill the employee role field with "Tester"
       And I fill the employee age field with "<age>"
       And I tap the save employee button
-      Then the employee dialog title element is "<dialog_state>"
+      Then the employee dialog title <dialog_state>
       And I should see "<expected_text>"
 
       Examples:
-        | name         | age | dialog_state | expected_text                              |
-        | Under18Test  | 17  | visible      | Employee must be at least 18 years old     |
-        | Adult18Test  | 18  | hidden       | Adult18Test                                |
-        | Adult100Test | 100 | hidden       | Adult100Test                               |
+        | name         | age | dialog_state          | expected_text                          |
+        | Under18Test  | 17  | should be visible     | Employee must be at least 18 years old |
+        | Adult18Test  | 18  | should not be visible | Adult18Test                            |
+        | Adult100Test | 100 | should not be visible | Adult100Test                           |
 
     Scenario: Empty name shows validation error
       When I tap the add employee button
@@ -58,7 +58,7 @@ Feature: Employee Directory Dashboard
       And I fill the employee age field with "25"
       And I tap the save employee button
       Then I should see "Name is required"
-      And I should see the employee dialog title element
+      And the employee dialog title should be visible
 
     Scenario: Non-numeric age shows validation error
       When I tap the add employee button
@@ -71,27 +71,24 @@ Feature: Employee Directory Dashboard
   Rule: Employees can be removed from the directory
     Scenario: Deleting an employee removes them from the table
       Given I should see "Alice Johnson"
-      When I scroll to the delete employee 0 button
-      And I tap the delete employee 0 button
-      Then I should see the delete confirm message element
+      When I tap the delete button for "Alice Johnson"
+      Then the delete confirm message should be visible
       And I should see "Delete Employee"
       When I tap the delete confirm button
       Then I should not see "Alice Johnson"
 
     Scenario: Cancelling delete keeps the employee in the table
       Given I should see "Alice Johnson"
-      When I scroll to the delete employee 0 button
-      And I tap the delete employee 0 button
-      Then I should see the delete confirm message element
+      When I tap the delete button for "Alice Johnson"
+      Then the delete confirm message should be visible
       When I tap the delete cancel button
-      Then I should not see the delete confirm message element
+      Then the delete confirm message should not be visible
       And I should see "Alice Johnson"
 
   Rule: Employee records can be updated via the edit dialog
     Scenario: Editing an employee updates the table row
       Given I should see "Bob Martinez"
-      When I scroll to the edit employee 1 button
-      And I tap the edit employee 1 button
+      When I tap the edit button for "Bob Martinez"
       Then I should see "Edit Employee"
       When I fill the employee name field with "Robert Martinez"
       And I tap the save employee button
@@ -112,20 +109,20 @@ Feature: Employee Directory Dashboard
     Scenario: Searching by name narrows the displayed employees empty state
       When I fill the search field with "xyznotfound"
       Then I should not see "Alice Johnson"
-      And I should see the empty employee text element
+      And the empty employee text should be visible
 
-  Scenario: Employee table displays all required columns
-    Then I should see "ID"
-    And I should see "Name"
-    And I should see "Role"
-    And I should see "Age"
-    And I should see "Biography"
-    And I should see "Actions"
+    Scenario: Employee table displays all required columns
+      Then I should see "ID"
+      And I should see "Name"
+      And I should see "Role"
+      And I should see "Age"
+      And I should see "Biography"
+      And I should see "Actions"
 
-  Scenario: Cancelling the Add Employee dialog saves nothing
-    Given I should see "Alice Johnson"
-    When I tap the add employee button
-    And I fill the employee name field with "Ghost Employee"
-    And I tap the cancel employee button
-    Then I should not see the employee dialog title element
-    And I should not see "Ghost Employee"
+    Scenario: Cancelling the Add Employee dialog saves nothing
+      Given I should see "Alice Johnson"
+      When I tap the add employee button
+      And I fill the employee name field with "Ghost Employee"
+      And I tap the cancel employee button
+      Then the employee dialog title should not be visible
+      And I should not see "Ghost Employee"

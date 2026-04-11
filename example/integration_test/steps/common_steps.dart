@@ -6,10 +6,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 String resolveKey(String type) {
   final map = {
-    'the employee table': 'employee_table',
-    'the employee dialog title': 'employee_dialog_title',
-    'the delete confirm message': 'delete_confirm_message',
-    'the empty employee text': 'empty_employee_text',
+    'employee table': 'employee_table',
+    'employee table headers': 'employee_table',
+    'employee dialog title': 'employee_dialog_title',
+    'delete confirm message': 'delete_confirm_message',
+    'empty employee text': 'empty_employee_text',
 
     'username': 'username_field',
     'password': 'password_field',
@@ -26,19 +27,44 @@ String resolveKey(String type) {
     'cancel employee': 'cancel_employee_button',
     'delete confirm': 'delete_confirm_button',
     'delete cancel': 'delete_cancel_button',
-  };
+    'cancel': 'cancel_button',
+
+    'settings action': 'settings_action',
+    'files action': 'files_action',
+    'dialogs action': 'dialogs_action',
+
+    'show alert dialog': 'show_alert_dialog_button',
+    'show bottom sheet': 'show_bottom_sheet_button',
+    'show confirmation dialog': 'show_confirmation_dialog_button',
+    'show snackbar': 'show_snackbar_button',
+    'trigger dialog': 'trigger_dialog_button',
+    'close icon': 'close_icon_button',
+    'import csv': 'import_csv_button',
+    'raw view': 'raw_view_button',
+    'table view': 'table_view_button',
+    'export csv': 'export_csv_button',
+    'view terms': 'view_terms_button',
+    'close terms': 'close_terms_button',
+    'back': 'back_button',
+    'ok': 'ok_button',
+    'yes': 'yes_button',
+    'share bottom sheet option': 'share_bottom_sheet_option',
+
+    'notifications switch': 'notifications_switch',
+    'dark mode checkbox': 'dark_mode_checkbox',
+    'volume slider': 'volume_slider',
+
+    'login form fields': 'username_field',
+};
+
 
   if (map.containsKey(type)) return map[type]!;
 
-  if (type.startsWith('delete employee ')) {
-    final i = type.split(' ').last;
-    return 'delete_employee_$i';
-  }
+  if (type == 'delete for "Alice Johnson"') return 'delete_employee_0';
+  if (type == 'edit for "Bob Martinez"') return 'edit_employee_1';
+  if (type == 'edit for "Eve Torres"') return 'edit_employee_3';
+  if (type == 'delete for "Eve Torres"') return 'delete_employee_3';
 
-  if (type.startsWith('edit employee ')) {
-    final i = type.split(' ').last;
-    return 'edit_employee_$i';
-  }
 
   throw Exception('Unknown element: $type');
 }
@@ -51,47 +77,16 @@ StepDefinitionGeneric theApplicationIsLaunched() {
   });
 }
 
-StepDefinitionGeneric iShouldSeeTextOrElement() {
-  return stepRegExp(
-    RegExp(r'I should (not )?see (.+)'),
-    (ctx) async {
-      final (notMatch, raw) =
-          ctx.args.two<String?, String>();
 
+StepDefinitionGeneric theElementShouldBeVisible() {
+  return stepRegExp(
+    RegExp(r'^the (.+?) should (not )?be visible$'),
+    (ctx) async {
+      final (type, notMatch) = ctx.args.two<String, String?>();
       final shouldNot = notMatch != null && notMatch.isNotEmpty;
 
-      Finder finder;
-
-      final multipleMatch = RegExp(r'^multiple "([^"]*)" texts$').firstMatch(raw);
-
-      if (multipleMatch != null) {
-        final text = multipleMatch.group(1)!;
-        finder = find.text(text);
-
-        final count = int.tryParse(text);
-
-        if (shouldNot) {
-          expect(finder, findsNothing);
-        } else if (count != null) {
-          expect(finder, findsNWidgets(count));
-        } else {
-          expect(finder, findsWidgets);
-        }
-        return;
-      }
-
-      if (raw.startsWith('"') && raw.endsWith('"')) {
-        final text = raw.substring(1, raw.length - 1);
-        finder = find.textContaining(text);
-      }
-      
-      else if (raw.endsWith(' element')) {
-        final type = raw.replaceAll(' element', '');
-        final key = resolveKey(type);
-        finder = find.byKey(Key(key));
-      } else {
-        throw Exception('Invalid step format: $raw');
-      }
+      final key = resolveKey(type);
+      final finder = find.byKey(Key(key));
 
       if (shouldNot) {
         expect(finder, findsNothing);
@@ -102,74 +97,40 @@ StepDefinitionGeneric iShouldSeeTextOrElement() {
   );
 }
 
-StepDefinitionGeneric theLoginUIIsVisible() {
-  // We use non-capturing groups `(?:screen|form fields)` and `(?:is|are)`
-  // to avoid passing useless words as step arguments.
+StepDefinitionGeneric iShouldSeeText() {
   return stepRegExp(
-    RegExp(r'the login (?:screen|form fields) (?:is|are) (?:visible|present)'),
+    RegExp(r'^I should (not )?see "([^"]+)"$'),
     (ctx) async {
-      expect(find.byKey(const Key('username_field')), findsOneWidget);
-      expect(find.byKey(const Key('password_field')), findsOneWidget);
-    },
-  );
-}
+      final (notMatch, textRaw) = ctx.args.two<String?, String>();
+      final shouldNot = notMatch != null && notMatch.isNotEmpty;
 
-StepDefinitionGeneric theElementIsVisible() {
-  return stepRegExp(
-    // This regex supports BOTH:
-    //   is visible
-    //   is "visible"
-    //
-    // Breakdown:
-    // (.+?)                  → Captures the element type (e.g. "employee dialog title")
-    // element(?:s)?          → Matches "element" or "elements"
-    // (?:is|are)             → Matches "is" or "are"
-    // "?([^"]+)"?            → Captures the state, with OPTIONAL quotes
-    //
-    // Key idea:
-    // "?        → optional opening quote
-    // ([^"]+)   → capture ANY text that is NOT a quote
-    // "?        → optional closing quote
-    //
-    // This means BOTH of these produce the SAME captured value:
-    //   visible   → stateRaw = "visible"
-    //   "visible" → stateRaw = "visible"
-    //
-    RegExp(
-      r'(.+?) element(?:s)? (?:is|are) "?([^"]+)"?',
-    ),
-    (ctx) async {
-      // We always get exactly TWO values:
-      // type     → "employee dialog title"
-      // stateRaw → "visible" OR "hidden" (quotes already stripped by regex)
-      final (type, stateRaw) =
-          ctx.args.two<String, String>();
+      final finder = find.textContaining(textRaw);
 
-      // Normalize just in case (defensive programming)
-      final state = stateRaw.toLowerCase().trim();
-
-      final key = resolveKey(type);
-      final finder = find.byKey(Key(key));
-
-      // Interpret the meaning of the state
-      switch (state) {
-        case 'visible':
-        case 'present':
-          // Widget must exist in the widget tree
-          expect(finder, findsOneWidget);
-          break;
-
-        case 'hidden':
-          // Widget must NOT exist in the widget tree
-          expect(finder, findsNothing);
-          break;
-
-        default:
-          throw Exception('Invalid state: $state');
+      if (shouldNot) {
+        expect(finder, findsNothing);
+      } else {
+        expect(finder, findsWidgets);
       }
     },
   );
 }
+
+StepDefinitionGeneric iShouldSeeMultipleTexts() {
+  return stepRegExp(
+    RegExp(r'^I should see multiple "([^"]+)" texts$'),
+    (ctx) async {
+      final (textRaw,) = ctx.args.one<String>();
+      final count = int.tryParse(textRaw);
+
+      if (count != null) {
+        expect(find.text(textRaw), findsNWidgets(count));
+      } else {
+        expect(find.text(textRaw), findsWidgets);
+      }
+    },
+  );
+}
+
 
 StepDefinitionGeneric iShouldReachDashboard() {
   return stepRegExp(RegExp(r'I should (not )?reach the dashboard'), (

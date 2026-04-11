@@ -125,19 +125,19 @@ void main() {
           // Background: Given the app is freshly launched at the login screen
           await launchApp(tester);
 
-          // Given the login screen is visible
+          // Given the login form fields should be visible
           expect(find.byKey(const Key('username_field')), findsOneWidget);
           expect(find.byKey(const Key('password_field')), findsOneWidget);
           expect(find.byKey(const Key('login_button')), findsOneWidget);
 
-          // When I enter the username "<username>"
+          // When I fill the username field with "<username>"
           await tester.enterText(
             find.byKey(const Key('username_field')),
             example['username'] as String,
           );
           await tester.pump();
 
-          // And I enter the password "<password>"
+          // And I fill the password field with "<password>"
           await tester.enterText(
             find.byKey(const Key('password_field')),
             example['password'] as String,
@@ -154,12 +154,12 @@ void main() {
             findsOneWidget,
           );
 
-          // And the dashboard reachability matches the expected outcome
+          // And the login button should be visible
           if (example['shouldReachDashboard'] == true) {
-            // Then I am redirected to the Dashboard
+            // Then I should reach the dashboard
             expect(find.byKey(const Key('add_employee_fab')), findsOneWidget);
           } else {
-            // Then I remain on the login screen
+            // Then the login button should be visible
             expect(find.byKey(const Key('login_button')), findsOneWidget);
           }
         },
@@ -175,13 +175,13 @@ void main() {
       // Background: Given the app is freshly launched
       await launchApp(tester);
 
-      // Then I should see the app name
+      // Then I should see "TeamSync"
       expect(find.text('TeamSync'), findsOneWidget);
 
-      // And I should see the subtitle
+      // And I should see "Employee Directory"
       expect(find.text('Employee Directory'), findsOneWidget);
 
-      // And the login form fields are present
+      // And the login form fields should be visible
       expect(find.byKey(const Key('username_field')), findsOneWidget);
       expect(find.byKey(const Key('password_field')), findsOneWidget);
     });
@@ -203,29 +203,29 @@ void main() {
       //
       // Background:
       //   Given I launch the TeamSync app
-      //   And I fill "username_field" with "admin"
-      //   And I fill "password_field" with "password123"
-      //   And I tap "login_button"
-      //   Then I should see "Welcome to the Dashboard!"
+      //   And I fill the username field with "admin"
+      //   And I fill the password field with "password123"
+      // And I tap the login button
+      //   Then I should reach the dashboard
     });
 
     // -------------------------------------------------------------------------
-    // Scenario: Dashboard displays the welcome message and employee table
+    // Scenario: Dashboard displays see "Welcome to the Dashboard!" and employee table
     // -------------------------------------------------------------------------
     testWidgets(
       'Scenario: Dashboard shows welcome message and employee table',
       (WidgetTester tester) async {
-        // Given the user is logged in
+        // Given the app is launched and logged in
         await launchApp(tester);
         await loginAsAdmin(tester);
 
-        // Then I should see the welcome message
+        // Then I should see "Welcome to the Dashboard!"
         expect(find.text('Welcome to the Dashboard!'), findsOneWidget);
 
-        // And the employee DataTable should be visible
+        // And the employee table should be visible
         expect(find.byKey(const Key('employee_table')), findsOneWidget);
 
-        // And the initial employees are displayed
+        // And I should see "Alice Johnson"
         expect(find.text('Alice Johnson'), findsOneWidget);
         expect(find.text('Bob Martinez'), findsOneWidget);
         expect(find.text('Carol White'), findsOneWidget);
@@ -238,17 +238,17 @@ void main() {
     testWidgets('Scenario: Dashboard stat cards reflect employee data', (
       WidgetTester tester,
     ) async {
-      // Given the user is logged in
+      // Given the app is launched and logged in
       await launchApp(tester);
       await loginAsAdmin(tester);
 
-      // Then the "Total Employees" stat card shows 3
+      // Then I should see "3"
       expect(find.text('3'), findsWidgets); // may match multiple text nodes
 
-      // And the stat card label "Total Employees" is present
+      // And I should see "Total Employees"
       expect(find.text('Total Employees'), findsOneWidget);
 
-      // And "Average Age" label is present
+      // And I should see "Average Age"
       expect(find.text('Average Age'), findsOneWidget);
     });
 
@@ -269,53 +269,53 @@ void main() {
           await launchApp(tester);
           await loginAsAdmin(tester);
 
-          // When I tap the "Add Employee" FAB
+          // When I tap the add employee button
           await tester.tap(find.byKey(const Key('add_employee_fab')));
           await tester.pumpAndSettle();
 
-          // Then the "Add Employee" dialog opens
+          // Then the employee dialog title should be visible
           expect(
             find.byKey(const Key('employee_dialog_title')),
             findsOneWidget,
           );
-          expect(find.text('Add Employee'), findsWidgets);
+          expect(find.text('Add Employee'), findsOneWidget);
 
-          // When I fill "employee_name_field" with "David Kim"
+          // When I fill the employee name field with "David Kim"
           await tester.enterText(
             find.byKey(const Key('employee_name_field')),
             'David Kim',
           );
           await tester.pump();
 
-          // And I fill "employee_role_field" with "Analyst"
+          // And I fill the employee role field with "Analyst"
           await tester.enterText(
             find.byKey(const Key('employee_role_field')),
             'Analyst',
           );
           await tester.pump();
 
-          // And I fill "employee_age_field" with "35"
+          // And I fill the employee age field with "35"
           await tester.enterText(
             find.byKey(const Key('employee_age_field')),
             '35',
           );
           await tester.pump();
 
-          // And I fill "employee_bio_field" with a multi-line biography
+          // And I fill the employee bio field with "multi-line biography"
           await tester.enterText(
             find.byKey(const Key('employee_bio_field')),
             'Business analyst with expertise in data.\nSix years experience.',
           );
           await tester.pump();
 
-          // And I tap "save_employee_button"
+          // And I tap the save employee button
           await tester.tap(find.byKey(const Key('save_employee_button')));
           await tester.pumpAndSettle();
 
-          // Then the dialog is dismissed
+          // Then the employee dialog title should not be visible
           expect(find.byKey(const Key('employee_dialog_title')), findsNothing);
 
-          // And "David Kim" now appears in the employee table
+          // And the employee table should be visible
           expect(find.text('David Kim'), findsOneWidget);
           expect(find.text('Analyst'), findsOneWidget);
         },
@@ -345,11 +345,11 @@ void main() {
             await launchApp(tester);
             await loginAsAdmin(tester);
 
-            // When I open the Add Employee dialog
+            // When I tap the add employee button
             await tester.tap(find.byKey(const Key('add_employee_fab')));
             await tester.pumpAndSettle();
 
-            // And I fill the required fields
+            // And I fill the employee name field with "David Kim"
             await tester.enterText(
               find.byKey(const Key('employee_name_field')),
               ex['name'] as String,
@@ -368,19 +368,19 @@ void main() {
             );
             await tester.pump();
 
-            // And I tap the Save button
+            // And I tap the save employee button
             await tester.tap(find.byKey(const Key('save_employee_button')));
             await tester.pumpAndSettle();
 
             if (ex['shouldSave'] == true) {
-              // Then the dialog closes and the employee is visible
+              // Then the employee dialog title should not be visible
               expect(
                 find.byKey(const Key('employee_dialog_title')),
                 findsNothing,
               );
               expect(find.text(ex['name'] as String), findsOneWidget);
             } else {
-              // Then the dialog remains open with a validation error
+              // Then the employee dialog title should be visible
               expect(
                 find.byKey(const Key('employee_dialog_title')),
                 findsOneWidget,
@@ -404,11 +404,11 @@ void main() {
         await launchApp(tester);
         await loginAsAdmin(tester);
 
-        // When I open the Add Employee dialog
+        // When I tap the add employee button
         await tester.tap(find.byKey(const Key('add_employee_fab')));
         await tester.pumpAndSettle();
 
-        // And I leave the name field empty but fill in other fields
+        // And I fill the employee role field with "Analyst"
         await tester.enterText(
           find.byKey(const Key('employee_role_field')),
           'Developer',
@@ -420,14 +420,14 @@ void main() {
         );
         await tester.pump();
 
-        // When I tap Save
+        // When I tap the save employee button
         await tester.tap(find.byKey(const Key('save_employee_button')));
         await tester.pumpAndSettle();
 
-        // Then I see "Name is required" validation message
+        // Then I should see "Name is required"
         expect(find.text('Name is required'), findsOneWidget);
 
-        // And the dialog is still open
+        // And the employee dialog title should be visible
         expect(find.byKey(const Key('employee_dialog_title')), findsOneWidget);
       });
 
@@ -441,11 +441,11 @@ void main() {
         await launchApp(tester);
         await loginAsAdmin(tester);
 
-        // When I open the Add Employee dialog
+        // When I tap the add employee button
         await tester.tap(find.byKey(const Key('add_employee_fab')));
         await tester.pumpAndSettle();
 
-        // And I fill the name and role
+        // And I fill the employee role field with "Analyst"
         await tester.enterText(
           find.byKey(const Key('employee_name_field')),
           'Test User',
@@ -457,18 +457,18 @@ void main() {
         );
         await tester.pump();
 
-        // And I enter a non-numeric age
+        // And I fill the employee age field with "thirty-five"
         await tester.enterText(
           find.byKey(const Key('employee_age_field')),
           'abc',
         );
         await tester.pump();
 
-        // When I tap Save
+        // When I tap the save employee button
         await tester.tap(find.byKey(const Key('save_employee_button')));
         await tester.pumpAndSettle();
 
-        // Then I see "Age must be a number"
+        // Then I should see "Age must be a number"
         expect(find.text('Age must be a number'), findsOneWidget);
       });
     });
@@ -487,10 +487,10 @@ void main() {
           await launchApp(tester);
           await loginAsAdmin(tester);
 
-          // And "Alice Johnson" is visible in the table
+          // And I should see "Alice Johnson"
           expect(find.text('Alice Johnson'), findsOneWidget);
 
-          // When I tap the delete button for the first employee (index 0)
+          // When I tap the delete button for "Alice Johnson"
           await tester.ensureVisible(
             find.byKey(const Key('delete_employee_0')),
           );
@@ -498,18 +498,18 @@ void main() {
           await tester.tap(find.byKey(const Key('delete_employee_0')));
           await tester.pumpAndSettle();
 
-          // Then a confirmation dialog appears
+          // Then the delete confirm message should be visible
           expect(
             find.byKey(const Key('delete_confirm_message')),
             findsOneWidget,
           );
           expect(find.text('Delete Employee'), findsOneWidget);
 
-          // When I tap "Delete" to confirm
+          // When I tap the delete confirm button
           await tester.tap(find.byKey(const Key('delete_confirm_button')));
           await tester.pumpAndSettle();
 
-          // Then "Alice Johnson" is no longer in the table
+          // Then I should not see "Alice Johnson"
           expect(find.text('Alice Johnson'), findsNothing);
         },
       );
@@ -524,10 +524,10 @@ void main() {
           await launchApp(tester);
           await loginAsAdmin(tester);
 
-          // And "Alice Johnson" is visible
+          // And I should see "Alice Johnson"
           expect(find.text('Alice Johnson'), findsOneWidget);
 
-          // When I tap the delete button for the first employee
+          // When I tap the delete button for "Alice Johnson"
           await tester.ensureVisible(
             find.byKey(const Key('delete_employee_0')),
           );
@@ -535,20 +535,20 @@ void main() {
           await tester.tap(find.byKey(const Key('delete_employee_0')));
           await tester.pumpAndSettle();
 
-          // Then the confirmation dialog appears
+          // Then the delete confirm message should be visible
           expect(
             find.byKey(const Key('delete_confirm_message')),
             findsOneWidget,
           );
 
-          // When I tap "Cancel"
+          // When I tap the cancel button
           await tester.tap(find.byKey(const Key('delete_cancel_button')));
           await tester.pumpAndSettle();
 
-          // Then the dialog is dismissed
+          // Then the employee dialog title should not be visible
           expect(find.byKey(const Key('delete_confirm_message')), findsNothing);
 
-          // And "Alice Johnson" is still present
+          // And I should see "Alice Johnson"
           expect(find.text('Alice Johnson'), findsOneWidget);
         },
       );
@@ -568,19 +568,19 @@ void main() {
         await launchApp(tester);
         await loginAsAdmin(tester);
 
-        // And "Bob Martinez" is visible
+        // And I should see "Bob Martinez"
         expect(find.text('Bob Martinez'), findsOneWidget);
 
-        // When I tap the edit button for the second employee (index 1)
+        // When I tap the edit button for "Bob Martinez"
         await tester.ensureVisible(find.byKey(const Key('edit_employee_1')));
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(const Key('edit_employee_1')));
         await tester.pumpAndSettle();
 
-        // Then the "Edit Employee" dialog opens with pre-filled data
+        // Then the edit dialog should be visible
         expect(find.text('Edit Employee'), findsOneWidget);
 
-        // When I clear and update the name field
+        // When I fill the employee name field with "Robert Martinez"
         final nameField = find.byKey(const Key('employee_name_field'));
         await tester.tap(nameField);
         await tester.pump();
@@ -588,14 +588,14 @@ void main() {
         await tester.enterText(nameField, 'Robert Martinez');
         await tester.pump();
 
-        // And I tap Save
+        // And I tap the save employee button
         await tester.tap(find.byKey(const Key('save_employee_button')));
         await tester.pumpAndSettle();
 
-        // Then the updated name "Robert Martinez" appears in the table
+        // Then I should see "Robert Martinez"
         expect(find.text('Robert Martinez'), findsOneWidget);
 
-        // And the old name "Bob Martinez" is no longer present
+        // And I should not see "Bob Martinez"
         expect(find.text('Bob Martinez'), findsNothing);
       });
     });
@@ -643,23 +643,23 @@ void main() {
           await launchApp(tester);
           await loginAsAdmin(tester);
 
-          // When I type the query into the search field
+          // When I fill the search field with "query"
           await tester.enterText(
             find.byKey(const Key('search_field')),
             ex['query'] as String,
           );
           await tester.pump();
 
-          // Then only matching employees are shown
+          // Then I should see "Alice Johnson"
           if (ex['visible'] != null) {
             expect(find.text(ex['visible'] as String), findsOneWidget);
           }
 
-          // And non-matching employees are hidden
+          // And I should not see "Bob Martinez"
           expect(find.text(ex['hidden'] as String), findsNothing);
 
           if (ex['empty'] == true) {
-            // And the empty state message is shown
+            // And the empty employee text should be visible
             expect(
               find.byKey(const Key('empty_employee_text')),
               findsOneWidget,
@@ -679,7 +679,7 @@ void main() {
       await launchApp(tester);
       await loginAsAdmin(tester);
 
-      // Then the DataTable column headers are visible
+      // Then the employee table headers should be visible
       expect(find.text('ID'), findsOneWidget);
       expect(find.text('Name'), findsOneWidget);
       expect(find.text('Role'), findsOneWidget);
@@ -702,25 +702,25 @@ void main() {
       // (We look for known employees as a proxy)
       expect(find.text('Alice Johnson'), findsOneWidget);
 
-      // When I open the Add Employee dialog
+      // When I tap the add employee button
       await tester.tap(find.byKey(const Key('add_employee_fab')));
       await tester.pumpAndSettle();
 
-      // And I fill in a name
+      // And I fill the employee name field with "Ghost Employee"
       await tester.enterText(
         find.byKey(const Key('employee_name_field')),
         'Ghost Employee',
       );
       await tester.pump();
 
-      // When I tap Cancel
+      // When I tap the cancel employee button
       await tester.tap(find.byKey(const Key('cancel_employee_button')));
       await tester.pumpAndSettle();
 
-      // Then the dialog is closed
+      // Then the employee dialog title should not be visible
       expect(find.byKey(const Key('employee_dialog_title')), findsNothing);
 
-      // And "Ghost Employee" was NOT added
+      // And I should not see "Ghost Employee"
       expect(find.text('Ghost Employee'), findsNothing);
     });
   });
@@ -736,7 +736,7 @@ void main() {
     // Background: Given the user is logged in and has navigated to Dialogs
     //   Given I launch the TeamSync app
     //   And I log in as "admin" / "password123"
-    //   And I tap the "dialogs_action" icon
+    // And I tap the dialogs action button
     //   Then I should see "Interactions & Dialogs"
 
     // -------------------------------------------------------------------------
@@ -750,21 +750,21 @@ void main() {
       await loginAsAdmin(tester);
       await navigateTo(tester, 'dialogs_action');
 
-      // Then the Dialogs screen title is visible
+      // Then I should see "Interactions & Dialogs"
       expect(find.text('Interactions & Dialogs'), findsOneWidget);
 
-      // When I tap "Show Alert Dialog"
+      // When I tap the show alert dialog button
       await tester.tap(find.byKey(const Key('show_alert_button')));
       await tester.pumpAndSettle();
 
-      // Then the alert dialog content is visible
+      // Then the alert dialog should be visible
       expect(find.text('This is a simple alert dialog.'), findsOneWidget);
 
-      // When I tap "OK"
+      // When I tap the ok button
       await tester.tap(find.byKey(const Key('alert_ok_button')));
       await tester.pumpAndSettle();
 
-      // Then the alert dialog is dismissed
+      // Then the alert dialog should not be visible
       expect(find.text('This is a simple alert dialog.'), findsNothing);
     });
 
@@ -779,18 +779,18 @@ void main() {
       await loginAsAdmin(tester);
       await navigateTo(tester, 'dialogs_action');
 
-      // When I tap "Show Confirmation Dialog"
+      // When I tap the show confirmation dialog button
       await tester.tap(find.byKey(const Key('show_confirm_button')));
       await tester.pumpAndSettle();
 
-      // Then the confirmation prompt is visible
+      // Then the confirmation dialog should be visible
       expect(find.text('Are you sure you want to proceed?'), findsOneWidget);
 
-      // When I tap "Yes"
+      // When I tap the yes button
       await tester.tap(find.byKey(const Key('confirm_yes_button')));
       await tester.pumpAndSettle();
 
-      // Then the dialog is gone
+      // Then the confirmation dialog should not be visible
       expect(find.text('Are you sure you want to proceed?'), findsNothing);
     });
 
@@ -805,18 +805,18 @@ void main() {
         await loginAsAdmin(tester);
         await navigateTo(tester, 'dialogs_action');
 
-        // When I tap "Show Confirmation Dialog"
+        // When I tap the show confirmation dialog button
         await tester.tap(find.byKey(const Key('show_confirm_button')));
         await tester.pumpAndSettle();
 
-        // Then the confirmation prompt is shown
+        // Then the confirmation dialog should be visible
         expect(find.text('Are you sure you want to proceed?'), findsOneWidget);
 
-        // When I tap "Cancel"
+        // When I tap the cancel button
         await tester.tap(find.byKey(const Key('confirm_cancel_button')));
         await tester.pumpAndSettle();
 
-        // Then the dialog is dismissed
+        // Then the employee dialog title should not be visible
         expect(find.text('Are you sure you want to proceed?'), findsNothing);
       },
     );
@@ -832,22 +832,22 @@ void main() {
       await loginAsAdmin(tester);
       await navigateTo(tester, 'dialogs_action');
 
-      // When I tap "Show Bottom Sheet"
+      // When I tap the show bottom sheet button
       await tester.tap(find.byKey(const Key('show_bottom_sheet_button')));
       await tester.pumpAndSettle();
 
-      // Then the bottom sheet title is visible
+      // Then the bottom sheet should be visible
       expect(find.text('Bottom Sheet Options'), findsOneWidget);
 
-      // And both options are present
+      // And the options should be visible
       expect(find.byKey(const Key('bottom_sheet_option_1')), findsOneWidget);
       expect(find.byKey(const Key('bottom_sheet_option_2')), findsOneWidget);
 
-      // When I tap option 1 (Share)
+      // When I tap the share bottom sheet option button
       await tester.tap(find.byKey(const Key('bottom_sheet_option_1')));
       await tester.pumpAndSettle();
 
-      // Then the bottom sheet is dismissed
+      // Then the bottom sheet should not be visible
       expect(find.text('Bottom Sheet Options'), findsNothing);
     });
 
@@ -862,14 +862,14 @@ void main() {
       await loginAsAdmin(tester);
       await navigateTo(tester, 'dialogs_action');
 
-      // When I tap "Show Snackbar"
+      // When I tap the show snackbar button
       await tester.tap(find.byKey(const Key('show_snackbar_button')));
       await tester.pump(); // kick off show animation
       await tester.pump(
         const Duration(milliseconds: 750),
       ); // complete show animation
 
-      // Then the snackbar message is visible
+      // Then the snackbar should be visible
       expect(find.text('This is a snackbar message!'), findsOneWidget);
 
       // After the snackbar duration, it disappears
@@ -913,18 +913,18 @@ void main() {
           await loginAsAdmin(tester);
           await navigateTo(tester, 'dialogs_action');
 
-          // When I tap the trigger button
+          // When I tap the trigger dialog button
           await tester.tap(find.byKey(Key(ex['triggerKey'] as String)));
           await tester.pumpAndSettle();
 
-          // Then the dialog content is visible
+          // Then the dialog content should be visible
           expect(find.text(ex['contentText'] as String), findsOneWidget);
 
-          // When I tap the dismiss button
+          // When I tap the close icon button
           await tester.tap(find.byKey(Key(ex['dismissKey'] as String)));
           await tester.pumpAndSettle();
 
-          // Then the dialog content is gone
+          // Then the dialog content should not be visible
           expect(find.text(ex['contentText'] as String), findsNothing);
         },
       );
@@ -942,7 +942,7 @@ void main() {
     // Background: Given the user is logged in and on the Files screen
     //   Given I launch the TeamSync app
     //   And I log in as "admin"
-    //   And I tap "files_action"
+    // And I tap the files action button
     //   Then I should see "File Management"
 
     // -------------------------------------------------------------------------
@@ -956,13 +956,13 @@ void main() {
       await loginAsAdmin(tester);
       await navigateTo(tester, 'files_action');
 
-      // Then the screen title is visible
+      // Then the files screen title should be visible
       expect(find.text('File Management'), findsOneWidget);
 
-      // And the status message says no files imported yet
+      // And the files status text should be visible
       expect(find.text('No files imported yet.'), findsOneWidget);
 
-      // And the empty files list placeholder is shown
+      // And the empty files text should be visible
       expect(find.text('Empty list'), findsOneWidget);
     });
 
@@ -977,30 +977,30 @@ void main() {
         await loginAsAdmin(tester);
         await navigateTo(tester, 'files_action');
 
-        // Given the status message shows no files imported
+        // Given the files status text should be visible
         expect(find.text('No files imported yet.'), findsOneWidget);
 
-        // When I tap "Import CSV"
+        // When I tap the import csv button
         await tester.tap(find.byKey(const Key('import_csv_button')));
         await tester.pumpAndSettle();
 
-        // Then the status message updates
+        // Then the files status text should be visible
         expect(find.text('CSV file imported successfully.'), findsOneWidget);
 
-        // And the imported files list is no longer empty
+        // And the files list should be visible
         expect(find.text('Empty list'), findsNothing);
         expect(find.byKey(const Key('imported_files_list')), findsOneWidget);
 
-        // And the parsed CSV DataTable is shown
+        // And the files datatable should be visible
         expect(find.byKey(const Key('csv_content_table')), findsOneWidget);
 
-        // And the CSV column headers are visible
+        // And the files datatable headers should be visible
         expect(find.text('name'), findsOneWidget);
         expect(find.text('role'), findsOneWidget);
         expect(find.text('age'), findsOneWidget);
         expect(find.text('email'), findsOneWidget);
 
-        // And sample data rows are visible
+        // And the files datatable rows should be visible
         expect(find.text('Alice Johnson'), findsOneWidget);
         expect(find.text('Engineer'), findsOneWidget);
       },
@@ -1017,34 +1017,34 @@ void main() {
       await loginAsAdmin(tester);
       await navigateTo(tester, 'files_action');
 
-      // Given I have imported a CSV file
+      // Given I tap the import csv button
       await tester.tap(find.byKey(const Key('import_csv_button')));
       await tester.pumpAndSettle();
 
-      // And the table view is shown
+      // And the files datatable should be visible
       expect(find.byKey(const Key('csv_content_table')), findsOneWidget);
 
-      // When I tap "Raw View"
+      // When I tap the raw view button
       await tester.tap(find.byKey(const Key('toggle_raw_button')));
       await tester.pumpAndSettle();
 
-      // Then the raw CSV text is visible
+      // Then the raw csv text should be visible
       expect(find.byKey(const Key('csv_raw_content')), findsOneWidget);
 
-      // And the raw text contains the CSV header line
+      // And the raw csv text should be visible
       expect(find.textContaining('name,role,age,email'), findsOneWidget);
 
-      // And the table view is hidden
+      // And the files datatable should not be visible
       expect(find.byKey(const Key('csv_content_table')), findsNothing);
 
-      // When I tap "Table View" to toggle back
+      // When I tap the table view button
       await tester.tap(find.byKey(const Key('toggle_raw_button')));
       await tester.pumpAndSettle();
 
-      // Then the table view is restored
+      // Then the files datatable should be visible
       expect(find.byKey(const Key('csv_content_table')), findsOneWidget);
 
-      // And the raw content is hidden
+      // And the raw csv text should not be visible
       expect(find.byKey(const Key('csv_raw_content')), findsNothing);
     });
 
@@ -1059,11 +1059,11 @@ void main() {
       await loginAsAdmin(tester);
       await navigateTo(tester, 'files_action');
 
-      // When I tap "Export CSV"
+      // When I tap the export csv button
       await tester.tap(find.byKey(const Key('export_csv_button')));
       await tester.pumpAndSettle();
 
-      // Then the status message confirms the export
+      // Then the files status text should be visible
       expect(find.text('Data exported to CSV successfully.'), findsOneWidget);
     });
 
@@ -1078,18 +1078,18 @@ void main() {
         await loginAsAdmin(tester);
         await navigateTo(tester, 'files_action');
 
-        // When I tap "Import CSV" the first time
+        // When I tap the import csv button
         await tester.tap(find.byKey(const Key('import_csv_button')));
         await tester.pumpAndSettle();
 
-        // Then one file entry is in the list
+        // Then the files list should be visible
         expect(find.byKey(const Key('file_item_0')), findsOneWidget);
 
-        // When I tap "Import CSV" again
+        // When I tap the import csv button
         await tester.tap(find.byKey(const Key('import_csv_button')));
         await tester.pumpAndSettle();
 
-        // Then two file entries are in the list
+        // Then the files list should be visible
         expect(find.byKey(const Key('file_item_0')), findsOneWidget);
         expect(find.byKey(const Key('file_item_1')), findsOneWidget);
       },
@@ -1107,7 +1107,7 @@ void main() {
     // Background: Given the user is logged in and on the Settings screen
     //   Given I launch the TeamSync app
     //   And I log in as "admin"
-    //   And I tap "settings_action"
+    // And I tap the settings action button
     //   Then I should see the Settings screen
 
     // -------------------------------------------------------------------------
@@ -1121,27 +1121,27 @@ void main() {
       await loginAsAdmin(tester);
       await navigateTo(tester, 'settings_action');
 
-      // Then the notifications switch is present
+      // Then the notifications switch should be visible
       expect(find.byKey(const Key('notifications_switch')), findsOneWidget);
 
-      // And it is initially ON (the SwitchListTile value is true)
+      // And the switch should be visible
       final switchFinder = find.byKey(const Key('notifications_switch'));
       final switchWidget = tester.widget<SwitchListTile>(switchFinder);
       expect(switchWidget.value, isTrue);
 
-      // When I tap the switch to disable notifications
+      // When I tap the notifications switch button
       await tester.tap(switchFinder);
       await tester.pump();
 
-      // Then the switch is now OFF
+      // Then the notifications switch should be visible
       final updatedSwitch = tester.widget<SwitchListTile>(switchFinder);
       expect(updatedSwitch.value, isFalse);
 
-      // When I tap the switch again to re-enable
+      // When I tap the notifications switch button
       await tester.tap(switchFinder);
       await tester.pump();
 
-      // Then the switch is ON again
+      // Then the notifications switch should be visible
       final reEnabledSwitch = tester.widget<SwitchListTile>(switchFinder);
       expect(reEnabledSwitch.value, isTrue);
     });
@@ -1157,19 +1157,19 @@ void main() {
       await loginAsAdmin(tester);
       await navigateTo(tester, 'settings_action');
 
-      // Then the dark mode checkbox is present
+      // Then the dark mode checkbox should be visible
       final checkboxFinder = find.byKey(const Key('dark_mode_checkbox'));
       expect(checkboxFinder, findsOneWidget);
 
-      // And it is initially unchecked
+      // And the dark mode checkbox should be visible
       final checkbox = tester.widget<CheckboxListTile>(checkboxFinder);
       expect(checkbox.value, isFalse);
 
-      // When I tap the checkbox to enable dark mode
+      // When I tap the dark mode checkbox button
       await tester.tap(checkboxFinder);
       await tester.pump();
 
-      // Then the checkbox is checked
+      // Then the dark mode checkbox should be visible
       final updatedCheckbox = tester.widget<CheckboxListTile>(checkboxFinder);
       expect(updatedCheckbox.value, isTrue);
     });
@@ -1185,10 +1185,10 @@ void main() {
       await loginAsAdmin(tester);
       await navigateTo(tester, 'settings_action');
 
-      // Then the volume slider is present
+      // Then the volume slider should be visible
       expect(find.byKey(const Key('volume_slider')), findsOneWidget);
 
-      // And the volume label shows the initial value "50"
+      // And the volume label should be visible
       expect(find.text('Current Volume: 50'), findsOneWidget);
     });
 
@@ -1203,28 +1203,28 @@ void main() {
         await loginAsAdmin(tester);
         await navigateTo(tester, 'settings_action');
 
-        // When I tap "View Terms & Conditions"
+        // When I tap the view terms button
         await tester.tap(find.byKey(const Key('view_terms_button')));
         await tester.pumpAndSettle();
 
-        // Then the Terms dialog opens
+        // Then the terms dialog should be visible
         expect(find.text('Terms & Conditions'), findsOneWidget);
 
-        // And the terms content is visible (doc-string style verification)
+        // And the terms content should be visible
         expect(find.byKey(const Key('terms_text')), findsOneWidget);
         expect(
           find.textContaining('Please read our terms and conditions'),
           findsOneWidget,
         );
 
-        // When I tap "Close"
+        // When I tap the close terms button
         await tester.tap(find.byKey(const Key('close_terms')));
         await tester.pumpAndSettle();
 
-        // Then the terms dialog is dismissed
+        // Then the terms dialog should not be visible
         expect(find.text('Terms & Conditions'), findsNothing);
 
-        // And the settings screen is still visible
+        // And the settings screen should be visible
         expect(find.text('Enable Notifications'), findsOneWidget);
       },
     );
@@ -1270,15 +1270,15 @@ void main() {
           await tester.tap(find.byKey(Key(ex['actionKey'] as String)));
           await tester.pumpAndSettle();
 
-          // Then I see the expected screen content
+          // Then I should see "<expectedText>"
           expect(find.text(ex['expectedText'] as String), findsOneWidget);
 
-          // And I can navigate back to the Dashboard using the back button
+          // And I tap the back button
           final NavigatorState navigator = tester.state(find.byType(Navigator));
           navigator.pop();
           await tester.pumpAndSettle();
 
-          // Then the Dashboard welcome message is visible again
+          // Then I should reach the dashboard
           expect(find.text('Welcome to the Dashboard!'), findsOneWidget);
         },
       );
@@ -1294,16 +1294,16 @@ void main() {
         await launchApp(tester);
         await loginAsAdmin(tester);
 
-        // When I navigate to Settings
+        // When I tap the settings action button
         await navigateTo(tester, 'settings_action');
         expect(find.text('Enable Notifications'), findsOneWidget);
 
-        // And I tap the OS back button (simulated via Navigator.pop)
+        // And I tap the back button
         final NavigatorState navigator = tester.state(find.byType(Navigator));
         navigator.pop();
         await tester.pumpAndSettle();
 
-        // Then I am back on the Dashboard
+        // Then I should reach the dashboard
         expect(find.text('Welcome to the Dashboard!'), findsOneWidget);
         expect(find.byKey(const Key('add_employee_fab')), findsOneWidget);
       },
@@ -1325,19 +1325,19 @@ void main() {
       WidgetTester tester,
     ) async {
       // ── Step 1: Login ───────────────────────────────────────────────────
-      // Given I launch the app and log in as admin
+      // Given the app is launched and logged in
       await launchApp(tester);
       await loginAsAdmin(tester);
 
-      // Then I am on the Dashboard
+      // Then I should reach the dashboard
       expect(find.text('Welcome to the Dashboard!'), findsOneWidget);
 
       // ── Step 2: Add ─────────────────────────────────────────────────────
-      // When I tap "Add Employee"
+      // When I tap the add employee button
       await tester.tap(find.byKey(const Key('add_employee_fab')));
       await tester.pumpAndSettle();
 
-      // And I fill in all fields
+      // And I fill the employee name field with "Eve Torres"
       await tester.enterText(
         find.byKey(const Key('employee_name_field')),
         'Eve Torres',
@@ -1356,75 +1356,77 @@ void main() {
       );
       await tester.pump();
 
-      // And I save the employee
+      // And I tap the save employee button
       await tester.tap(find.byKey(const Key('save_employee_button')));
       await tester.pumpAndSettle();
 
-      // Then "Eve Torres" appears in the employee table
+      // Then I should see "Eve Torres"
       expect(find.text('Eve Torres'), findsOneWidget);
       expect(find.text('DevOps'), findsOneWidget);
 
       // ── Step 3: Search / Read ────────────────────────────────────────────
-      // When I search for "Eve"
+      // When I fill the search field with "Eve"
       await tester.enterText(find.byKey(const Key('search_field')), 'Eve');
       await tester.pump();
 
-      // Then only "Eve Torres" is visible
+      // Then I should see "Eve Torres"
       expect(find.text('Eve Torres'), findsOneWidget);
       expect(find.text('Alice Johnson'), findsNothing);
 
-      // When I clear the search
+      // When I fill the search field with ""
       await tester.enterText(find.byKey(const Key('search_field')), '');
       await tester.pump();
 
-      // Then all employees are shown again
+      // Then I should see "Alice Johnson"
       expect(find.text('Alice Johnson'), findsOneWidget);
       expect(find.text('Eve Torres'), findsOneWidget);
 
       // ── Step 4: Edit ─────────────────────────────────────────────────────
-      // When I tap the edit button for "Eve Torres" (she is last = index 3)
+      // When I tap the edit button for "Eve Torres"
       await tester.ensureVisible(find.byKey(const Key('edit_employee_3')));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('edit_employee_3')));
       await tester.pumpAndSettle();
 
-      // Then the edit dialog opens
+      // Then the edit dialog should be visible
       expect(find.text('Edit Employee'), findsOneWidget);
 
-      // When I update the role
+      // When I fill the employee role field with "Senior DevOps"
       await tester.enterText(
         find.byKey(const Key('employee_role_field')),
         'Senior DevOps',
       );
       await tester.pump();
 
-      // And I save
+      // And I tap the save employee button
       await tester.tap(find.byKey(const Key('save_employee_button')));
       await tester.pumpAndSettle();
 
-      // Then the updated role is visible
+      // Then I should see "Senior DevOps"
       expect(find.text('Senior DevOps'), findsOneWidget);
 
       // ── Step 5: Delete ───────────────────────────────────────────────────
-      // When I tap the delete button for "Eve Torres" (still index 3)
+      // When I tap the delete button for "Eve Torres"
       await tester.ensureVisible(find.byKey(const Key('delete_employee_3')));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('delete_employee_3')));
       await tester.pumpAndSettle();
 
-      // Then the confirmation dialog appears
+      // Then the delete confirm message should be visible
       expect(find.byKey(const Key('delete_confirm_message')), findsOneWidget);
 
-      // When I confirm deletion
+      // When I tap the delete confirm button
       await tester.tap(find.byKey(const Key('delete_confirm_button')));
       await tester.pumpAndSettle();
 
-      // Then "Eve Torres" is no longer in the table
+      // Then I should not see "Eve Torres"
       expect(find.text('Eve Torres'), findsNothing);
 
-      // And the original employees are still present
+      // And I should see "Alice Johnson"
       expect(find.text('Alice Johnson'), findsOneWidget);
+      // And I should see "Bob Martinez"
       expect(find.text('Bob Martinez'), findsOneWidget);
+      // And I should see "Carol White"
       expect(find.text('Carol White'), findsOneWidget);
     });
   });

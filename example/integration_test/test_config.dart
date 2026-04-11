@@ -26,10 +26,10 @@ final config = IntegrationTestConfig(
   ],
   steps: [
     theApplicationIsLaunched(),
-    iShouldSeeTextOrElement(),
-    theLoginUIIsVisible(),
     iShouldReachDashboard(),
-    theElementIsVisible(),
+    theElementShouldBeVisible(),
+    iShouldSeeText(),
+    iShouldSeeMultipleTexts(),
     iEnterText(),
     iInteractWithButton(),
   ],
