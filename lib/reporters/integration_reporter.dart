@@ -4,5 +4,8 @@ abstract class IntegrationReporter implements LifecycleListener {
   final String path;
   IntegrationReporter({this.path = ''});
 
+  @override
+  String? get tagExpression => null;
+
   Map<String, dynamic> toJson();
 }

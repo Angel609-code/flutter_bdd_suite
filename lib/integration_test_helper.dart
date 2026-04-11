@@ -176,17 +176,17 @@ class IntegrationTestHelper {
       }
     }
 
+    await _hookManager.onBeforeScenario(scenario);
+    await _reporterManager.onBeforeScenario(scenario);
+
     if (backgroundSteps.isNotEmpty) {
       for (final step in backgroundSteps) {
-        await _executeStep(step, true);
+        await _executeStep(step, true, scenario: scenario);
       }
     }
   }
 
   Future<void> runStepsForScenario(ScenarioInfo scenario) async {
-    await _hookManager.onBeforeScenario(scenario);
-    await _reporterManager.onBeforeScenario(scenario);
-
     final steps = _parseStepsFromJsonList(scenario.steps);
 
     for (final step in steps) {

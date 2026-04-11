@@ -6,6 +6,8 @@ import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
 abstract class LifecycleListener {
   int get priority => 0;
 
+  String? get tagExpression => null;
+
   Future<void> onBeforeAll() async {}
 
   Future<void> onAfterAll() async {}

@@ -90,8 +90,9 @@ class StepsRegistry {
       if (stepDef.matches(cleanedStepText)) {
         if (match != null) {
           // Second match found — collect all for a descriptive error message.
-          final allMatches =
-              _steps.where((s) => s.matches(cleanedStepText)).toList();
+          final allMatches = _steps
+              .where((s) => s.matches(cleanedStepText))
+              .toList();
           final patterns = allMatches
               .map((s) => s.pattern.pattern)
               .join('\n  ');

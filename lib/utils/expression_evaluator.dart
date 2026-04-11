@@ -40,13 +40,12 @@ class OrExpr extends TagExpr {
 
 /// Parses expressions like `not @a and (@b or @c)`
 TagExpr parseTagExpression(String input) {
-  final tokens =
-      input
-          .replaceAll('(', ' ( ')
-          .replaceAll(')', ' ) ')
-          .split(RegExp(r'\s+'))
-          .where((t) => t.isNotEmpty)
-          .toList();
+  final tokens = input
+      .replaceAll('(', ' ( ')
+      .replaceAll(')', ' ) ')
+      .split(RegExp(r'\s+'))
+      .where((t) => t.isNotEmpty)
+      .toList();
 
   int idx = 0;
 

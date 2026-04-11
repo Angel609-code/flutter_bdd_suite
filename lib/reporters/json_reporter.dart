@@ -133,10 +133,9 @@ class JsonReporter extends IntegrationReporter {
     );
 
     final rawMessage = result.message ?? '';
-    final message =
-        rawMessage.length > 300
-            ? '${rawMessage.substring(0, 300)}...'
-            : rawMessage;
+    final message = rawMessage.length > 300
+        ? '${rawMessage.substring(0, 300)}...'
+        : rawMessage;
 
     if (result.success) {
       logLine(

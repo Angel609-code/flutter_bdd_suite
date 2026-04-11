@@ -16,6 +16,11 @@ abstract class IntegrationHook implements LifecycleListener {
   @override
   int get priority => 0;
 
+  /// An optional tag expression to conditionally execute this hook.
+  /// For example: `@browser and not @headless`.
+  @override
+  String? get tagExpression => null;
+
   /// Invoked once before the entire test suite begins execution.
   @override
   Future<void> onBeforeAll() async {}
