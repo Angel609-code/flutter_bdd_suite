@@ -4,6 +4,7 @@ import 'package:flutter_bdd_suite/lifecycle_manager.dart';
 import 'package:flutter_bdd_suite/logger.dart';
 import 'package:flutter_bdd_suite/models/models.dart';
 import 'package:flutter_bdd_suite/server/integration_test_server.dart';
+import 'package:flutter_bdd_suite/steps/step_exceptions.dart';
 import 'package:flutter_bdd_suite/steps/step_result.dart';
 import 'package:flutter_bdd_suite/steps/steps_registry.dart';
 import 'package:flutter_bdd_suite/bootstrap.dart';
@@ -251,7 +252,23 @@ class IntegrationTestHelper {
     // Resolve the step function from the per-execution registry. The
     // multiline argument (table or doc-string) is constructed once from the
     // step's first-class fields and forwarded as a single typed value.
-    final stepFunction = _stepsRegistry.getStep(step.text);
+    StepFunction? stepFunction;
+    try {
+      stepFunction = _stepsRegistry.getStep(step.text);
+    } on AmbiguousStepException catch (e) {
+      final duration = DateTime.now().microsecondsSinceEpoch - start;
+      result = StepAmbiguous(
+        step.text,
+        step.line,
+        duration,
+        error: e,
+        table: step.table,
+        docString: step.docString,
+      );
+      await _handleStepFailureOrPending(result, step, isBackground, scenario);
+      return;
+    }
+
     final multilineArg = _buildMultilineArg(step);
     _world.multilineArgToInject = multilineArg;
 
@@ -302,6 +319,15 @@ class IntegrationTestHelper {
           table: step.table,
           docString: step.docString,
         );
+      } on PendingStepException {
+        final duration = DateTime.now().microsecondsSinceEpoch - start;
+        result = StepPending(
+          step.text,
+          step.line,
+          duration,
+          table: step.table,
+          docString: step.docString,
+        );
       } catch (e, st) {
         final duration = DateTime.now().microsecondsSinceEpoch - start;
         result = StepFailure(
@@ -316,8 +342,8 @@ class IntegrationTestHelper {
       }
     } else {
       final duration = DateTime.now().microsecondsSinceEpoch - start;
-      logLine('${red}Step not implemented: ${step.text}$reset');
-      result = StepPending(
+      logLine('${yellow}Step undefined: ${step.text}$reset');
+      result = StepUndefined(
         step.text,
         step.line,
         duration,
@@ -326,10 +352,22 @@ class IntegrationTestHelper {
       );
     }
 
+    await _handleStepFailureOrPending(result, step, isBackground, scenario);
+  }
+
+  Future<void> _handleStepFailureOrPending(
+    StepResult result,
+    Step step,
+    bool isBackground,
+    ScenarioInfo? scenario,
+  ) async {
     await _hookManager.onAfterStep(result, _world);
     await _reporterManager.onAfterStep(result, _world);
 
-    if (result is StepFailure || result is StepPending) {
+    if (result is StepFailure ||
+        result is StepPending ||
+        result is StepUndefined ||
+        result is StepAmbiguous) {
       _skipRemaining = true;
       _errorOnBackground = isBackground;
       _scenarioStatus = ScenarioExecutionStatus.failed;
@@ -345,9 +383,12 @@ class IntegrationTestHelper {
         } else {
           _firstError = result.error;
         }
-      } else {
-        // StepPending — treat like a soft-failure so the test still fails.
-        _firstError = 'Step not implemented: ${step.text}';
+      } else if (result is StepAmbiguous) {
+        _firstError = result.error;
+      } else if (result is StepUndefined) {
+        _firstError = 'Step undefined: ${step.text}';
+      } else if (result is StepPending) {
+        _firstError = 'Step pending: ${step.text}';
       }
     }
   }

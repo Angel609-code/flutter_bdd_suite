@@ -82,10 +82,26 @@ class JsonReporter extends IntegrationReporter {
     final parts = stepText.split(' ');
     final keyword = '${parts.first} ';
     final name = parts.skip(1).join(' ');
-    String status = result is StepSuccess ? 'passed' : 'failed';
+    String status;
+    String? errorMessage;
 
-    if (result is StepSkipped) {
+    if (result is StepSuccess) {
+      status = 'passed';
+    } else if (result is StepSkipped) {
       status = 'skipped';
+    } else if (result is StepUndefined) {
+      status = 'undefined';
+    } else if (result is StepPending) {
+      status = 'pending';
+    } else if (result is StepAmbiguous) {
+      status = 'ambiguous';
+      errorMessage = '${result.error}';
+    } else if (result is StepFailure) {
+      status = 'failed';
+      errorMessage = '${result.error}';
+    } else {
+      status = 'failed';
+      errorMessage = 'Unknown step result type: ${result.runtimeType}';
     }
 
     final jsonStep = JsonStep(
@@ -93,7 +109,7 @@ class JsonReporter extends IntegrationReporter {
       name: name,
       line: line,
       status: status,
-      errorMessage: result is StepFailure ? '${result.error}' : null,
+      errorMessage: errorMessage,
       duration: result.duration,
       table: result.table,
     );

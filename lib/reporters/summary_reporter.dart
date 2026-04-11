@@ -35,7 +35,10 @@ class SummaryReporter extends IntegrationReporter {
 
   @override
   Future<void> onAfterStep(StepResult result, WidgetTesterWorld world) async {
-    if (result is StepFailure) {
+    if (result is StepFailure ||
+        result is StepPending ||
+        result is StepUndefined ||
+        result is StepAmbiguous) {
       _currentStatus = ScenarioStatus.failed;
     } else if (result is StepSkipped) {
       if (_currentStatus == ScenarioStatus.passed) {
