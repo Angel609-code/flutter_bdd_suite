@@ -14,10 +14,7 @@ final config = IntegrationTestConfig(
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
     debugPrint('Implement anything before the tests');
   },
-  reporters: [
-    SummaryReporter(),
-    JsonReporter(path: './report/report.json'),
-  ],
+  reporters: [JsonReporter(path: './report/report.json')],
   steps: [
     theApplicationIsLaunched(),
     iShouldReachDashboard(),
