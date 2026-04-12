@@ -101,7 +101,6 @@ class SummaryReporter extends IntegrationReporter {
     final secs = elapsed.inSeconds % 60;
     final millis = (elapsed.inMilliseconds % 1000).toString().padLeft(3, '0');
 
-    logLine('');
     logLine(
       '$_totalScenarios scenarios '
       '($green$_passedScenarios passed$reset, '
@@ -109,7 +108,6 @@ class SummaryReporter extends IntegrationReporter {
       '$yellow$_skippedScenarios skipped$reset)',
     );
     logLine('${mins}m$secs.${millis}s');
-    logLine('');
   }
 
   @override
