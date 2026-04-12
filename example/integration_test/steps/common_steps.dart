@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:example/main.dart';
 import 'package:example/app_theme.dart';
-import 'package:flutter_bdd_suite/utils/step_definition_generic.dart';
+import 'package:flutter_bdd_suite/flutter_bdd_suite.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 String resolveKey(String type) {

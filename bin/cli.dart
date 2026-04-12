@@ -2,8 +2,8 @@ import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter_bdd_suite/runner/generation_pipeline.dart';
-import 'package:flutter_bdd_suite/server/integration_test_server.dart';
+import 'package:flutter_bdd_suite/src/runner/generation_pipeline.dart';
+import 'package:flutter_bdd_suite/flutter_bdd_bridge.dart';
 
 Future<void> main(List<String> args) async {
   final delimiterIndex = args.indexOf('--');
@@ -542,7 +542,7 @@ Future<String> _writeGeneratedBridgeRunner({
 
   final content =
       '''// GENERATED FILE. DO NOT EDIT.
-import 'package:flutter_bdd_suite/server/integration_test_server.dart';
+import 'package:flutter_bdd_suite/flutter_bdd_bridge.dart';
 import '../../$setupImport';
 
 Future<void> main() async {

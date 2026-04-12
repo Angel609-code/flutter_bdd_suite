@@ -1,7 +1,4 @@
-import 'package:flutter_bdd_suite/hooks/integration_hook.dart';
-import 'package:flutter_bdd_suite/logger.dart';
-import 'package:flutter_bdd_suite/models/models.dart';
-import 'package:flutter_bdd_suite/models/step_hook_contexts.dart';
+import 'package:flutter_bdd_suite/flutter_bdd_suite.dart';
 
 import '../integration_endpoints/say_hello.dart';
 

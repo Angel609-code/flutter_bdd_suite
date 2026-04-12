@@ -241,9 +241,7 @@ Use [tag expressions](#tag-filtering) with the `--tags` CLI flag to run only mat
 Create a Dart file (typically `integration_test/test_config.dart`) that exports a top-level `config` variable of type `IntegrationTestConfig`:
 
 ```dart
-import 'package:flutter_bdd_suite/integration_test_config.dart';
-import 'package:flutter_bdd_suite/reporters/json_reporter.dart';
-import 'package:flutter_bdd_suite/reporters/summary_reporter.dart';
+import 'package:flutter_bdd_suite/flutter_bdd_suite.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -291,6 +289,10 @@ final config = IntegrationTestConfig(
 | `reporters` | `List<IntegrationReporter>` | Result reporters. |
 
 ### Scenario Setup Strategies
+
+Import strategy:
+- Flutter integration runtime code (steps, hooks, reporters, config): `package:flutter_bdd_suite/flutter_bdd_suite.dart`
+- Host-side bridge setup/scripts executed with `dart run`: `package:flutter_bdd_suite/flutter_bdd_bridge.dart`
 
 The framework supports two valid startup styles. Choose one and apply it consistently.
 
@@ -654,7 +656,7 @@ If you request `ctx.args.four()` for this step, the framework will throw a helpf
 You can register custom parameter models to be automatically parsed from your step text:
 
 ```dart
-import 'package:flutter_bdd_suite/utils/placeholders.dart';
+import 'package:flutter_bdd_suite/flutter_bdd_suite.dart';
 
 // In your setup file:
 ParameterTypes.register<Color>(
@@ -779,10 +781,7 @@ Hooks are composable and define an execution `priority` (default is 0). `onBefor
 You can declare all your hooks in a single class or split them into multiple classes.
 
 ```dart
-import 'package:flutter_bdd_suite/hooks/integration_hook.dart';
-import 'package:flutter_bdd_suite/models/models.dart';
-import 'package:flutter_bdd_suite/steps/step_result.dart';
-import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
+import 'package:flutter_bdd_suite/flutter_bdd_suite.dart';
 
 class MyCustomHook extends IntegrationHook {
   @override
@@ -955,10 +954,7 @@ node generate_report.js
 Extend `IntegrationReporter` to build your own output format:
 
 ```dart
-import 'package:flutter_bdd_suite/reporters/integration_reporter.dart';
-import 'package:flutter_bdd_suite/models/models.dart';
-import 'package:flutter_bdd_suite/steps/step_result.dart';
-import 'package:flutter_bdd_suite/world/widget_tester_world.dart';
+import 'package:flutter_bdd_suite/flutter_bdd_suite.dart';
 
 class MyReporter extends IntegrationReporter {
   @override
@@ -1011,8 +1007,7 @@ The bridge is started automatically by `cli` unless `--no-bridge` is specified. 
 ```dart
 // integration_test/bridge_setup.dart
 import 'dart:io';
-import 'package:flutter_bdd_suite/server/integration_test_server.dart';
-import 'package:flutter_bdd_suite/models/endpoint_registration_model.dart';
+import 'package:flutter_bdd_suite/flutter_bdd_bridge.dart';
 
 void registerEndpoints(IntegrationTestServer server) {
   // Example: return host directory listing
@@ -1095,8 +1090,7 @@ Create thin wrapper functions in `integration_test/integration_endpoints/` to ca
 
 ```dart
 // integration_test/integration_endpoints/endpoints.dart
-import 'package:flutter_bdd_suite/server/bridge_client.dart';
-import 'package:flutter_bdd_suite/models/integration_server_result_model.dart';
+import 'package:flutter_bdd_suite/flutter_bdd_suite.dart';
 
 Future<IntegrationServerResult> sayHello() => bridgeGet('/hello');
 
@@ -1168,7 +1162,7 @@ Each executed step in a scenario resolves to one of the standard Cucumber step r
 If you want to explicitly mark a step as pending (work-in-progress) without failing the execution abruptly via a crash, throw a `PendingStepException` in your step definition:
 
 ```dart
-import 'package:flutter_bdd_suite/steps/step_exceptions.dart';
+import 'package:flutter_bdd_suite/flutter_bdd_suite.dart';
 
 StepDefinitionGeneric myPendingStep() => generic(
   'I am doing some work in progress',

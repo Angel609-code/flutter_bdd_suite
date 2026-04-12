@@ -1,4 +1,4 @@
-import 'package:flutter_bdd_suite/server/integration_test_server.dart';
+import 'package:flutter_bdd_suite/flutter_bdd_bridge.dart';
 
 import 'integration_endpoints/endpoints.dart';
 

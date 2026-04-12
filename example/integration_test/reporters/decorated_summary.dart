@@ -1,13 +1,6 @@
 import 'dart:math';
-import 'package:flutter_bdd_suite/logger.dart';
+import 'package:flutter_bdd_suite/flutter_bdd_suite.dart';
 import 'package:wcwidth/wcwidth.dart';
-import 'package:flutter_bdd_suite/models/feature_model.dart';
-import 'package:flutter_bdd_suite/models/scenario_model.dart';
-import 'package:flutter_bdd_suite/models/step_hook_contexts.dart';
-import 'package:flutter_bdd_suite/reporters/integration_reporter.dart';
-import 'package:flutter_bdd_suite/steps/step_result.dart';
-import 'package:flutter_bdd_suite/utils/enums.dart';
-import 'package:flutter_bdd_suite/utils/terminal_colors.dart';
 
 class DecoratedSummaryReporter extends IntegrationReporter {
   /// Matches any ANSI colour/style escape sequence so that visible width can
@@ -40,9 +33,9 @@ class DecoratedSummaryReporter extends IntegrationReporter {
   @override
   Future<void> onAfterStep(AfterStepContext context) async {
     final result = context.result;
-    if (result is StepFailure) {
+    if (result.status.blocksFollowingSteps) {
       _currentStatus = ScenarioStatus.failed;
-    } else if (result is StepSkipped &&
+    } else if (result.status == StepStatus.skipped &&
         _currentStatus == ScenarioStatus.passed) {
       _currentStatus = ScenarioStatus.skipped;
     }
