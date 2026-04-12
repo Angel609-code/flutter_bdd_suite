@@ -1,7 +1,6 @@
 import 'dart:convert' show jsonEncode, utf8;
 import 'dart:io';
-import 'package:flutter_bdd_suite/models/endpoint_registration_model.dart';
-import 'package:flutter_bdd_suite/server/integration_test_server.dart';
+import 'package:flutter_bdd_suite/flutter_bdd_suite.dart';
 
 class EndpointUtils {
   static void addHelloEndpoint(IntegrationTestServer server) {
