@@ -9,21 +9,17 @@ import 'package:flutter_bdd_suite/src/steps/step_result.dart';
 import 'package:flutter_bdd_suite/src/steps/steps_registry.dart';
 import 'package:flutter_bdd_suite/src/bootstrap.dart';
 import 'package:flutter_bdd_suite/src/utils/step_definition_generic.dart';
+import 'package:flutter_bdd_suite/src/reporters/cucumber_formatter.dart';
+import 'package:flutter_bdd_suite/src/reporters/cucumber_reporter.dart';
+import 'package:flutter_bdd_suite/src/models/report_presentation.dart';
 import 'package:flutter_bdd_suite/src/utils/terminal_colors.dart';
 import 'package:flutter_bdd_suite/src/world/widget_tester_world.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 
 class IntegrationTestHelper {
-  /// The package name prefix used to filter out framework frames when printing
-  /// a condensed stack trace on step failure.
-  static const _ownPackagePrefix = 'flutter_bdd_suite';
-
-  /// Pattern that matches the Dart file path portion of a stack-trace frame,
-  /// e.g. `package:my_app/steps/login_steps.dart`.
-  static final _dartFilePattern = RegExp(r'^(.*\.dart)');
-
   final IntegrationTestConfig config;
+  late final ReportPresentation _presentation;
   List<Step> _backgroundSteps = [];
   List<Step> get backgroundSteps => _backgroundSteps;
 
@@ -41,8 +37,6 @@ class IntegrationTestHelper {
   /// registered at most once per instance, even if [registerSuiteHooks] is
   /// called more than once.
   bool _suiteHooksRegistered = false;
-
-  FeatureInfo? _featureInfo;
 
   bool _skipRemaining = false;
   bool _errorOnBackground = false;
@@ -119,7 +113,33 @@ class IntegrationTestHelper {
 
   IntegrationTestHelper._(this.config) {
     _hookManager = LifecycleManager(config.hooks);
-    _reporterManager = LifecycleManager(config.reporters);
+
+    // Allow CLI flags (via --dart-define) to override config values
+    final envNoColors = const String.fromEnvironment('FGP_NO_COLORS');
+    final envShowPaths = const String.fromEnvironment('FGP_SHOW_PATHS');
+    final envShowStackTraces = const String.fromEnvironment(
+      'FGP_SHOW_STACK_TRACES',
+    );
+
+    _presentation = config.presentation.copyWith(
+      useColors: envNoColors.isNotEmpty ? envNoColors != 'true' : null,
+      showStepPaths: envShowPaths.isNotEmpty ? envShowPaths == 'true' : null,
+      showStackTraces:
+          envShowStackTraces.isNotEmpty ? envShowStackTraces == 'true' : null,
+    );
+
+    final reporters = [...config.reporters];
+    if (config.useDefaultReporter &&
+        !reporters.any((r) => r is CucumberReporter)) {
+      reporters.insert(
+        0,
+        CucumberReporter(
+          formatter: CucumberFormatter(_presentation),
+          logger: bddLogger,
+        ),
+      );
+    }
+    _reporterManager = LifecycleManager(reporters);
 
     _world = WidgetTesterWorld();
     _world.binding = binding;
@@ -143,7 +163,6 @@ class IntegrationTestHelper {
     required FeatureInfo featureInfo,
     List<String>? backgroundSteps,
   }) async {
-    _featureInfo = featureInfo;
     if (backgroundSteps != null) {
       _backgroundSteps = _parseStepsFromJsonList(backgroundSteps);
     } else {
@@ -277,11 +296,6 @@ class IntegrationTestHelper {
 
       if (!isBackground) _scenarioStatus = ScenarioExecutionStatus.skipped;
 
-      logLine(
-        '$red➔ [${_featureInfo?.uri}:${step.line}] '
-        'Skipping ${isBackground ? 'background step' : 'step'}: ${step.text}$reset',
-      );
-
       // Only reporters receive the skipped-step notification; user hooks are
       // intentionally omitted in line with the Cucumber invoke-around contract.
       await _reporterManager.onAfterStep(result, _world);
@@ -317,12 +331,6 @@ class IntegrationTestHelper {
 
     if (stepFunction != null) {
       try {
-        logLine(
-          '$green➔ [${_featureInfo?.uri}:${step.line}] '
-          '${isBackground ? orange : yellow}'
-          'Executing${isBackground ? ' background ' : ' '}step: ${step.text}$reset',
-        );
-
         // Inject the multiline argument into the world context before execution.
         await stepFunction(_world);
 
@@ -357,7 +365,6 @@ class IntegrationTestHelper {
       }
     } else {
       final duration = DateTime.now().microsecondsSinceEpoch - start;
-      logLine('${yellow}Step undefined: ${step.text}$reset');
       result = StepResult.undefined(
         step.text,
         step.line,
@@ -411,34 +418,18 @@ class IntegrationTestHelper {
   // ── Error Handling ─────────────────────────────────────────────────────────
 
   Future<void> _handleTestError(Object error, StackTrace stackTrace) async {
-    logLine(
-      '${red}Error in ${_errorOnBackground ? 'background' : 'scenario "$_scenarioName"'}:\n$error.$reset',
-    );
+    final r = _presentation.useColors ? red : '';
+    final res = _presentation.useColors ? reset : '';
 
-    const blockedPrefixes = [_ownPackagePrefix];
-
-    final lines = stackTrace.toString().trim().split('\n');
-    final lastByFile = <String, String>{};
-
-    for (final line in lines) {
-      final trimmed = line.trim();
-      if (trimmed.contains('package') &&
-          !blockedPrefixes.any((prefix) => trimmed.contains(prefix))) {
-        final match = _dartFilePattern.firstMatch(trimmed);
-        if (match != null) {
-          final file = match.group(1)!;
-          lastByFile[file] = line;
-        }
-      }
-    }
-
-    for (final line in lastByFile.values) {
-      logLine('$red$line$reset');
-    }
+    final cleanError =
+        error
+            .toString()
+            .replaceFirst(RegExp(r'^(Exception|TestFailure):\s*'), '')
+            .trim();
 
     final String errorMessage =
-        '${red}Error on step, skipping remaining steps for '
-        '${_errorOnBackground ? 'background' : 'scenario: "$_scenarioName"'}$reset';
+        '${r}Error on step, skipping remaining steps for '
+        '${_errorOnBackground ? 'background' : 'scenario: "$_scenarioName"'}:\n$cleanError$res';
 
     fail(errorMessage);
   }

@@ -24,21 +24,6 @@ abstract final class _StepStatus {
   static const failed = 'failed';
 }
 
-/// Identifiers for the synthetic `Background` element emitted in the JSON
-/// report when background steps are present.
-abstract final class _BackgroundElement {
-  /// Display keyword used as the `keyword` field in the JSON element.
-  static const keyword = 'Background';
-
-  /// Element type used as the `type` field in the JSON element.
-  static const type = 'background';
-
-  /// Separator used when building the `id` field: `<featureId>;background`.
-  static const idSuffix = 'background';
-}
-
-/// Maximum number of characters included in a log message for the report-save
-/// response body.  Longer messages are truncated and suffixed with `...`.
 const _maxLogMessageLength = 300;
 
 // ── Reporter ─────────────────────────────────────────────────────────────────
@@ -60,11 +45,19 @@ class JsonReporter extends IntegrationReporter {
   /// JSON model for the feature that is currently executing.
   JsonFeature? _currentFeature;
 
-  /// JSON model for the synthetic Background element of the current feature.
+  /// Buffer for background steps captured before the current scenario starts.
   ///
-  /// Created lazily on the first background step result received after
-  /// [onBeforeFeature] or [onAfterScenario].
-  JsonScenario? _background;
+  /// Collected in [onAfterStep] when [_inBackground] is true, and prepended to
+  /// the scenario in [onBeforeScenario].
+  final List<JsonStep> _backgroundStepsBuffer = [];
+  
+  /// Whether the feature-level background element has already been recorded
+  /// for the current feature.
+  bool _featureBackgroundRecorded = false;
+
+  /// The single, top-level background element emitted once per feature to 
+  /// populate the report's feature summary.
+  JsonScenario? _featureBackground;
 
   /// Whether the reporter is currently recording steps for the Background
   /// section (`true`) or for an active Scenario (`false`).
@@ -100,7 +93,9 @@ class JsonReporter extends IntegrationReporter {
     _features.add(_currentFeature!);
 
     _inBackground = true;
-    _background = null;
+    _backgroundStepsBuffer.clear();
+    _featureBackgroundRecorded = false;
+    _featureBackground = null;
   }
 
   /// Creates a new [JsonScenario] entry for the scenario that is about to run
@@ -113,7 +108,8 @@ class JsonReporter extends IntegrationReporter {
     _inBackground = false;
 
     final featureId = _currentFeature?.id ?? 'unknown-feature';
-    final scenarioId = '$featureId;${scenario.scenarioName.toLowerCase().replaceAll(' ', '-')}';
+    final scenarioId =
+        '$featureId;${scenario.scenarioName.toLowerCase().replaceAll(' ', '-')}';
 
     _currentScenario = JsonScenario(
       keyword: 'Scenario',
@@ -122,6 +118,7 @@ class JsonReporter extends IntegrationReporter {
       name: scenario.scenarioName,
       line: scenario.line,
       tags: scenario.tags.map((t) => JsonTag(t, scenario.line - 1)).toList(),
+      steps: List<JsonStep>.from(_backgroundStepsBuffer),
     );
     _currentFeature!.elements.add(_currentScenario!);
   }
@@ -131,7 +128,8 @@ class JsonReporter extends IntegrationReporter {
   @override
   Future<void> onAfterScenario(ScenarioResult result) async {
     _inBackground = true;
-    _background = null;
+    _backgroundStepsBuffer.clear();
+    _featureBackgroundRecorded = true;
     _currentScenario = null;
   }
 
@@ -144,19 +142,6 @@ class JsonReporter extends IntegrationReporter {
   @override
   Future<void> onAfterStep(AfterStepContext context) async {
     final result = context.result;
-
-    if (_inBackground && _background == null) {
-      final featureId = _currentFeature?.id ?? 'unknown-feature';
-      _background = JsonScenario(
-        keyword: _BackgroundElement.keyword,
-        type: _BackgroundElement.type,
-        name: '',
-        id: '$featureId;${_BackgroundElement.idSuffix}',
-        line: result.line - 1,
-      );
-
-      _currentFeature!.elements.add(_background!);
-    }
 
     final stepText = result.stepText;
     final line = result.line;
@@ -198,7 +183,22 @@ class JsonReporter extends IntegrationReporter {
     );
 
     if (_inBackground) {
-      _background?.steps.add(jsonStep);
+      _backgroundStepsBuffer.add(jsonStep);
+      
+      if (!_featureBackgroundRecorded) {
+        if (_featureBackground == null) {
+          final featureId = _currentFeature?.id ?? 'unknown-feature';
+          _featureBackground = JsonScenario(
+            keyword: 'Background',
+            type: 'background',
+            name: '',
+            id: '$featureId;background',
+            line: line - 1,
+          );
+          _currentFeature!.elements.add(_featureBackground!);
+        }
+        _featureBackground!.steps.add(jsonStep);
+      }
     } else {
       _currentScenario?.steps.add(jsonStep);
     }
@@ -215,9 +215,10 @@ class JsonReporter extends IntegrationReporter {
     );
 
     final rawMessage = result.message ?? '';
-    final message = rawMessage.length > _maxLogMessageLength
-        ? '${rawMessage.substring(0, _maxLogMessageLength)}...'
-        : rawMessage;
+    final message =
+        rawMessage.length > _maxLogMessageLength
+            ? '${rawMessage.substring(0, _maxLogMessageLength)}...'
+            : rawMessage;
 
     if (result.success) {
       logLine(

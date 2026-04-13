@@ -256,11 +256,6 @@ final config = IntegrationTestConfig(
     await tester.pumpAndSettle();
   },
 
-  // Optional: called once after the binding is initialized
-  onBindingInitialized: (binding) async {
-    // e.g. configure your DI container
-  },
-
   // Custom step definitions
   steps: [
     myCustomStep(),
@@ -272,9 +267,14 @@ final config = IntegrationTestConfig(
     MyHook(),
   ],
 
+  // Controls the visual representation of reports
+  presentation: ReportPresentation(
+    showStepPaths: true,
+    showStackTraces: true,
+  ),
+
   // Result reporters
   reporters: [
-    SummaryReporter(),
     JsonReporter(path: 'test_report.json'),
   ],
 );
@@ -286,7 +286,9 @@ final config = IntegrationTestConfig(
 | `onBindingInitialized` | `Future<void> Function(IntegrationTestWidgetsFlutterBinding)?` | Optional setup hook run once after binding initialization. |
 | `steps` | `List<StepDefinitionGeneric>` | Custom step definitions to add to the registry. |
 | `hooks` | `List<IntegrationHook>` | Lifecycle hooks executed around tests. |
-| `reporters` | `List<IntegrationReporter>` | Result reporters. |
+| `presentation` | `ReportPresentation` | Controls output formatting (colors, paths, stack traces, etc.). |
+| `reporters` | `List<IntegrationReporter>` | List of additional result reporters. |
+| `useDefaultReporter` | `bool` | Whether to enable the standard Cucumber-like reporter. Defaults to `true`. |
 
 ### Scenario Setup Strategies
 
@@ -422,6 +424,9 @@ dart run flutter_bdd_suite:cli [options]
 | `--order none\|alphabetically\|basename\|reverse\|random[:seed]` | `none` | Order in which feature files are executed. |
 | `--pattern <regex>` | _(none)_ | Filter feature files by a regex on their file path. |
 | `--tags <expression>` | _(none)_ | Run only scenarios matching a boolean tag expression. |
+| `--no-colors` | `false` | Suppress ANSI color codes in console output. |
+| `--show-paths` | `false` | Include feature file paths and line numbers in output. |
+| `--show-stack-traces` | `false` | Print full stack traces for failed steps. |
 | `--dry-run` | `false` | Generate test files only; do not execute them. |
 | `--generate-only` | `false` | Same as `--dry-run`. |
 | `--command <shell>` | _(auto)_ | Replace the entire flutter invocation with a custom shell command. |
@@ -905,14 +910,34 @@ onAfterAll
 
 Reporters observe the same lifecycle events as hooks and are used to collect and output test results.
 
-### SummaryReporter
+By default, `flutter_bdd_suite` uses a built-in **CucumberReporter** that prints standard Gherkin-style output to your terminal. You can customize its behavior using **Presentation Settings**.
 
-Prints a concise summary to the terminal after the test run:
+### Presentation Settings
 
+Use the `ReportPresentation` model in your config (or CLI flags) to control how results are displayed.
+
+```dart
+final config = IntegrationTestConfig(
+  presentation: ReportPresentation(
+    useColors: true,          // Default: true
+    showStepPaths: false,     // Default: false
+    showDebugLogs: false,     // Default: false
+    showStackTraces: false,   // Default: false
+  ),
+);
 ```
-3 scenarios (2 passed, 1 failed)
-Elapsed: 00:01:23.456
-```
+
+### CLI Overrides
+
+All presentation settings can be overridden at runtime via CLI flags:
+
+- `--no-colors`
+- `--show-paths`
+- `--show-stack-traces`
+
+### SummaryReporter (Legacy)
+
+Prints a concise one-line summary after the run. Note that the default `CucumberReporter` now includes its own summary by default.
 
 ```dart
 reporters: [SummaryReporter()],

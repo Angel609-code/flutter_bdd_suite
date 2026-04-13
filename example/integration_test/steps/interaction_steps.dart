@@ -19,12 +19,10 @@ StepDefinitionGeneric iEnterText() {
 
 StepDefinitionGeneric iEnterTextDocString() {
   // Use non-capturing groups `(?:enter|fill)` to simplify the callback signature.
-  return stepRegExp(RegExp(r'^I fill the (.+?) field with$'), (
-    ctx,
-  ) async {
-    print('ctx.args: ${ctx.args.debugSource.toString()}');
-    print('ctx.args: ${ctx.args.toString()}');
-    print(ctx.docString());
+  return stepRegExp(RegExp(r'^I fill the (.+?) field with$'), (ctx) async {
+    logLine('ctx.args: ${ctx.args.debugSource.toString()}');
+    logLine('ctx.args: ${ctx.args.toString()}');
+    logLine(ctx.docString());
   });
 }
 

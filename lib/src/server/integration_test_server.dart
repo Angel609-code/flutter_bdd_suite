@@ -72,10 +72,11 @@ class IntegrationTestServer {
       }
       try {
         final method = req.method.toUpperCase();
-        final handlers = {
-          'POST': {'/save-report': _handleReport, ...?_custom['POST']},
-          'GET': {...?_custom['GET']},
-        }[method];
+        final handlers =
+            {
+              'POST': {'/save-report': _handleReport, ...?_custom['POST']},
+              'GET': {...?_custom['GET']},
+            }[method];
         final handler = handlers?[req.uri.path];
         if (handler != null) {
           await handler(req);
@@ -98,22 +99,25 @@ class IntegrationTestServer {
   Future<void> _handleReport(HttpRequest req) async {
     try {
       final data = jsonDecode(await utf8.decoder.bind(req).join());
-      String pathFromClient = data['path'] is String ? data['path'] as String : 'report.json';
+      String pathFromClient =
+          data['path'] is String ? data['path'] as String : 'report.json';
 
       // 1. Get the Project Root (where the dev is running the app/test)
       final projectRoot = Directory.current.path;
 
       // 2. Build the Absolute Path
       // If the path is already absolute, use it. Otherwise, join it with project root.
-      final absolutePath = pathFromClient.startsWith('/')
-          ? pathFromClient
-          : '$projectRoot/$pathFromClient';
+      final absolutePath =
+          pathFromClient.startsWith('/')
+              ? pathFromClient
+              : '$projectRoot/$pathFromClient';
 
       final file = File(absolutePath);
 
       // 3. Create directories if they don't exist and write
       await file.create(recursive: true);
-      final String content = data['content'] is String ? data['content'] as String : '';
+      final String content =
+          data['content'] is String ? data['content'] as String : '';
       await file.writeAsString(content);
 
       stdout.writeln('[IntegrationTestServer] Report saved at: $absolutePath');

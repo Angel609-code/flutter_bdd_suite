@@ -8,9 +8,8 @@ import 'package:flutter_bdd_suite/flutter_bdd_bridge.dart';
 Future<void> main(List<String> args) async {
   final delimiterIndex = args.indexOf('--');
   final myArgs = delimiterIndex >= 0 ? args.sublist(0, delimiterIndex) : args;
-  final passthroughArgs = delimiterIndex >= 0
-      ? args.sublist(delimiterIndex + 1)
-      : <String>[];
+  final passthroughArgs =
+      delimiterIndex >= 0 ? args.sublist(delimiterIndex + 1) : <String>[];
 
   if (_hasHelpFlag(myArgs)) {
     _printUsage();
@@ -49,6 +48,9 @@ Future<void> main(List<String> args) async {
   final command = _readArg(myArgs, '--command');
   final dryRun = myArgs.contains('--dry-run');
   final generateOnly = myArgs.contains('--generate-only');
+  final noColors = myArgs.contains('--no-colors');
+  final showPaths = myArgs.contains('--show-paths');
+  final showStackTraces = myArgs.contains('--show-stack-traces');
 
   final bridgeConfig = _resolveBridgeConfig(args: myArgs);
   final forceNoBridge = myArgs.contains('--no-bridge');
@@ -138,6 +140,9 @@ Future<void> main(List<String> args) async {
         bridgeConfig: bridgeConfig,
         includeBridgeDefines: bridgeActive,
         passthroughArgs: passthroughArgs,
+        noColors: noColors,
+        showPaths: showPaths,
+        showStackTraces: showStackTraces,
       );
 
       stdout.writeln('Execution command: ${commandData.display}');
@@ -164,6 +169,9 @@ _ExecutionCommand _buildExecutionCommand({
   required _ResolvedBridgeConfig bridgeConfig,
   required bool includeBridgeDefines,
   List<String> passthroughArgs = const [],
+  bool noColors = false,
+  bool showPaths = false,
+  bool showStackTraces = false,
 }) {
   if (commandOverride != null && commandOverride.trim().isNotEmpty) {
     if (includeBridgeDefines) {
@@ -182,6 +190,9 @@ _ExecutionCommand _buildExecutionCommand({
       '--dart-define=FGP_BRIDGE_HOST=${bridgeConfig.host}',
     if (includeBridgeDefines)
       '--dart-define=FGP_BRIDGE_PORT=${bridgeConfig.port}',
+    '--dart-define=FGP_NO_COLORS=$noColors',
+    '--dart-define=FGP_SHOW_PATHS=$showPaths',
+    '--dart-define=FGP_SHOW_STACK_TRACES=$showStackTraces',
   ];
 
   if (mode == 'drive') {
@@ -540,8 +551,7 @@ Future<String> _writeGeneratedBridgeRunner({
   final generatedFile = File('${generatedDir.path}/bridge_runner.dart');
   final setupImport = bridgeSetupPath.replaceAll('\\', '/');
 
-  final content =
-      '''// GENERATED FILE. DO NOT EDIT.
+  final content = '''// GENERATED FILE. DO NOT EDIT.
 import 'package:flutter_bdd_suite/flutter_bdd_bridge.dart';
 import '../../$setupImport';
 
@@ -622,6 +632,9 @@ Wrapper options (consumed before --):
   --bridge-host <host>
   --bridge-port <port>
   --no-bridge
+  --no-colors                         Disables ANSI colors
+  --show-paths                        Includes file paths and line numbers in output
+  --show-stack-traces                 Shows full stack traces for failures
   --bridge-script <path>
   --bridge-setup <path>
   -h, --help

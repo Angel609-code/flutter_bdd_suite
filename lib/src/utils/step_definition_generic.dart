@@ -237,7 +237,12 @@ StepDefinitionGeneric step(
     pattern,
     registry ?? defaultParameterTypes,
   );
-  return StepDefinitionGeneric(compiled.regex, (rawArgs, world, multilineArg) async {
+
+  return StepDefinitionGeneric(compiled.regex, (
+    rawArgs,
+    world,
+    multilineArg,
+  ) async {
     final List<Object?> parsedArgs = [
       for (int i = 0; i < compiled.tokens.length; i++)
         compiled.tokens[i].parser(rawArgs[i]),
@@ -308,9 +313,13 @@ StepDefinitionGeneric stepRegExp(
       );
     }
 
-    final List<Object?> parsedArgs = (converters != null)
-        ? [for (int i = 0; i < rawArgs.length; i++) converters[i](rawArgs[i])]
-        : rawArgs;
+    final List<Object?> parsedArgs =
+        (converters != null)
+            ? [
+              for (int i = 0; i < rawArgs.length; i++)
+                converters[i](rawArgs[i]),
+            ]
+            : rawArgs;
 
     final ctx = StepContext(
       tester: world.tester,

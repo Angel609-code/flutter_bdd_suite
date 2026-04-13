@@ -1,6 +1,7 @@
 import 'package:flutter_bdd_suite/src/hooks/integration_hook.dart';
 import 'package:flutter_bdd_suite/src/reporters/integration_reporter.dart';
 import 'package:flutter_bdd_suite/src/utils/step_definition_generic.dart';
+import 'package:flutter_bdd_suite/src/models/report_presentation.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -68,11 +69,22 @@ class IntegrationTestConfig {
   /// Steps provided here are appended to the registry in the order given.
   final List<StepDefinitionGeneric> steps;
 
+  /// Controls the visual representation and behavior of the reporting output.
+  final ReportPresentation presentation;
+
+  /// Whether to automatically register the default [CucumberReporter].
+  ///
+  /// Defaults to `true`.  Set to `false` if you want to provide your own
+  /// reporting logic exclusively.
+  final bool useDefaultReporter;
+
   IntegrationTestConfig({
     this.setUp,
     this.onBindingInitialized,
     this.hooks = const [],
     this.reporters = const [],
     this.steps = const [],
+    this.presentation = const ReportPresentation(),
+    this.useDefaultReporter = true,
   });
 }
