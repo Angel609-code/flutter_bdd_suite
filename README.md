@@ -29,6 +29,7 @@ Built natively on Flutter's `integration_test` package, it gives you direct acce
 - [Step Definitions](#step-definitions)
   - [Built-in Steps](#built-in-steps)
   - [Custom Steps](#custom-steps)
+  - [Expression vs RegExp Steps](#expression-vs-regexp-steps)
   - [Pattern Syntax](#pattern-syntax)
   - [Working with Tables in Steps](#working-with-tables-in-steps)
 - [Test World](#test-world)
@@ -52,7 +53,7 @@ Built natively on Flutter's `integration_test` package, it gives you direct acce
 - **Native Integration Test:** Built on Flutter's `integration_test` package — no `flutter_driver` dependencies.
 - **Automatic Code Generation:** Converts `.feature` files into executable Dart integration test files with a single CLI command.
 - **Rich Gherkin Parsing:** Full support for Scenario Outlines, Background, Rules, data tables, doc strings, and tags.
-- **Flexible Step Definitions:** Typed step builders (`generic` through `generic6`) with `{string}`, `{int}`, `{float}`, `{word}` placeholders and arbitrary regex captures. Data tables and doc-strings are accessible via the `TestWorld` context object.
+- **Flexible Step Definitions:** Define steps with pure Cucumber Expressions (`step()`) or powerful Regular Expressions (`stepRegExp()`). Data tables and doc-strings are naturally accessible via the step context.
 - **Lifecycle Hooks:** Before/after hooks at the All, Feature, Scenario, and Step levels with priority-based execution.
 - **Extensible Reporters:** Built-in summary and Cucumber-compatible JSON reporters. Compose your own by extending `IntegrationReporter`.
 - **Host Bridge Server:** A built-in local HTTP server runs on your host machine while tests execute on any platform (Android, iOS, macOS, Linux, Windows, or Web). Device-side tests call it via HTTP to perform host-side actions that are impossible from inside the test process — for example, saving report files to disk (including from web where the device has no access to the host file system), seeding or resetting a database, calling external APIs, triggering CI scripts, or any other operation that requires the host environment.
@@ -275,7 +276,7 @@ final config = IntegrationTestConfig(
 
   // Result reporters
   reporters: [
-    JsonReporter(path: 'test_report.json'),
+    JsonReporter(path: 'reports/test_report.json'),
   ],
 );
 ```
@@ -291,10 +292,6 @@ final config = IntegrationTestConfig(
 | `useDefaultReporter` | `bool` | Whether to enable the standard Cucumber-like reporter. Defaults to `true`. |
 
 ### Scenario Setup Strategies
-
-Import strategy:
-- Flutter integration runtime code (steps, hooks, reporters, config): `package:flutter_bdd_suite/flutter_bdd_suite.dart`
-- Host-side bridge setup/scripts executed with `dart run`: `package:flutter_bdd_suite/flutter_bdd_bridge.dart`
 
 The framework supports two valid startup styles. Choose one and apply it consistently.
 
@@ -320,13 +317,10 @@ Leave `setUp` as `null` (or keep it only for memory/state resets) and mount the 
 
 ```dart
 StepDefinitionGeneric theAppIsLaunched() {
-  return generic<WidgetTesterWorld>(
-    r'the application is launched',
-    (world) async {
-      await world.tester.pumpWidget(const BddExampleApp());
-      await world.tester.pumpAndSettle();
-    },
-  );
+  return step('the application is launched', (ctx) async {
+    await ctx.tester.pumpWidget(const MyApp());
+    await ctx.tester.pumpAndSettle();
+  });
 }
 ```
 
@@ -349,55 +343,26 @@ The `cli` command is a thin orchestration wrapper. It handles two things:
 1. **Generation** — Discovers `.feature` files, applies any filters (`--tags`, `--pattern`, `--order`), and generates the Dart test bindings.
 2. **Execution** — Runs native Flutter tooling (`flutter test` or `flutter drive`) based on `--mode`.
 
-### How Argument Forwarding Works
-
-- Arguments **before** `--` are consumed by `flutter_bdd_suite:cli`.
-- Arguments **after** `--` are forwarded to the underlying Flutter command.
-- `--mode` is a wrapper flag and selects which native command is executed internally:
-  - `--mode test` -> `flutter test ...`
-  - `--mode drive` -> `flutter drive ...`
-
-In other words, this wrapper chooses the Flutter command, and the passthrough part after `--` is where you place normal/native Flutter flags.
-
-Command shapes used internally:
-
-- **Test mode:** `flutter test [bridge dart-defines] [passthrough args] [generated target if none provided]`
-- **Drive mode:** `flutter drive [bridge dart-defines] [passthrough args]`
-
-For drive mode, pass required Flutter drive flags yourself (typically `--driver` and `--target`) after `--`.
-
 ### Test Mode (Mobile & Desktop)
 
-The default mode. Works on Android, iOS, macOS, Linux, and Windows — any platform supported by `flutter test`.
-
-```bash
-dart run flutter_bdd_suite:cli --mode test --config test_config.dart -- -d macos --coverage
-```
-
-This runs generation, then executes native Flutter test with your passthrough flags:
-
-```bash
-flutter test -d macos --coverage integration_test/all_integration_tests.dart
-```
-
-### Drive Mode (Web)
-
-Web integration tests require `flutter drive`.
+This is the default mode. It uses `flutter test`.
 
 ```bash
 dart run flutter_bdd_suite:cli \
   --config test_config.dart \
-  --mode drive \
   -- \
-  --driver test_driver/integration_test.dart \
-  --target integration_test/all_integration_tests.dart \
-  -d chrome
+  -d linux
 ```
 
-This runs generation, then executes native Flutter drive with the forwarded flags:
+### Drive Mode (Web)
+
+Use this when running tests on the web. It uses `flutter drive`.
 
 ```bash
-flutter drive \
+dart run flutter_bdd_suite:cli \
+  --mode drive \
+  --config test_config.dart \
+  -- \
   --driver=test_driver/integration_test.dart \
   --target=integration_test/all_integration_tests.dart \
   -d chrome
@@ -448,55 +413,45 @@ dart run flutter_bdd_suite:cli \
   --tags "@smoke" \
   --order random \
   -- --coverage
-
-# Run only feature files matching 'auth', generate without running
-dart run flutter_bdd_suite:cli \
-  --config test_config.dart \
-  --pattern auth \
-  --dry-run
-
-# Web run on Chrome, pass extra flutter args
-dart run flutter_bdd_suite:cli \
-  --config test_config.dart \
-  --mode drive \
-  -- \
-  --driver test_driver/integration_test.dart \
-  --target integration_test/all_integration_tests.dart \
-  -d chrome \
-  --web-renderer=html
 ```
 
 ---
 
 ## Code Generation
 
-Every time you run `cli`, the pipeline:
+The CLI orchestrator automatically regenerates test files before each execution. If you prefer to manually generate them without running tests (e.g. in a pre-commit hook), use the `--generate-only` flag.
 
-1. Discovers all `*.feature` files under `integration_test/features/`.
-2. Parses each file with the built-in `FeatureParser` (handles outlines, backgrounds, rules, tables, doc strings, tags).
-3. Deletes the existing `integration_test/generated/` directory.
-4. Renders a Dart test file for each feature using a Mustache template — one `testWidgets()` per scenario.
-5. Generates `integration_test/all_integration_tests.dart` — a master runner that imports every generated file.
+```bash
+dart run flutter_bdd_suite:cli --config test_config.dart --generate-only
+```
 
-The generated files are **deterministic** and can be committed to version control if desired, but they are always regenerated on the next run, so it is generally safe to add `integration_test/generated/` to `.gitignore`.
+Generated files are output into the `integration_test/generated/` directory.
+
+> **Note:** The generated directory should be ignored in version control (`.gitignore`).
 
 ---
 
 ## Coverage
 
+To generate test coverage, you must use `--mode test` (the default). Coverage is generated by the underlying `flutter test` command.
+
+1. Pass the `--coverage` flag after the `--` separator.
+2. Provide the `lcov.info` generated path to `genhtml` to build the report.
+
 ```bash
+# Run tests and collect coverage
 dart run flutter_bdd_suite:cli \
   --config test_config.dart \
-  -- --coverage
+  -- \
+  --coverage
+
+# Generate HTML report from lcov.info
+genhtml coverage/lcov.info -o coverage/html
 ```
 
-> **Important:** `--coverage` only works with `--mode test`. The `flutter drive` command does not support coverage.
+> **Requirements:** The `genhtml` command is part of the `lcov` package, which must be installed on your system.
 
-Once the run completes, a `coverage/lcov.info` file is generated. To convert it to a human-readable HTML report you need the `genhtml` tool, which is part of the **LCOV** package.
-
-**Installing LCOV / genhtml:**
-
-| Platform | Command |
+| Platform | Install Command |
 |---|---|
 | macOS | `brew install lcov` |
 | Ubuntu / Debian | `sudo apt-get install lcov` |
@@ -526,44 +481,40 @@ The package ships with one built-in step, available by default without any confi
 
 ### Custom Steps
 
-Define custom steps using the typed `generic` builder functions. Each function corresponds to the number of captures (arguments) extracted from the step text:
+Define custom steps using the `step()` and `stepRegExp()` functions. Each step receives a `StepContext` (`ctx`), providing access to `ctx.tester`, `ctx.args`, and multiline strings/tables.
 
 ```dart
 import 'package:flutter_bdd_suite/flutter_bdd_suite.dart';
 
-// 0 captures — matches the literal string exactly
-StepDefinitionGeneric tapLoginButton() => generic(
-  'I tap the login button',
-  (WidgetTesterWorld world) async {
-    await world.tester.tap(find.byKey(const ValueKey('login_button')));
-    await world.tester.pumpAndSettle();
-  },
-);
+// Plain step with no placeholders
+StepDefinitionGeneric theAppIsLaunched() {
+  return step('the application is launched', (ctx) async {
+    await ctx.tester.pumpWidget(const MyApp());
+    await ctx.tester.pumpAndSettle();
+  });
+}
 
-// 1 capture — {string} extracts a quoted value
-StepDefinitionGeneric iSeeText() => generic1(
-  'I should see {string}',
-  (String text, WidgetTesterWorld world) async {
-    expect(find.text(text), findsOneWidget);
-  },
-);
+// Step with Cucumber Expression placeholders
+StepDefinitionGeneric iFillField() {
+  return step('I fill the {string} field with {string}', (ctx) async {
+    // Safely extract the arguments with type safety
+    final (field, value) = ctx.args.two<String, String>();
 
-// 2 captures — two {string} placeholders
-StepDefinitionGeneric fillField() => generic2(
-  'I fill the {string} field with {string}',
-  (String key, String value, WidgetTesterWorld world) async {
-    await world.tester.enterText(find.byKey(ValueKey(key)), value);
-    await world.tester.pumpAndSettle();
-  },
-);
+    await ctx.tester.enterText(find.byKey(Key(field)), value);
+    await ctx.tester.pumpAndSettle();
+  });
+}
 
 // Manual regex capture — use a regex group directly in the pattern
-StepDefinitionGeneric waitSeconds() => generic1(
-  r'I wait (\d+) seconds?',
-  (String seconds, WidgetTesterWorld world) async {
-    await Future.delayed(Duration(seconds: int.parse(seconds)));
-  },
-);
+StepDefinitionGeneric waitSeconds() {
+  return stepRegExp(
+    RegExp(r'I wait (\d+) seconds?'),
+    (ctx) async {
+      final (seconds,) = ctx.args.one<String>();
+      await Future.delayed(Duration(seconds: int.parse(seconds)));
+    }
+  );
+}
 ```
 
 Register your steps in the config:
@@ -572,15 +523,12 @@ Register your steps in the config:
 final config = IntegrationTestConfig(
   setUp: ...,
   steps: [
-    tapLoginButton(),
-    iSeeText(),
-    fillField(),
+    theAppIsLaunched(),
+    iFillField(),
     waitSeconds(),
   ],
 );
 ```
-
-Builders `generic` through `generic6` are available, supporting 0 to 6 captures respectively.
 
 ### Expression vs RegExp Steps
 
@@ -694,8 +642,6 @@ Patterns are strings that get compiled to `RegExp` for matching. The following c
 | `(?:optional)?` | `I tap the (?:big )?button` | Non-capturing optional literal — not passed to the step function. |
 | `(?=...)` / `(?!...)` | Lookahead/lookbehind | Supported, not counted as captures. |
 
-> **Note:** The total number of capturing groups in the pattern must match the `generic` variant you use (`generic1` → 1, `generic2` → 2, etc.).
-
 ### Working with Tables in Steps
 
 Data tables are **first-class properties** on the `Step` model — they are never embedded in the step text string. When the runner matches a step, it attaches the table or doc-string to the `WidgetTesterWorld` context object.
@@ -730,8 +676,6 @@ StepDefinitionGeneric fillFieldWithDocString() => stepRegExp(
 );
 ```
 
-If you use `generic`/`genericN` APIs directly with `WidgetTesterWorld`, you can still inspect `world.multilineArg` and pattern-match the union type manually.
-
 `GherkinTable` API:
 
 | Method / Property | Description |
@@ -755,18 +699,19 @@ The **World** is a context object that lives for the duration of a single scenar
 
 ```dart
 // Step 1: store a value
-StepDefinitionGeneric iRememberTheText() => generic1(
+StepDefinitionGeneric iRememberTheText() => step(
   'I remember the text {string}',
-  (String text, WidgetTesterWorld world) async {
-    world.setAttachment('remembered_text', text);
+  (ctx) async {
+    final (text,) = ctx.args.one<String>();
+    ctx.world.setAttachment('remembered_text', text);
   },
 );
 
 // Step 2: retrieve the stored value
-StepDefinitionGeneric iVerifyTheText() => generic(
+StepDefinitionGeneric iVerifyTheText() => step(
   'I verify the remembered text',
-  (WidgetTesterWorld world) async {
-    final text = world.getAttachment<String>('remembered_text');
+  (ctx) async {
+    final text = ctx.world.getAttachment<String>('remembered_text');
     expect(find.text(text!), findsOneWidget);
   },
 );
@@ -935,7 +880,7 @@ All presentation settings can be overridden at runtime via CLI flags:
 - `--show-paths`
 - `--show-stack-traces`
 
-### SummaryReporter (Legacy)
+### SummaryReporter
 
 Prints a concise one-line summary after the run. Note that the default `CucumberReporter` now includes its own summary by default.
 
@@ -1136,13 +1081,15 @@ class SetupHook extends IntegrationHook {
 Or in a step definition:
 
 ```dart
-StepDefinitionGeneric theDbIsReset() => generic(
-  'the database has been reset',
-  (WidgetTesterWorld world) async {
-    final result = await resetDatabase();
-    expect(result.success, isTrue);
-  },
-);
+StepDefinitionGeneric theDbIsReset() {
+  return step(
+    'the database has been reset',
+    (ctx) async {
+      final result = await resetDatabase();
+      expect(result.success, isTrue);
+    },
+  );
+}
 ```
 
 ### Host Address Resolution
@@ -1189,12 +1136,14 @@ If you want to explicitly mark a step as pending (work-in-progress) without fail
 ```dart
 import 'package:flutter_bdd_suite/flutter_bdd_suite.dart';
 
-StepDefinitionGeneric myPendingStep() => generic(
-  'I am doing some work in progress',
-  (world) async {
-    throw PendingStepException('Automation not ready yet');
-  },
-);
+StepDefinitionGeneric myPendingStep() {
+  return step(
+    'I am doing some work in progress',
+    (ctx) async {
+      throw PendingStepException('Automation not ready yet');
+    },
+  );
+}
 ```
 
 ---
