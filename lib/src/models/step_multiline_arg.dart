@@ -17,7 +17,7 @@ import 'package:flutter_bdd_suite/src/models/gherkin_table_model.dart';
 ///   case StepTable(:final table):
 ///     for (final row in table.asMap()) { ... }
 ///   case StepDocString(:final content):
-///     print(content);
+///     logLine(content);
 ///   case null:
 ///     // step has no multiline argument
 /// }

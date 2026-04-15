@@ -30,7 +30,6 @@ export 'src/server/integration_test_server.dart' hide EndpointHandler;
 export 'src/steps/step_exceptions.dart';
 export 'src/steps/step_result.dart';
 export 'src/steps/steps_registry.dart';
-export 'src/steps/when_fill_field_step.dart';
 
 export 'src/utils/placeholders.dart';
 export 'src/utils/step_args.dart';

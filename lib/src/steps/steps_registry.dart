@@ -1,5 +1,4 @@
 import 'package:flutter_bdd_suite/src/steps/step_exceptions.dart';
-import 'package:flutter_bdd_suite/src/steps/when_fill_field_step.dart';
 import 'package:flutter_bdd_suite/src/utils/step_definition_generic.dart';
 import 'package:flutter_bdd_suite/src/utils/steps_keywords.dart';
 
@@ -28,7 +27,7 @@ class StepsRegistry {
   ///
   /// A read-only list; never mutated at runtime. Custom steps are merged at
   /// construction time into [_steps].
-  static final List<StepDefinitionGeneric> defaultSteps = [whenFillFieldStep()];
+  static final List<StepDefinitionGeneric> defaultSteps = [];
 
   /// The active step definitions for this registry instance.
   ///

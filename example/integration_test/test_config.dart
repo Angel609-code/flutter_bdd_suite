@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_bdd_suite/flutter_bdd_suite.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -12,7 +11,7 @@ final config = IntegrationTestConfig(
   },
   onBindingInitialized: (IntegrationTestWidgetsFlutterBinding binding) async {
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
-    debugPrint('Implement anything before the tests');
+    logLine('Implement anything before the tests');
   },
   reporters: [JsonReporter(path: './report/report.json')],
   steps: [
