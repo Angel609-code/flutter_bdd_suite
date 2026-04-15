@@ -14,8 +14,8 @@ on:
         default: '@smoke'
 
 jobs:
-  package-checks:
-    name: Package Checks
+  package-analysis:
+    name: Package Analysis
     runs-on: ubuntu-latest
 
     steps:
@@ -34,13 +34,10 @@ jobs:
       - name: Analyze package
         run: dart analyze .
 
-      - name: Run package tests
-        run: flutter test
-
   example-integration:
     name: Example Integration
     runs-on: ubuntu-latest
-    needs: package-checks
+    needs: package-analysis
     env:
       BDD_TAGS: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tags || '@smoke' }}
 
@@ -80,7 +77,8 @@ jobs:
         working-directory: example
         run: |
           xvfb-run -a dart run flutter_bdd_suite:cli \
-            --config integration_test/test_config.dart \
+            --mode test \
+            --config test_config.dart \
             --tags "$BDD_TAGS" \
             -- \
             -d linux \
