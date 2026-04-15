@@ -19,10 +19,22 @@ StepDefinitionGeneric iEnterText() {
 
 StepDefinitionGeneric iEnterTextDocString() {
   // Use non-capturing groups `(?:enter|fill)` to simplify the callback signature.
-  return stepRegExp(RegExp(r'^I fill the (.+?) field with$'), (ctx) async {
-    logLine('ctx.args: ${ctx.args.debugSource.toString()}');
-    logLine('ctx.args: ${ctx.args.toString()}');
-    logLine(ctx.docString());
+  return stepRegExp(RegExp(r'^I fill the (.+?) field with:$'), (ctx) async {
+    final (type,) = ctx.args.one<String>();
+    final key = resolveKey(type);
+
+    await ctx.tester.enterText(find.byKey(Key(key)), ctx.docString().split('\n').map((line) => line.trim()).join());
+    await ctx.tester.pumpAndSettle();
+  });
+}
+
+// I print table to test output:
+StepDefinitionGeneric iPrintTableToTestOutput() {
+  return stepRegExp(RegExp(r'^I print table to test output:$'), (ctx) async {
+    // final table = ctx.table().asMap();
+    // for (final row in table) {
+    //   logLine('| ${row.values.join(' | ')} |');
+    // }
   });
 }
 

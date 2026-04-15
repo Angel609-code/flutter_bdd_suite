@@ -32,7 +32,7 @@ Feature: Employee Directory Dashboard
       When I fill the employee name field with "David Kim"
       And I fill the employee role field with "Analyst"
       And I fill the employee age field with "35"
-      And I fill the employee bio field with
+      And I fill the employee bio field with:
         """
         Business analyst with expertise in data.
         Six years experience.
@@ -41,6 +41,9 @@ Feature: Employee Directory Dashboard
       Then the employee dialog title should not be visible
       And I should see "David Kim"
       And I should see "Analyst"
+      And I print table to test output:
+        | Name      | Role    | Age | Biography                                |
+        | David Kim | Analyst | 35  | Business analyst with expertise in data. |
 
     Scenario Outline: Adding employees with boundary ages
       When I tap the add employee button

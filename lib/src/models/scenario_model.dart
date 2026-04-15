@@ -11,6 +11,12 @@ class Scenario {
   /// The scenario title as written after the `Scenario:` keyword.
   final String name;
 
+  /// Original Gherkin keyword for this element (e.g. `Scenario`, `Scenario Outline`).
+  final String keyword;
+
+  /// Free-form description lines written below the scenario header.
+  final String description;
+
   /// Line number of the `Scenario:` keyword in the feature file (1-based).
   final int line;
 
@@ -20,11 +26,19 @@ class Scenario {
   /// Steps belonging to this scenario in declaration order.
   final List<Step> steps = [];
 
-  Scenario({required this.name, required this.line, this.tags = const []});
+  Scenario({
+    required this.name,
+    this.keyword = 'Scenario',
+    this.description = '',
+    required this.line,
+    this.tags = const [],
+  });
 
   Map<String, dynamic> toJson() {
     return {
       'name': name,
+      'keyword': keyword,
+      'description': description,
       'line': line,
       'tags': tags,
       'steps': steps.map((step) => step.toJson()).toList(),
@@ -46,6 +60,12 @@ class ScenarioInfo {
   /// The scenario title as written after the `Scenario:` keyword.
   final String scenarioName;
 
+  /// Original Gherkin keyword for this element (e.g. `Scenario`, `Scenario Outline`).
+  final String keyword;
+
+  /// Free-form description lines written below the scenario header.
+  final String description;
+
   /// Line number of the `Scenario:` keyword in the feature file (1-based).
   final int line;
 
@@ -64,6 +84,8 @@ class ScenarioInfo {
 
   ScenarioInfo({
     required this.scenarioName,
+    this.keyword = 'Scenario',
+    this.description = '',
     required this.line,
     this.tags = const [],
     this.steps = const [],

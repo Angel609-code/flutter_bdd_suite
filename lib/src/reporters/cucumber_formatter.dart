@@ -1,4 +1,5 @@
 import 'package:flutter_bdd_suite/src/models/report_presentation.dart';
+import 'package:flutter_bdd_suite/src/models/gherkin_table_model.dart';
 import 'package:flutter_bdd_suite/src/steps/step_result.dart';
 import 'package:flutter_bdd_suite/src/utils/terminal_colors.dart' as colors;
 
@@ -38,6 +39,19 @@ class CucumberFormatter {
         (showPath && uri != null) ? ' $_gray[$uri:${result.line}]$_reset' : '';
 
     return '    $color$symbol ${result.stepText}$pathStr$_reset';
+  }
+
+  /// Formats an attached doc-string or data table for pretty console output.
+  List<String> formatMultilineArgument(StepResult result) {
+    if (result.docString != null) {
+      return _formatDocString(result.docString!);
+    }
+
+    if (result.table != null) {
+      return _formatTable(result.table!);
+    }
+
+    return const [];
   }
 
   /// Formats a clean error message for a failed step.
@@ -93,6 +107,47 @@ class CucumberFormatter {
     final secs = elapsed.inSeconds % 60;
     final millis = (elapsed.inMilliseconds % 1000).toString().padLeft(3, '0');
     return '${mins}m$secs.${millis}s';
+  }
+
+  List<String> _formatDocString(String docString) {
+    final lines = docString.split('\n');
+    return [
+      '      $_gray"""$_reset',
+      ...lines.map((line) => '      $line'),
+      '      $_gray"""$_reset',
+    ];
+  }
+
+  List<String> _formatTable(GherkinTable table) {
+    final rows = <TableRow>[
+      if (table.header != null) table.header!,
+      ...table.rows,
+    ];
+
+    if (rows.isEmpty) {
+      return const [];
+    }
+
+    final columnCount = rows
+        .map((row) => row.columns.length)
+        .fold<int>(0, (max, length) => length > max ? length : max);
+    final widths = List<int>.generate(columnCount, (index) {
+      return rows.fold<int>(0, (max, row) {
+        final value = index < row.columns.length ? row.columns[index] ?? '' : '';
+        return value.length > max ? value.length : max;
+      });
+    });
+
+    return rows.map((row) => _formatTableRow(row, widths)).toList();
+  }
+
+  String _formatTableRow(TableRow row, List<int> widths) {
+    final cells = List<String>.generate(widths.length, (index) {
+      final value = index < row.columns.length ? row.columns[index] ?? '' : '';
+      return value.padRight(widths[index]);
+    });
+
+    return '      | ${cells.join(' | ')} |';
   }
 
   /// Formats count details (passed/failed/skipped) with colors.

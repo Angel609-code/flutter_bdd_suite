@@ -86,6 +86,7 @@ class JsonReporter extends IntegrationReporter {
       uri: feature.uri,
       id: feature.featureName.toLowerCase().replaceAll(' ', '-'),
       name: feature.featureName,
+      description: feature.description,
       line: feature.line,
       tags: feature.tags.map((t) => JsonTag(t, feature.line - 1)).toList(),
     );
@@ -112,10 +113,11 @@ class JsonReporter extends IntegrationReporter {
         '$featureId;${scenario.scenarioName.toLowerCase().replaceAll(' ', '-')}';
 
     _currentScenario = JsonScenario(
-      keyword: 'Scenario',
+      keyword: scenario.keyword,
       type: 'scenario',
       id: scenarioId,
       name: scenario.scenarioName,
+      description: scenario.description,
       line: scenario.line,
       tags: scenario.tags.map((t) => JsonTag(t, scenario.line - 1)).toList(),
       steps: List<JsonStep>.from(_backgroundStepsBuffer),
@@ -180,6 +182,7 @@ class JsonReporter extends IntegrationReporter {
       errorMessage: errorMessage,
       duration: result.duration,
       table: result.table,
+      docString: result.docString,
     );
 
     if (_inBackground) {

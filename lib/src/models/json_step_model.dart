@@ -10,6 +10,7 @@ class JsonStep {
   final String? errorMessage;
   final int? duration;
   final GherkinTable? table;
+  final String? docString;
 
   const JsonStep({
     required this.keyword,
@@ -19,6 +20,7 @@ class JsonStep {
     this.errorMessage,
     this.duration,
     this.table,
+    this.docString,
   });
 
   Map<String, dynamic> toJson() {
@@ -27,7 +29,7 @@ class JsonStep {
       'name': name,
       'line': line,
       'result': <String, dynamic>{'status': status},
-      if (table != null) 'rows': table!.toJsonRows(),
+      'arguments': _buildArguments(),
     };
 
     final inner = result['result'] as Map<String, dynamic>;
@@ -38,6 +40,27 @@ class JsonStep {
       inner['error_message'] = errorMessage;
     }
     return result;
+  }
+
+  List<Map<String, dynamic>> _buildArguments() {
+    if (docString != null) {
+      return [
+        {
+          'content': docString,
+          'line': line + 1,
+        },
+      ];
+    }
+
+    if (table != null) {
+      return [
+        {
+          'rows': table!.toJsonRows(),
+        },
+      ];
+    }
+
+    return const [];
   }
 
   @override

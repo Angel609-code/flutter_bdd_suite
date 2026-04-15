@@ -12,6 +12,9 @@ class Feature {
   /// The feature title as written after the `Feature:` keyword.
   final String name;
 
+  /// Free-form description lines written below the `Feature:` header.
+  final String description;
+
   /// Relative URI of the `.feature` file (e.g. `features/auth/login.feature`).
   final String uri;
 
@@ -30,6 +33,7 @@ class Feature {
 
   Feature({
     required this.name,
+    this.description = '',
     required this.uri,
     required this.line,
     this.tags = const [],
@@ -38,6 +42,7 @@ class Feature {
   Map<String, dynamic> toJson() {
     return {
       'name': name,
+      'description': description,
       'uri': uri,
       'line': line,
       'tags': tags,
@@ -61,6 +66,9 @@ class FeatureInfo {
   /// The feature title as written after the `Feature:` keyword.
   final String featureName;
 
+  /// Free-form description lines written below the `Feature:` header.
+  final String description;
+
   /// Relative URI of the `.feature` file (e.g. `features/auth/login.feature`).
   final String uri;
 
@@ -72,6 +80,7 @@ class FeatureInfo {
 
   FeatureInfo({
     required this.featureName,
+    this.description = '',
     required this.uri,
     required this.line,
     this.tags = const [],

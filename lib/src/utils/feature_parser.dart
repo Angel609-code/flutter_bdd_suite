@@ -34,8 +34,10 @@ class FeatureParser {
 
       // Feature declaration
       if (line.startsWith(GherkinKeywords.feature)) {
+        final descriptionLines = _readDescriptionLines(rawLines, i + 1);
         feature = Feature(
           name: line.substring(GherkinKeywords.feature.length).trim(),
+          description: descriptionLines.join('\n'),
           uri: '/features/$featurePath',
           line: i + 1,
           tags: pendingTags,
@@ -79,6 +81,8 @@ class FeatureParser {
                 : GherkinKeywords.scenarioTemplate;
         currentOutline = Scenario(
           name: line.substring(prefix.length).trim(),
+          keyword: 'Scenario Outline',
+          description: _readDescriptionLines(rawLines, i + 1).join('\n'),
           line: i + 1,
           tags: pendingTags,
         );
@@ -117,24 +121,29 @@ class FeatureParser {
             GherkinKeywords.tableRowRegex.hasMatch(rawLines[j].trim())) {
           // Found the data table.
           final rows = <TableRow>[];
+          final rowLines = <int>[];
           while (j < rawLines.length &&
               GherkinKeywords.tableRowRegex.hasMatch(rawLines[j].trim())) {
             final tableLine = rawLines[j].trim();
             final cells = _splitTableRow(tableLine);
             rows.add(TableRow(cells));
+            rowLines.add(j + 1);
             j++;
           }
 
           if (rows.length > 1) {
             final header = rows.first;
             final dataRows = rows.sublist(1);
+            final dataRowLines = rowLines.sublist(1);
             final keys = header.columns.map((c) => c ?? '').toList();
 
             for (var rIdx = 0; rIdx < dataRows.length; rIdx++) {
               final row = dataRows[rIdx];
               final substitutedScenario = Scenario(
-                name: '${currentOutline.name} (Example ${rIdx + 1})',
-                line: currentOutline.line,
+                name: currentOutline.name,
+                keyword: currentOutline.keyword,
+                description: currentOutline.description,
+                line: dataRowLines[rIdx],
                 tags: [...outlineTags, ...examplesTags],
               );
 
@@ -194,6 +203,8 @@ class FeatureParser {
                 : GherkinKeywords.example;
         currentScenario = Scenario(
           name: line.substring(prefix.length).trim(),
+          keyword: line.startsWith(GherkinKeywords.example) ? 'Example' : 'Scenario',
+          description: _readDescriptionLines(rawLines, i + 1).join('\n'),
           line: i + 1,
           tags: pendingTags,
         );
@@ -224,6 +235,7 @@ class FeatureParser {
 
       // If it matches a stepLinePattern, create a Step
       if (stepLinePattern.hasMatch(line)) {
+        final stepLine = i + 1;
         // stepText is the bare keyword + description.
         final String stepText = line;
 
@@ -242,16 +254,15 @@ class FeatureParser {
               ) ||
               nextLineTrimmed.startsWith(GherkinKeywords.docStringBackticks)) {
             final delimiter = nextLineTrimmed.substring(0, 3);
+            final indentToStrip = _leadingWhitespaceWidth(rawLines[i + 1]);
             i++; // skip the opening delimiter line
             final docLines = <String>[];
             while (i + 1 < rawLines.length) {
               i++;
               final l = rawLines[i];
               if (l.trim().startsWith(delimiter)) break;
-              docLines.add(l);
+              docLines.add(_stripIndent(l, indentToStrip));
             }
-            // Preserve the raw content (including any internal whitespace /
-            // newlines) exactly as written in the feature file.
             docString = docLines.join('\n');
           }
         }
@@ -291,7 +302,7 @@ class FeatureParser {
         // Build the Step with table and docString as first-class properties.
         final step = Step(
           text: stepText,
-          line: i + 1,
+          line: stepLine,
           table: table,
           docString: docString,
         );
@@ -315,6 +326,78 @@ class FeatureParser {
     }
 
     return feature;
+  }
+
+  List<String> _readDescriptionLines(List<String> rawLines, int startIndex) {
+    final descriptionLines = <String>[];
+
+    for (var i = startIndex; i < rawLines.length; i++) {
+      final rawLine = rawLines[i];
+      final trimmed = rawLine.trim();
+
+      if (_isDescriptionTerminator(trimmed)) {
+        break;
+      }
+
+      if (trimmed.startsWith('#')) {
+        continue;
+      }
+
+      descriptionLines.add(rawLine.replaceFirst(RegExp(r'\s+$'), ''));
+    }
+
+    while (descriptionLines.isNotEmpty && descriptionLines.last.trim().isEmpty) {
+      descriptionLines.removeLast();
+    }
+
+    return descriptionLines;
+  }
+
+  bool _isDescriptionTerminator(String line) {
+    if (line.startsWith('@')) {
+      return true;
+    }
+
+    return line.startsWith(GherkinKeywords.feature) ||
+        line.startsWith(GherkinKeywords.rule) ||
+        line.startsWith(GherkinKeywords.background) ||
+        line.startsWith(GherkinKeywords.scenario) ||
+        line.startsWith(GherkinKeywords.scenarioOutline) ||
+        line.startsWith(GherkinKeywords.scenarioTemplate) ||
+        line.startsWith(GherkinKeywords.example) ||
+        line.startsWith(GherkinKeywords.examples) ||
+        line.startsWith(GherkinKeywords.scenarios) ||
+        stepLinePattern.hasMatch(line) ||
+        GherkinKeywords.tableRowRegex.hasMatch(line);
+  }
+
+  int _leadingWhitespaceWidth(String line) {
+    var count = 0;
+    while (count < line.length) {
+      final char = line[count];
+      if (char != ' ' && char != '\t') {
+        break;
+      }
+      count++;
+    }
+    return count;
+  }
+
+  String _stripIndent(String line, int indentToStrip) {
+    if (line.trim().isEmpty) {
+      return '';
+    }
+
+    var stripped = 0;
+    while (stripped < line.length && stripped < indentToStrip) {
+      final char = line[stripped];
+      if (char != ' ' && char != '\t') {
+        break;
+      }
+      stripped++;
+    }
+
+    return line.substring(stripped);
   }
 
   List<String?> _splitTableRow(String rowString) {

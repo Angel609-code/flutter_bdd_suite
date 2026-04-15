@@ -503,7 +503,7 @@ StepDefinitionGeneric waitSeconds() {
   return stepRegExp(
     RegExp(r'I wait (\d+) seconds?'),
     (ctx) async {
-      final (seconds) = ctx.args.one<String>();
+      final (seconds,) = ctx.args.one<String>();
       await Future.delayed(Duration(seconds: int.parse(seconds)));
     }
   );
@@ -616,7 +616,7 @@ Then use it in a step:
 
 ```dart
 step('the background should be {color}', (ctx) async {
-    final (color) = ctx.args.one<Color>();
+    final (color,) = ctx.args.one<Color>();
 });
 ```
 

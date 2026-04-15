@@ -83,6 +83,9 @@ class CucumberReporter extends IntegrationReporter {
     }
 
     logger.write(formatter.formatStep(result, uri: _currentFeature?.uri));
+    for (final line in formatter.formatMultilineArgument(result)) {
+      logger.write(line);
+    }
 
     final errorMsg = formatter.formatError(result);
     if (errorMsg != null) {

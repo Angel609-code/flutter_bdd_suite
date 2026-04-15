@@ -1,3 +1,4 @@
+import 'dart:convert' show jsonEncode;
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:math';
@@ -145,6 +146,8 @@ Future<GeneratePipelineResult> runGeneratePipeline(
       final scTagsUnique = sc.tags.toSet().toList();
       scenarioMaps.add({
         'name': sc.name,
+        'keywordJson': jsonEncode(sc.keyword),
+        'descriptionJson': jsonEncode(sc.description),
         'line': sc.line,
         'hasTags': scTagsUnique.isNotEmpty,
         'tagsString': '[${scTagsUnique.map((e) => "'$e'").join(', ')}]',
@@ -157,6 +160,7 @@ Future<GeneratePipelineResult> runGeneratePipeline(
     final featureTagsUnique = feature.tags.toSet().toList();
     final featureData = {
       'name': feature.name,
+      'descriptionJson': jsonEncode(feature.description),
       'uri': feature.uri,
       'line': feature.line,
       'hasTags': featureTagsUnique.isNotEmpty,

@@ -30,6 +30,8 @@ void run(IntegrationTestHelper helper) {
         tester,
         ScenarioInfo(
           scenarioName: '{{name}}',
+          keyword: {{{keywordJson}}},
+          description: {{{descriptionJson}}},
           line: {{line}},
           {{#hasTags}}
           tags: {{{tagsString}}},
@@ -53,6 +55,7 @@ void run(IntegrationTestHelper helper) {
 
 FeatureInfo _featureInfo = FeatureInfo(
   featureName: '{{name}}',
+  description: {{{descriptionJson}}},
   uri: '{{uri}}',
   line: {{line}},
   {{#hasTags}}
